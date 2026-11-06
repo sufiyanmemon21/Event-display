@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { PageHeading } from "@/components/workspace";
-import { IntegrationNotice } from "@/components/integration-state";
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -187,10 +187,7 @@ export default function WebsiteSettings() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-5">
-      <PageHeading title="Website settings" description="Manage your public website branding, content, and contact information." />
-      <IntegrationNotice title="Website previews">
-        The logo and main banner can be saved in this browser. Other settings are previews.
-      </IntegrationNotice>
+      <PageHeading title="Website settings" description="Save your logo and main banner in this browser. Other fields are available to preview." />
 
       <form onSubmit={event => event.preventDefault()} className="space-y-5">
         {sections.map(section => (

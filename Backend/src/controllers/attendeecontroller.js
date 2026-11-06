@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Attendee from "../models/attendeemodel.js";
 import Event from "../models/eventmodel.js";
 import { publishUpdate } from "../services/liveupdates.js";
+import { isPastEvent } from "../services/eventdates.js";
 
 async function registerAttendee(req, res) {
   try {
@@ -23,6 +24,10 @@ async function registerAttendee(req, res) {
 
     if (!selectedEvent) {
       return res.status(404).json({ msg: "Event not found" });
+    }
+
+    if (isPastEvent(selectedEvent.date)) {
+      return res.status(409).json({ msg: "Bookings are closed for past events." });
     }
 
     await Attendee.init();

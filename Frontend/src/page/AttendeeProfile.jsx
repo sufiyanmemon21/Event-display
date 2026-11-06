@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import API, { clearAuth } from '@/api/api';
 import useAuth from '@/hooks/useAuth';
 import useLiveRefresh from '@/hooks/useLiveRefresh';
+import { isPastEvent } from '@/lib/eventDates';
 
 const statuses = ['Pending', 'Confirmed', 'Rejected', 'Cancelled'];
 const tickets = ['Standard', 'VIP', 'Regular'];
@@ -141,6 +142,10 @@ export default function AttendeeProfile() {
   async function requestBooking(e) {
     e.preventDefault();
     if (saving || !eventId) return;
+    if (isPastEvent(event?.date)) {
+      setEventError('Bookings are closed for past events.');
+      return;
+    }
     setSaving(true);
     setEventError('');
     try {
@@ -179,7 +184,9 @@ export default function AttendeeProfile() {
             {event?._id === eventId && (
               <>
                 <p className="font-medium">{event.title}</p>
-                {alreadyBooked ? <p className="text-sm text-[#756a64]">You already have a booking for this event.</p> : (
+                {alreadyBooked ? <p className="text-sm text-[#756a64]">You already have a booking for this event.</p> : isPastEvent(event.date) ? (
+                  <p className="text-sm text-[#756a64]">Bookings are closed for past events.</p>
+                ) : (
                   <form onSubmit={requestBooking} className="flex flex-wrap items-end gap-3">
                     <label className="grid gap-1 text-sm font-medium">Ticket type
                       <select value={ticket} onChange={e => setTicket(e.target.value)} className="min-h-10 rounded-md border border-[#e2c9bd] bg-white px-3">

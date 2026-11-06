@@ -180,7 +180,7 @@ export default function Messages({ compact = false }) {
   const [refresh, setRefresh] = useState(0);
   const role = localStorage.getItem("userRole");
   const userId = localStorage.getItem("userId");
-  const isOrganizer = role === "organizer";
+  const managesInbox = role === "organizer" || role === "admin";
   useEffect(() => {
     const controller = new AbortController();
     const poll = { timer: undefined, stopped: false };
@@ -188,12 +188,12 @@ export default function Messages({ compact = false }) {
       try {
         const [inboxResponse, participationResponse] = await Promise.all([API.get("/messages/conversations", {
           signal: controller.signal
-        }), isOrganizer ? Promise.resolve(null) : API.get(role === "attendee" ? "/attendees/all" : "/exhibitors/all", {
+        }), managesInbox ? Promise.resolve(null) : API.get(role === "attendee" ? "/attendees/all" : "/exhibitors/all", {
           signal: controller.signal
         })]);
         if (controller.signal.aborted) return;
         setConversations(inboxResponse.data.conversations);
-        const records = isOrganizer ? [] : role === "attendee" ? participationResponse.data.attendees : participationResponse.data.exhibitors;
+        const records = managesInbox ? [] : role === "attendee" ? participationResponse.data.attendees : participationResponse.data.exhibitors;
         const eventMap = new Map();
         for (const record of records) {
           if (record.event?._id) {
@@ -225,7 +225,7 @@ export default function Messages({ compact = false }) {
       controller.abort();
       window.clearTimeout(poll.timer);
     };
-  }, [role, isOrganizer, refresh]);
+  }, [role, managesInbox, refresh]);
   async function selectThread(nextThread) {
     if (sending) return;
     const sameConversation = thread?.eventId === nextThread.eventId && thread?.participantId === nextThread.participantId;
@@ -250,7 +250,7 @@ export default function Messages({ compact = false }) {
       eventId: item.event._id,
       participantId: item.participant._id,
       title: item.event.title,
-      person: isOrganizer ? item.participant.name : "Event Organizer"
+      person: managesInbox ? item.participant.name : "Event Organizer"
     });
   }
   async function backToInbox() {
@@ -279,7 +279,7 @@ export default function Messages({ compact = false }) {
           {error}
         </p>}
 
-      {!isOrganizer && (!compact || !thread) && <Card>
+      {!managesInbox && (!compact || !thread) && <Card>
           <CardHeader>
             <CardTitle>Contact Event Organizer</CardTitle>
           </CardHeader>
@@ -315,7 +315,7 @@ export default function Messages({ compact = false }) {
 
           <CardContent className="space-y-3">
             {loading ? <p role="status">Loading inbox...</p> : conversations.length === 0 ? <p className="text-sm text-muted-foreground">
-                {error ? "Inbox is currently unavailable." : isOrganizer ? "Participant messages will appear here." : "No conversations yet."}
+                {error ? "Inbox is currently unavailable." : managesInbox ? "Participant messages will appear here." : "No conversations yet."}
               </p> : conversations.map(item => {
             const active = thread?.eventId === item.event._id && thread?.participantId === item.participant._id;
             return <Button variant="ghost" key={`${item.event._id}-${item.participant._id}`} type="button" disabled={sending} onClick={() => openConversation(item)} aria-pressed={active} className={`h-auto w-full flex-col items-start space-y-1 rounded-xl border p-4 text-left disabled:opacity-50 ${active ? "bg-muted" : "hover:bg-muted"}`}>
@@ -323,7 +323,7 @@ export default function Messages({ compact = false }) {
                       {item.event.title}
                     </p>
                     <p className="break-words text-sm">
-                      {isOrganizer ? item.participant.name : "Organizer"}
+                      {managesInbox ? item.participant.name : "Organizer"}
                     </p>
                     <p className="line-clamp-2 break-words text-xs text-muted-foreground">
                       {item.lastMessage}

@@ -37,10 +37,6 @@ const WebsiteSettings = lazy(() => import("./page/WebsiteSettings"));
 const ContactMessages = lazy(() => import("./page/ContactMessages"));
 const ExpoTickets = lazy(() => import("./page/ExpoTickets"));
 const EventApprovals = lazy(() => import("./page/EventApprovals"));
-const AdminMessages = lazy(() => import("./page/AdminMessages"));
-function MessageWorkspace() {
-  return localStorage.getItem("userRole") === "admin" ? <AdminMessages /> : <Messages />;
-}
 const FloorPlan = lazy(() => import("./page/FloorPlan"));
 const allRoles = ["admin", "organizer", "exhibitor", "attendee"];
 function App() {
@@ -107,7 +103,7 @@ function App() {
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={allRoles} />}>
-            <Route path="messages" element={<MessageWorkspace />} />
+            <Route path="messages" element={<Messages />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={["admin", "organizer", "exhibitor"]} />}>

@@ -46,7 +46,8 @@ async function checkConversation(user, eventId, participantId) {
     ["attendee", "exhibitor"].includes(user.role) &&
     user._id.toString() === participantId;
 
-  if (!organizer && !participant) {
+  const admin = user.role === "admin";
+  if (!admin && !organizer && !participant) {
     fail(403, "You do not have access to this conversation");
   }
 
@@ -68,6 +69,10 @@ async function checkConversation(user, eventId, participantId) {
     );
   }
 
+  if (admin && !await Message.exists({ event: event._id, participant: participantId })) {
+    fail(404, "Conversation not found");
+  }
+
   return event;
 }
 
@@ -75,7 +80,9 @@ export async function getConversations(req, res) {
   try {
     let filter;
 
-    if (req.user.role === "organizer") {
+    if (req.user.role === "admin") {
+      filter = {};
+    } else if (req.user.role === "organizer") {
       const events = await Event.find({
         organizer: req.user._id,
       }).select("_id");

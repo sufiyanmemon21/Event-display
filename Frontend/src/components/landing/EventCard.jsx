@@ -2,6 +2,7 @@ import { ArrowUpRight, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { isExpo } from '@/hooks/useExpos';
 import { getEventImage } from './eventImages';
+import { isPastEvent } from '@/lib/eventDates';
 import './catalog-finishes.css';
 
 const dayFormat = new Intl.DateTimeFormat(undefined, { day: 'numeric' });
@@ -12,9 +13,10 @@ export default function EventCard({ event, index = 0 }) {
   const date = new Date(event.date);
   const hasDate = Boolean(event.date) && Number.isFinite(date.getTime());
   const kind = isExpo(event) ? 'Expo' : 'Event';
+  const action = isPastEvent(event.date) ? 'View details' : 'Book now';
 
   return (
-    <Link to={`/expos/${event._id}`} className="celebration-listing" data-kind={kind} aria-label={`Book now: ${event.title}`}>
+    <Link to={`/expos/${event._id}`} className="celebration-listing" data-kind={kind} aria-label={`${action}: ${event.title}`}>
       <article className="celebration-listing-ticket">
         <div className="celebration-listing-photo">
           <img src={getEventImage(event, index)} alt="" loading="lazy" className="absolute inset-0 size-full object-cover object-center" />
@@ -34,7 +36,7 @@ export default function EventCard({ event, index = 0 }) {
         </div>
         <div className="celebration-listing-stub">
           <p>{hasDate ? fullDateFormat.format(date) : 'Date to be announced'}</p>
-          <span className="celebration-listing-action">Book now <span aria-hidden="true"><ArrowUpRight size={17} /></span></span>
+          <span className="celebration-listing-action">{action} <span aria-hidden="true"><ArrowUpRight size={17} /></span></span>
         </div>
       </article>
     </Link>

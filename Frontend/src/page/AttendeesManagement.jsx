@@ -1,4 +1,4 @@
-import { IntegrationNotice } from "@/components/integration-state";
+
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { PageHeading } from "@/components/workspace";
@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 import { useConfirmation } from "@/hooks/useConfirmation";
+import { isPastEvent } from "@/lib/eventDates";
 async function fetchRegistrationData(isAttendee, signal) {
   const [registrationResponse, eventResponse] = await Promise.all([API.get("/attendees/all", {
     signal
@@ -74,6 +75,10 @@ export default function AttendeesManagement() {
   async function handleRegister(event) {
     event.preventDefault();
     if (saving || !eventId) return;
+    if (isPastEvent(events.find(item => item._id === eventId)?.date)) {
+      toast.error("Bookings are closed for past events.");
+      return;
+    }
     setSaving(true);
     try {
       const response = await API.post("/attendees/register", {
@@ -112,9 +117,8 @@ export default function AttendeesManagement() {
       </p>;
   }
   return <div className="w-full space-y-6">
-      <PageHeading title={isAttendee ? "My registrations" : "Attendee registrations"} description="Track event participation and manage your registration details." />
+      <PageHeading title={isAttendee ? "My registrations" : "Attendee registrations"} description={isOrganizer ? "Review booking requests and manage attendee registrations." : "Track your bookings and download confirmed passes from your profile."} />
 
-      <IntegrationNotice title="Booking status">{isOrganizer ? "Review pending requests here. Confirmed attendees can download their QR pass from their profile." : "Check booking decisions and download confirmed passes from your public profile."}</IntegrationNotice>
       {isAttendee && <FormPanel open={formOpen} onOpenChange={value => {
       if (!saving) setFormOpen(value);
     }} title="Register for an Event" compact trigger="Register for an expo"><Card>
@@ -130,9 +134,12 @@ export default function AttendeesManagement() {
                   <WorkspaceSelect id="attendee-event" value={eventId} onChange={event => setEventId(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" required>
                     <option value="">Select an event</option>
 
-                    {events.map(event => <option key={event._id} value={event._id}>
-                        {event.title}
-                      </option>)}
+                    {events.map(event => {
+                      const closed = isPastEvent(event.date);
+                      return <option key={event._id} value={event._id} disabled={closed}>
+                        {closed ? `${event.title} (booking closed)` : event.title}
+                      </option>;
+                    })}
                   </WorkspaceSelect>
                 </div>
 

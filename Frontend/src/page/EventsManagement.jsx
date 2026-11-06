@@ -1,4 +1,4 @@
-import { IntegrationNotice } from "@/components/integration-state";
+
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeading, FormPanel, RecordBrowser } from "@/components/workspace";
@@ -245,7 +245,6 @@ export default function EventsManagement({ listingType = "expo" }) {
         </FormPanel>}
 
       </PageHeading>
-      <IntegrationNotice title="Public listings">The listing type determines whether a record appears under Events or Expos on the public site. You can change it when editing a listing.</IntegrationNotice>
       <div className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3"><div><h2 className="text-lg font-semibold">{collectionName} collection</h2><p className="text-sm text-muted-foreground">{listings.length} {collectionName.toLowerCase()} in your workspace</p></div><div className="space-y-2"><Label htmlFor="expo-date-filter">Filter by date</Label><Input id="expo-date-filter" type="date" value={dateFilter} onChange={e => setDateFilter(e.target.value)} /></div></div>
 

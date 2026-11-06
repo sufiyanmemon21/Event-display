@@ -1,4 +1,3 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PageHeading } from "@/components/workspace";
@@ -9,8 +8,6 @@ import WorkspaceSelect from "@/components/workspace-select";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import ExhibitorProfileForm from "@/components/ExhibitorProfileForm";
-import ExhibitorFiles from "@/components/ExhibitorFiles";
-import ExhibitorStaff from "@/components/ExhibitorStaff";
 import ExhibitorServices from "@/components/ExhibitorServices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -230,7 +227,7 @@ export default function ExhibitorsManagement() {
                     </>}
                 </div>
 
-                <Tabs defaultValue="files"><TabsList className="w-full justify-start"><TabsTrigger value="files">Company files</TabsTrigger><TabsTrigger value="staff">Staff</TabsTrigger><TabsTrigger value="services">Services</TabsTrigger></TabsList><TabsContent value="files" className="pt-3"><ExhibitorFiles exhibitorId={item._id} canUpload={isExhibitor} /></TabsContent><TabsContent value="staff" className="pt-3"><ExhibitorStaff exhibitorId={item._id} canEdit={isExhibitor && item.status === "Approved"} /></TabsContent><TabsContent value="services" className="pt-3"><ExhibitorServices profile={item} /></TabsContent></Tabs>
+                <ExhibitorServices profile={item} />
                 {isExhibitor && editingId !== item._id && <Button variant="outline" onClick={() => setEditingId(item._id)} disabled={saving || Boolean(editingId)}>
                     Edit Profile
                   </Button>}

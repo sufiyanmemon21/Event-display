@@ -7,6 +7,7 @@ import { getEventImage } from '@/components/landing/eventImages';
 import PublicPageShell from '@/components/landing/PublicPageShell';
 import useExpos, { isExpo } from '@/hooks/useExpos';
 import useAuth from '@/hooks/useAuth';
+import { isPastEvent } from '@/lib/eventDates';
 
 function Catalog({ events = false }) {
   const data = useExpos();
@@ -129,7 +130,7 @@ export function ExpoDetailPage() {
                   </p>
                 </div>
                 <div className="mt-7 flex flex-wrap gap-3">
-                  {(!user || user.role === 'attendee') && <Link
+                  {isPastEvent(event.date) ? <p className="self-center text-sm font-medium text-[#756a64]">Bookings closed · Event has passed</p> : (!user || user.role === 'attendee') && <Link
                     to={user ? `/profile?event=${event._id}` : '/login'}
                     state={user ? undefined : { from: `/profile?event=${event._id}` }}
                     className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#c6952d] px-6 text-sm font-semibold text-white transition hover:bg-[#a97818]"

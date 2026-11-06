@@ -24,7 +24,7 @@ const messageLimiter = rateLimit({
 
 messageRouter.use(
   authenticate,
-  authorize("organizer", "attendee", "exhibitor")
+  authorize("admin", "organizer", "attendee", "exhibitor")
 );
 
 messageRouter.get("/conversations", getConversations);
