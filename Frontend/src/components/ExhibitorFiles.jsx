@@ -15,8 +15,9 @@ async function getErrorMessage(error, fallback) {
   }
   return data?.msg || data?.error || fallback;
 }
-function LogoPreview({
-  exhibitorId
+export function LogoPreview({
+  exhibitorId,
+  fallback
 }) {
   const [url, setUrl] = useState("");
   const [failed, setFailed] = useState(false);
@@ -45,6 +46,7 @@ function LogoPreview({
     };
   }, [exhibitorId]);
   if (failed) {
+    if (fallback) return fallback;
     return <p className="text-sm text-muted-foreground">
         Logo preview unavailable. Try Refresh Files.
       </p>;
@@ -73,7 +75,7 @@ function CompanyFiles({
           signal: controller.signal
         });
         if (controller.signal.aborted) return;
-        setFiles(response.data.files);
+        setFiles(response.data.files || []);
         setError("");
       } catch (err) {
         if (controller.signal.aborted) return;

@@ -18,7 +18,9 @@ const titles = {
   "/expo-tickets": "Expo tickets",
   "/event-approvals": "Events & approvals",
   "/events": "Expos",
+  "/dashboard/events": "Events",
   "/exhibitors": "Exhibitors",
+  "/exhibitor-profile": "Profile",
   "/attendees": "Registrations",
   "/booths": "Booths",
   "/floor-plan": "Floor plan",
@@ -50,7 +52,8 @@ export function SiteHeader({
     pathname
   } = useLocation();
   const title = getTitle(pathname);
-  return <header className="sticky top-0 z-30 flex h-16 shrink-0 items-center border-b border-border/80 bg-card/90 backdrop-blur-xl">
+  const portal = user?.role ? `${user.role[0].toUpperCase()}${user.role.slice(1)} Portal` : "Workspace";
+  return <header className="workspace-topbar sticky top-0 z-30 flex h-16 shrink-0 items-center border-b border-border/80 backdrop-blur-xl">
       <div className="flex w-full items-center gap-3 px-4 sm:px-6">
         <SidebarTrigger className="-ml-1 rounded-xl" />
         <Separator orientation="vertical" className="h-5" />
@@ -58,7 +61,7 @@ export function SiteHeader({
           <BreadcrumbList className="flex-nowrap gap-2">
             <BreadcrumbItem className="hidden sm:inline-flex">
               <BreadcrumbLink asChild>
-                <Link to="/dashboard">Workspace</Link>
+                <Link to="/dashboard">{portal}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator className="hidden sm:inline-flex" />

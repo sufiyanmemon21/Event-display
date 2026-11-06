@@ -155,7 +155,7 @@ export default function FloorPlan() {
   return <div className="w-full space-y-6">
       <PageHeading title="Floor plan studio" description="Arrange your expo space and locate exhibitors." />
 
-      <Card>
+      <Card className="workspace-event-scope">
         <CardHeader>
           <CardTitle>Select an Event</CardTitle>
         </CardHeader>
@@ -188,15 +188,15 @@ export default function FloorPlan() {
           {error}
         </p>}
 
-      {layout && !loading && <>
-          {canEdit && <Card>
+      {layout && !loading && <div className={canEdit ? "workspace-floor-studio" : "min-w-0"}>
+          {canEdit && <Card className="workspace-floor-controls">
               <CardHeader>
                 <CardTitle>Layout controls</CardTitle>
               </CardHeader>
 
               <CardContent className="space-y-4">
                 <fieldset disabled={busy || conflict} className="space-y-4">
-                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="layout-rows">Rows</Label>
                       <Input id="layout-rows" type="number" min={1} max={20} value={layout.rows} onChange={event => resizeGrid("rows", event.target.value)} />
@@ -225,7 +225,7 @@ export default function FloorPlan() {
                     does not delete the booth or cancel its reservation.
                   </p>
 
-                  <div className="flex flex-wrap gap-3">
+                  <div className="workspace-floor-actions">
                     <Button variant="outline" onClick={removeSelectedBooth} disabled={!placedIds.has(selectedBoothId)}>
                       Remove Selected Booth from Plan
                     </Button>
@@ -250,7 +250,7 @@ export default function FloorPlan() {
               </CardContent>
             </Card>}
 
-          <Card>
+          <Card className="min-w-0">
             <CardHeader>
               <CardTitle>{selectedEvent?.title}</CardTitle>
               <p className="text-sm text-muted-foreground">
@@ -263,7 +263,7 @@ export default function FloorPlan() {
                   No saved floor plan yet.
                 </p>}
 
-              <div className="overflow-x-auto rounded-md border p-3">
+              <div className="workspace-floor-canvas overflow-x-auto rounded-lg border p-3 sm:p-4">
                 <div className="grid gap-2" style={{
               gridTemplateColumns: `repeat(${layout.columns}, 90px)`
             }}>
@@ -291,6 +291,6 @@ export default function FloorPlan() {
               </p>
             </CardContent>
           </Card>
-        </>}
+        </div>}
     </div>;
 }

@@ -1,10 +1,33 @@
 
 import mongoose from "mongoose";
+import sharp from "sharp";
 import Event from "../models/eventmodel.js";
 import Exhibitor from "../models/exhibitormodel.js";
 import Attendee from "../models/attendeemodel.js";
 import Booth from "../models/boothmodel.js";
 import Session from "../models/sessionmodel.js";
+
+async function readCover(req, res, data) {
+  if (!req.file) return true;
+  try {
+    const image = sharp(req.file.buffer, { limitInputPixels: 24_000_000 });
+    const { format } = await image.metadata();
+    if (!["jpeg", "png", "webp", "heif"].includes(format)) throw new Error("Unsupported format");
+    data.coverData = await image.rotate().resize({ width: 1600, height: 1200, fit: "inside", withoutEnlargement: true }).webp({ quality: 85 }).toBuffer();
+    data.hasImage = true;
+    return true;
+  } catch {
+    res.status(400).json({ msg: "Choose a valid JPEG, PNG, WebP, or AVIF cover image" });
+    return false;
+  }
+}
+
+export async function getEventCover(req, res) {
+  if (!mongoose.isObjectIdOrHexString(req.params.id)) return res.sendStatus(404);
+  const event = await Event.findById(req.params.id).select("+coverData");
+  if (!event?.coverData?.length) return res.sendStatus(404);
+  return res.set("Cache-Control", "public, no-cache").type("image/webp").send(Buffer.from(event.coverData));
+}
 
 function readEvent(body = {}) {
   const fields = ["title", "description", "location", "category"];
@@ -39,6 +62,13 @@ function readEvent(body = {}) {
 
   data.date = date;
 
+  if (Object.hasOwn(body, "listingType")) {
+    if (!["event", "expo"].includes(body.listingType)) {
+      return { error: "Choose Event or Expo as the listing type" };
+    }
+    data.listingType = body.listingType;
+  }
+
   return { data };
 }
 
@@ -56,6 +86,8 @@ async function createEvent(req, res) {
     if (result.error) {
       return res.status(400).json({ msg: result.error });
     }
+
+    if (!await readCover(req, res, result.data)) return;
 
     const event = await Event.create({
       ...result.data,
@@ -135,6 +167,8 @@ async function updateEvent(req, res) {
     if (result.error) {
       return res.status(400).json({ msg: result.error });
     }
+
+    if (!await readCover(req, res, result.data)) return;
 
     Object.assign(event, result.data);
     await event.save();

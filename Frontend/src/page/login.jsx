@@ -20,9 +20,9 @@ export default function Login({ signup = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const from = location.state?.from;
-  const destination =
-    typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && !from.includes('\\') && !/login|signup|register/i.test(from) ? from : '/dashboard';
-  if (user) return <Navigate to={destination} replace />;
+  const returnTo =
+    typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && !from.includes('\\') && !/login|signup|register/i.test(from) ? from : null;
+  if (user) return <Navigate to={returnTo || (user.role === 'attendee' ? '/' : '/dashboard')} replace />;
   async function submit(event) {
     event.preventDefault();
     if (loading) return;
@@ -43,8 +43,9 @@ export default function Login({ signup = false }) {
       setLoading(true);
       values.email = values.email.trim().toLowerCase();
       const { data } = await API.post(signup ? '/auth/register' : '/auth/login', values);
-      saveAuth(data.token, signup ? data.data : data.existingUser);
-      navigate(destination, { replace: true });
+      const account = signup ? data.data : data.existingUser;
+      saveAuth(data.token, account);
+      navigate(returnTo || (account.role === 'attendee' ? '/' : '/dashboard'), { replace: true });
     } catch (failure) {
       setError(failure.response?.data?.msg || failure.message || 'Unable to connect to the server');
     } finally {
@@ -154,7 +155,7 @@ export default function Login({ signup = false }) {
       </form>
       <p className="mt-4 text-center text-sm leading-6 [&_a]:font-semibold">
         {signup ? 'Already part of EventSphere?' : 'New to EventSphere?'}{' '}
-        <Link to={signup ? '/login' : '/signup'} state={{ from: destination }}>
+        <Link to={signup ? '/login' : '/signup'} state={{ from: returnTo }}>
           {signup ? 'Sign in' : 'Create an account'}
         </Link>
       </p>

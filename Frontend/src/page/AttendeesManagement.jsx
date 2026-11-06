@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
+import { useConfirmation } from "@/hooks/useConfirmation";
 async function fetchRegistrationData(isAttendee, signal) {
   const [registrationResponse, eventResponse] = await Promise.all([API.get("/attendees/all", {
     signal
@@ -23,6 +24,7 @@ async function fetchRegistrationData(isAttendee, signal) {
   };
 }
 export default function AttendeesManagement() {
+  const confirm = useConfirmation();
   const [formOpen, setFormOpen] = useState(false);
   const [attendees, setAttendees] = useState([]);
   const [events, setEvents] = useState([]);
@@ -31,6 +33,7 @@ export default function AttendeesManagement() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [reviewing, setReviewing] = useState("");
   const role = localStorage.getItem("userRole");
   const isAttendee = role === "attendee";
   const isOrganizer = role === "organizer" || role === "admin";
@@ -88,6 +91,20 @@ export default function AttendeesManagement() {
       setSaving(false);
     }
   }
+  async function reviewBooking(booking, status) {
+    if (reviewing) return;
+    if (status !== "Confirmed" && !(await confirm(`${status === "Rejected" ? "Reject" : "Cancel"} this booking?`))) return;
+    setReviewing(booking._id);
+    try {
+      const { data } = await API.patch(`/attendees/${booking._id}/status`, { status });
+      setAttendees(previous => previous.map(item => item._id === booking._id ? { ...item, status: data.status } : item));
+      toast.success(`Booking ${data.status.toLowerCase()}.`);
+    } catch (error) {
+      toast.error(error.response?.data?.msg || "Unable to update booking status.");
+    } finally {
+      setReviewing("");
+    }
+  }
   if (!canView) {
     return <p className="p-6">
         Event registration requires an attendee account.
@@ -97,17 +114,17 @@ export default function AttendeesManagement() {
   return <div className="w-full space-y-6">
       <PageHeading title={isAttendee ? "My registrations" : "Attendee registrations"} description="Track event participation and manage your registration details." />
 
-      <IntegrationNotice title="Registration records connected">The current API stores attendee, event, and ticket type. Booking decisions, check-in, entry passes, and administrator registration edits require backend support.</IntegrationNotice>
+      <IntegrationNotice title="Booking status">{isOrganizer ? "Review pending requests here. Confirmed attendees can download their QR pass from their profile." : "Check booking decisions and download confirmed passes from your public profile."}</IntegrationNotice>
       {isAttendee && <FormPanel open={formOpen} onOpenChange={value => {
       if (!saving) setFormOpen(value);
-    }} title="Register for an Event" trigger="Register for an expo"><Card>
+    }} title="Register for an Event" compact trigger="Register for an expo"><Card>
           <CardHeader>
             <CardTitle>Register for an Event</CardTitle>
           </CardHeader>
 
           <CardContent>
             <form onSubmit={handleRegister}>
-              <fieldset disabled={saving || loading || Boolean(loadError)} className="space-y-4">
+              <fieldset disabled={saving || loading || Boolean(loadError)} className="workspace-field-grid workspace-registration-fields">
                 <div className="space-y-2">
                   <Label htmlFor="attendee-event">Event</Label>
                   <WorkspaceSelect id="attendee-event" value={eventId} onChange={event => setEventId(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" required>
@@ -148,8 +165,18 @@ export default function AttendeesManagement() {
           </Button>
         </div> : attendees.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
           No registrations found.
-        </p> : <RecordBrowser records={attendees} label="registrations">{visible => <div className="overflow-hidden rounded-xl border bg-card"><Table><TableHeader><TableRow><TableHead>Attendee / Event</TableHead><TableHead>Contact</TableHead><TableHead>Ticket</TableHead><TableHead>Event date</TableHead><TableHead>Location</TableHead></TableRow></TableHeader><TableBody>{visible.map(registration => <TableRow key={registration._id}><TableCell className="whitespace-normal"><p className="font-medium">{isOrganizer ? registration.user?.name || "Unavailable" : registration.event?.title || "Event unavailable"}</p>{isOrganizer && <p className="mt-1 text-xs text-muted-foreground">{registration.event?.title || "Event unavailable"}</p>}</TableCell><TableCell>{isOrganizer ? registration.user?.email || "Unavailable" : "Your registration"}</TableCell><TableCell><Badge variant="secondary">{registration.ticketType}</Badge></TableCell><TableCell>{registration.event?.date ? new Date(registration.event.date).toLocaleDateString("en-GB", {
+        </p> : <RecordBrowser records={attendees} label="registrations">{visible => <div className="overflow-hidden rounded-xl border bg-card"><Table><TableHeader><TableRow><TableHead>Attendee / Event</TableHead><TableHead>Contact</TableHead><TableHead>Ticket</TableHead><TableHead>Event date</TableHead><TableHead>Location</TableHead><TableHead>Status</TableHead>{isOrganizer && <TableHead>Actions</TableHead>}</TableRow></TableHeader><TableBody>{visible.map(registration => <TableRow key={registration._id}><TableCell className="whitespace-normal"><p className="font-medium">{isOrganizer ? registration.user?.name || "Unavailable" : registration.event?.title || "Event unavailable"}</p>{isOrganizer && <p className="mt-1 text-xs text-muted-foreground">{registration.event?.title || "Event unavailable"}</p>}</TableCell><TableCell>{isOrganizer ? registration.user?.email || "Unavailable" : "Your registration"}</TableCell><TableCell><Badge variant="secondary">{registration.ticketType}</Badge></TableCell><TableCell>{registration.event?.date ? new Date(registration.event.date).toLocaleDateString("en-GB", {
                   timeZone: "UTC"
-                }) : "Unavailable"}</TableCell><TableCell className="max-w-60 whitespace-normal">{registration.event?.location || "Unavailable"}</TableCell></TableRow>)}</TableBody></Table></div>}</RecordBrowser>}
+                }) : "Unavailable"}</TableCell><TableCell className="max-w-60 whitespace-normal">{registration.event?.location || "Unavailable"}</TableCell>
+                    <TableCell><Badge variant="secondary">{registration.status || "Confirmed"}</Badge></TableCell>
+                    {isOrganizer && <TableCell><div className="flex flex-wrap gap-2">
+                      {registration.status === "Pending" && <>
+                        <Button size="sm" disabled={Boolean(reviewing)} onClick={() => reviewBooking(registration, "Confirmed")}>Confirm</Button>
+                        <Button size="sm" variant="outline" disabled={Boolean(reviewing)} onClick={() => reviewBooking(registration, "Rejected")}>Reject</Button>
+                      </>}
+                      {(!registration.status || ["Pending", "Confirmed"].includes(registration.status)) &&
+                        <Button size="sm" variant="outline" disabled={Boolean(reviewing)} onClick={() => reviewBooking(registration, "Cancelled")}>Cancel booking</Button>}
+                    </div></TableCell>}
+                  </TableRow>)}</TableBody></Table></div>}</RecordBrowser>}
     </div>;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CalendarDays, MessageSquareText, LayoutDashboard, Users, Building2, MapPin, Map, Clock, Bell, BarChart3, Search, MessageSquare, Mail, LogIn, UserPlus, Settings2, Ticket, ClipboardCheck } from "lucide-react";
+import { CalendarDays, MessageSquareText, LayoutDashboard, Users, Building2, MapPin, Map, Clock, Bell, BarChart3, Search, MessageSquare, Mail, LogIn, UserPlus, Settings2, Ticket, ClipboardCheck, UserRound } from "lucide-react";
+import useWebsiteLogo from "@/hooks/useWebsiteLogo";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
@@ -18,11 +19,23 @@ const menuItems = [{
   group: "Workspace",
   roles: allRoles
 }, {
+  title: "Events",
+  url: "/dashboard/events",
+  icon: <CalendarDays className="size-4" />,
+  group: "Workspace",
+  roles: allRoles
+}, {
   title: "Exhibitors",
   url: "/exhibitors",
   icon: <Building2 className="size-4" />,
   group: "Workspace",
   roles: ["organizer", "admin", "exhibitor"]
+}, {
+  title: "Profile",
+  url: "/exhibitor-profile",
+  icon: <UserRound className="size-4" />,
+  group: "Workspace",
+  roles: ["exhibitor"]
 }, {
   title: "Attendees",
   url: "/attendees",
@@ -126,6 +139,7 @@ export function AppSidebar({
   ...props
 }) {
   const [account, setAccount] = useState(readAccount);
+  const logo = useWebsiteLogo();
   useEffect(() => {
     function updateAccount() {
       setAccount(readAccount());
@@ -141,9 +155,10 @@ export function AppSidebar({
     if (item.url === "/exhibitors" && account.role === "exhibitor") {
       return {
         ...item,
-        title: "My Applications"
+        title: "Registration"
       };
     }
+    if (item.url === "/booths" && account.role === "exhibitor") return { ...item, title: "My Booth" };
     if (item.url === "/attendees" && account.role === "attendee") {
       return {
         ...item,
@@ -171,24 +186,24 @@ export function AppSidebar({
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="EventSphere">
               <Link to="/dashboard">
-                <span className="grid size-9 group-data-[collapsible=icon]:size-8 shrink-0 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                <span className={`size-9 group-data-[collapsible=icon]:size-8 shrink-0 place-items-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground ${logo ? "hidden group-data-[collapsible=icon]:grid" : "grid"}`}>
                   <CalendarDays className="size-5" />
                 </span>
-                <span className="grid min-w-0 text-left group-data-[collapsible=icon]:hidden">
-                  <span className="truncate text-sm font-semibold tracking-tight">
+                {logo ? <img src={logo} alt="EventSphere" className="h-9 max-w-full object-contain group-data-[collapsible=icon]:hidden" /> : <span className="grid min-w-0 text-left group-data-[collapsible=icon]:hidden">
+                  <span className="workspace-wordmark truncate tracking-tight">
                     EventSphere
                   </span>
                   <span className="truncate text-[11px] text-sidebar-foreground/60">
                     Experience operations
                   </span>
-                </span>
+                </span>}
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
 
         {account.loggedIn && <p className="group-data-[collapsible=icon]:hidden px-2 pt-2 text-[11px] font-medium uppercase tracking-[0.12em] text-sidebar-foreground/55">
-            {account.role} workspace
+            {account.role} portal
           </p>}
       </SidebarHeader>
 

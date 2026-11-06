@@ -6,6 +6,7 @@ import EventCard from '@/components/landing/EventCard';
 import { getEventImage } from '@/components/landing/eventImages';
 import PublicPageShell from '@/components/landing/PublicPageShell';
 import useExpos, { isExpo } from '@/hooks/useExpos';
+import useAuth from '@/hooks/useAuth';
 
 function Catalog({ events = false }) {
   const data = useExpos();
@@ -43,6 +44,7 @@ export function EventsPage() {
 }
 
 export function ExpoDetailPage() {
+  const user = useAuth();
   const { expoId } = useParams();
   const data = useExpos();
   const eventIndex = data.items.findIndex((item) => item._id === expoId);
@@ -127,13 +129,13 @@ export function ExpoDetailPage() {
                   </p>
                 </div>
                 <div className="mt-7 flex flex-wrap gap-3">
-                  <Link
-                    to="/signup?role=attendee"
-                    state={{ from: `/expos/${event._id}` }}
+                  {(!user || user.role === 'attendee') && <Link
+                    to={user ? `/profile?event=${event._id}` : '/login'}
+                    state={user ? undefined : { from: `/profile?event=${event._id}` }}
                     className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#c6952d] px-6 text-sm font-semibold text-white transition hover:bg-[#a97818]"
                   >
-                    Join EventSphere <ArrowUpRight size={16} />
-                  </Link>
+                    {user ? 'Book this event' : 'Log in to book'} <ArrowUpRight size={16} />
+                  </Link>}
                   <Link
                     to="/event-listing"
                     className="inline-flex min-h-11 items-center rounded-full border border-[#d9c7ad] px-6 text-sm font-semibold text-[#4a292a] transition hover:bg-[#fbf4ee]"

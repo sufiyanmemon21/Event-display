@@ -205,7 +205,7 @@ export default function BoothSelection() {
   return <div className="w-full space-y-6">
       <PageHeading title="Booth workspace" description="Coordinate availability, reservations, and exhibitor assignments." />
 
-      <Card>
+      <Card className="workspace-event-scope">
         <CardHeader>
           <CardTitle>Select an Event</CardTitle>
         </CardHeader>
@@ -242,13 +242,13 @@ export default function BoothSelection() {
 
       {canManage && <FormPanel open={createOpen} onOpenChange={value => {
       if (!busy) setCreateOpen(value);
-    }} title="Create Booth" trigger="Add booth"><Card>
+    }} title="Create Booth" compact trigger="Add booth"><Card>
           <CardHeader>
             <CardTitle>Create Booth</CardTitle>
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleCreate} className="space-y-4">
+            <form onSubmit={handleCreate} className="workspace-inline-form">
               <div className="space-y-2">
                 <Label htmlFor="booth-number">Booth Number</Label>
                 <Input id="booth-number" value={boothNumber} onChange={event => setBoothNumber(event.target.value)} placeholder="A1" maxLength={20} disabled={busy} required />
@@ -271,7 +271,7 @@ export default function BoothSelection() {
 
               <CardContent>
                 <form onSubmit={handleAssignment}>
-                  <fieldset disabled={busy} className="space-y-4">
+                  <fieldset disabled={busy} className="workspace-field-grid">
                     <div className="space-y-2">
                       <Label htmlFor="assignment-booth">
                         Available Booth
@@ -353,7 +353,7 @@ export default function BoothSelection() {
                 const available = booth.status === "Available";
                 const mine = isMyBooth(booth);
                 const processing = action?.id === booth._id;
-                return <div key={booth._id} className={`flex flex-col gap-3 rounded-xl border p-5 ${available ? "border-primary/25 bg-primary/5" : "border-border bg-muted/40"}`}>
+                return <div key={booth._id} className={`workspace-booth-tile flex flex-col gap-3 rounded-xl border p-5 ${available ? "border-primary/25 bg-primary/5" : "border-border bg-muted/40"}`}>
                         <h2 className="break-words text-xl font-semibold">
                           {booth.boothNumber}
                         </h2>

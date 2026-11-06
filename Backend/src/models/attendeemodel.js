@@ -17,6 +17,11 @@ const attendeeSchema = new mongoose.Schema(
       enum: ["Standard", "VIP", "Regular"],
       default: "Standard",
     },
+    status: {
+      type: String,
+      enum: ["Pending", "Confirmed", "Rejected", "Cancelled"],
+      default: "Confirmed",
+    },
   },
   { timestamps: true }
 );

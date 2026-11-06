@@ -2,8 +2,14 @@ import useLiveRefresh from './useLiveRefresh';
 import { useEffect, useState } from 'react';
 import api from '@/api/api';
 
-export function isExpo({ category, title }) {
-  return /\b(?:expos?|expositions?|exhibitions?|trade[\s-]+(?:shows?|fairs?))\b/i.test(`${category ?? ''} ${title ?? ''}`);
+export function isExpo({ listingType, category, title }) {
+  if (listingType === 'expo' || listingType === 'event') return listingType === 'expo';
+
+  const label = `${category ?? ''} ${title ?? ''}`;
+  if (/\b(?:expos?|expositions?|exhibitions?|trade[\s-]+(?:shows?|fairs?))\b/i.test(label)) return true;
+
+  // Older records were created through the Expos workspace with no type field.
+  return !/\b(?:birthdays?|weddings?|bridal|engagements?|concerts?|music|gigs?|part(?:y|ies)|showers?|festivals?|picnics?|celebrations?|receptions?)\b/i.test(label);
 }
 export default function useExpos() {
   const [state, setState] = useState({ loading: true, items: [], error: '', fetchedAt: null });

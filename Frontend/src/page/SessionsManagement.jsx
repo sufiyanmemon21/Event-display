@@ -209,7 +209,7 @@ export default function SessionsManagement() {
   return <div className="w-full space-y-6">
       <PageHeading title="Schedule" description="Plan speakers, rooms, and sessions for each expo." />
 
-      <Card>
+      <Card className="workspace-event-scope">
         <CardHeader>
           <CardTitle>Select an Event</CardTitle>
         </CardHeader>
@@ -257,7 +257,7 @@ export default function SessionsManagement() {
 
           <CardContent>
             <form onSubmit={handleSubmit}>
-              <fieldset disabled={busy} className="space-y-4">
+              <fieldset disabled={busy} className="workspace-field-grid">
                 {fields.map(field => <div key={field.name} className="space-y-2">
                     <Label htmlFor={`session-${field.name}`}>
                       {field.label}
@@ -272,7 +272,7 @@ export default function SessionsManagement() {
                   <Textarea id="session-description" name="description" value={form.description} onChange={handleChange} maxLength={3000} rows={3} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="workspace-time-range col-span-full grid gap-3 sm:grid-cols-2">
                   {["startTime", "endTime"].map(name => <div key={name} className="space-y-2">
                       <Label htmlFor={`session-${name}`}>
                         {name === "startTime" ? "Start Time" : "End Time"}
@@ -285,7 +285,7 @@ export default function SessionsManagement() {
                   Enter times in your computer&apos;s local timezone.
                 </p>
 
-                <div className="flex gap-3">
+                <div className="workspace-form-actions">
                   <Button type="submit">
                     {saving ? "Saving..." : editingId ? "Save Changes" : "Create Session"}
                   </Button>
@@ -304,7 +304,7 @@ export default function SessionsManagement() {
           </p> : <RecordBrowser records={sessions} label="sessions">{visible => <div className="space-y-4">
             <h2 className="text-xl font-semibold">Event Schedule</h2>
 
-            {visible.map(session => <Card key={session._id} className="relative ml-3 border-l-4 border-l-primary">
+            {visible.map(session => <Card key={session._id} className="workspace-schedule-entry border-l-4 border-l-primary">
                 <CardContent className="space-y-4 p-6">
                   <h3 className="break-words text-lg font-semibold">
                     {session.title}

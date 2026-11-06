@@ -4,6 +4,8 @@ import DashboardLayout from "./layout/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EventSphereHome from "./page/EventSphereHome";
 const Dashboard = lazy(() => import("./page/Dashboard"));
+const AttendeeProfile = lazy(() => import("./page/AttendeeProfile"));
+const PassVerification = lazy(() => import("./page/PassVerification"));
 const Contact = lazy(() => import("./page/Contact"));
 const Expos = lazy(() => import("./page/Expos"));
 const ExpoDetail = lazy(() => import("./page/Expos").then(module => ({
@@ -21,6 +23,7 @@ const Otp = lazy(() => import("./page/otp"));
 const Reset = lazy(() => import("./page/reset"));
 const EventsManagement = lazy(() => import("./page/EventsManagement"));
 const ExhibitorsManagement = lazy(() => import("./page/ExhibitorsManagement"));
+const ExhibitorProfile = lazy(() => import("./page/ExhibitorProfile"));
 const AttendeesManagement = lazy(() => import("./page/AttendeesManagement"));
 const BoothSelection = lazy(() => import("./page/BoothSelection"));
 const SessionsManagement = lazy(() => import("./page/SessionsManagement"));
@@ -81,6 +84,10 @@ function App() {
         <Route path="/dashboard/forget-password" element={<Forget />} />
         <Route path="/dashboard/otp" element={<Otp />} />
         <Route path="/dashboard/reset" element={<Reset />} />
+        <Route path="/passes/verify" element={<PassVerification />} />
+        <Route element={<ProtectedRoute allowedRoles={["attendee"]} />}>
+          <Route path="profile" element={<AttendeeProfile />} />
+        </Route>
 
         <Route element={<ProtectedRoute allowedRoles={allRoles} />}>
         <Route element={<DashboardLayout />}>
@@ -88,7 +95,8 @@ function App() {
 
 
           <Route element={<ProtectedRoute allowedRoles={allRoles} />}>
-            <Route path="events" element={<EventsManagement />} />
+            <Route path="events" element={<EventsManagement key="expo" />} />
+            <Route path="dashboard/events" element={<EventsManagement key="event" listingType="event" />} />
             <Route path="sessions" element={<SessionsManagement />} />
             <Route path="floor-plan" element={<FloorPlan />} />
             <Route path="notifications" element={<NotificationsManagement />} />
@@ -105,6 +113,9 @@ function App() {
           <Route element={<ProtectedRoute allowedRoles={["admin", "organizer", "exhibitor"]} />}>
             <Route path="exhibitors" element={<ExhibitorsManagement />} />
             <Route path="booths" element={<BoothSelection />} />
+          </Route>
+          <Route element={<ProtectedRoute allowedRoles={["exhibitor"]} />}>
+            <Route path="exhibitor-profile" element={<ExhibitorProfile />} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={["admin", "organizer", "attendee"]} />}>

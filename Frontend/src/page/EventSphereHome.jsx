@@ -40,9 +40,12 @@ export default function EventSphereHome() {
   const [occasion, setOccasion] = useState('');
   const [selectedPackage, setSelectedPackage] = useState('');
   const catalog = useExpos();
-  const expoItems = catalog.items.filter(isExpo);
-  const eventItems = catalog.items.filter((item) => !isExpo(item));
-  const upcoming = expoItems.find((item) => Date.parse(item.date) >= catalog.fetchedAt);
+  const upcoming = catalog.items.find((item) => isExpo(item) && Date.parse(item.date) >= catalog.fetchedAt);
+  const latest = [...catalog.items].sort((left, right) =>
+    (Date.parse(right.createdAt) || 0) - (Date.parse(left.createdAt) || 0),
+  );
+  const expoItems = latest.filter(isExpo);
+  const eventItems = latest.filter((item) => !isExpo(item));
   const photos = occasion ? occasions.filter(({ name }) => name === occasion) : occasions.slice(0, 4);
 
   useEffect(() => {

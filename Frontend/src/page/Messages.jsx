@@ -20,7 +20,8 @@ function Conversation({
   userId,
   onSent,
   sending,
-  setSending
+  setSending,
+  compact
 }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -131,7 +132,7 @@ function Conversation({
                 {loadingOlder ? "Loading..." : "Load Older Messages"}
               </Button>}
 
-            <div className="max-h-[450px] space-y-3 overflow-y-auto rounded-md border p-3">
+            <div className={`${compact ? "max-h-64" : "max-h-[450px]"} space-y-3 overflow-y-auto rounded-md border p-3`}>
               {messages.length === 0 ? <p className="text-sm text-muted-foreground">
                   {error ? "Messages are currently unavailable." : "No messages yet. Send the first message below."}
                 </p> : messages.map(message => {
@@ -167,7 +168,7 @@ function Conversation({
       </CardContent>
     </Card>;
 }
-export default function Messages() {
+export default function Messages({ compact = false }) {
   const confirm = useConfirmation();
   const [conversations, setConversations] = useState([]);
   const [events, setEvents] = useState([]);
@@ -252,25 +253,33 @@ export default function Messages() {
       person: isOrganizer ? item.participant.name : "Event Organizer"
     });
   }
-  return <div className="w-full space-y-6">
+  async function backToInbox() {
+    if (!sending && await confirm("Return to the inbox? Any unsent draft will be cleared.")) setThread(null);
+  }
+  return <div className={compact ? "w-full space-y-3" : "w-full space-y-6"}>
+      {compact && thread && <Button type="button" variant="outline" size="sm" disabled={sending} onClick={backToInbox}>Back to inbox</Button>}
+      {(!compact || !thread) && (
       <div className="flex flex-wrap items-center justify-between gap-3">
+        {!compact && (
         <div className="space-y-1">
           <PageHeading title="Messages" description="Keep event conversations together in one place." />
           <p className="text-sm text-muted-foreground">
             Messages update automatically while this page is open.
           </p>
         </div>
+        )}
 
         <Button variant="outline" disabled={loading || sending} onClick={() => setRefresh(previous => previous + 1)}>
           Refresh Inbox
         </Button>
       </div>
+      )}
 
       {error && <p role="alert" className="text-sm text-destructive">
           {error}
         </p>}
 
-      {!isOrganizer && <Card>
+      {!isOrganizer && (!compact || !thread) && <Card>
           <CardHeader>
             <CardTitle>Contact Event Organizer</CardTitle>
           </CardHeader>
@@ -297,7 +306,8 @@ export default function Messages() {
           </CardContent>
         </Card>}
 
-      <div className="grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+      <div className={compact ? "grid gap-3" : "grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]"}>
+        {(!compact || !thread) && (
         <Card>
           <CardHeader>
             <CardTitle>Recent Conversations</CardTitle>
@@ -322,8 +332,9 @@ export default function Messages() {
           })}
           </CardContent>
         </Card>
+        )}
 
-        {thread ? <Conversation key={`${thread.eventId}-${thread.participantId}`} thread={thread} userId={userId} sending={sending} setSending={setSending} onSent={() => setRefresh(previous => previous + 1)} /> : <p className="grid min-h-[480px] place-content-center rounded-2xl border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
+        {thread ? <Conversation key={`${thread.eventId}-${thread.participantId}`} thread={thread} userId={userId} sending={sending} setSending={setSending} compact={compact} onSent={() => setRefresh(previous => previous + 1)} /> : !compact && <p className="grid min-h-[480px] place-content-center rounded-2xl border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
             Open a conversation to view or send messages.
           </p>}
       </div>

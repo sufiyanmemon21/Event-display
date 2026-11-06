@@ -136,7 +136,7 @@ export default function ExhibitorsManagement() {
       </p>;
   }
   return <div className="w-full space-y-6">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end [&_.workspace-heading]:flex-1">
         <PageHeading title={isExhibitor ? "My applications" : "Exhibitor applications"} description="Review companies, manage applications, and coordinate exhibitor services." />
 
         <Button variant="outline" onClick={refreshData} disabled={loading || saving || Boolean(editingId) || Boolean(updatingId)}>
@@ -153,7 +153,7 @@ export default function ExhibitorsManagement() {
 
           <CardContent>
             <form onSubmit={handleSubmit}>
-              <fieldset disabled={saving || loading || Boolean(loadError) || Boolean(editingId)} className="space-y-4">
+              <fieldset disabled={saving || loading || Boolean(loadError) || Boolean(editingId)} className="workspace-field-grid">
                 <div className="space-y-2">
                   <Label htmlFor="company-name">Company Name</Label>
                   <Input id="company-name" value={companyName} onChange={event => setCompanyName(event.target.value)} maxLength={150} required />

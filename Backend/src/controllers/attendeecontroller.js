@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Attendee from "../models/attendeemodel.js";
 import Event from "../models/eventmodel.js";
+import { publishUpdate } from "../services/liveupdates.js";
 
 async function registerAttendee(req, res) {
   try {
@@ -41,10 +42,11 @@ async function registerAttendee(req, res) {
       user: req.user._id,
       event,
       ticketType,
+      status: "Pending",
     });
 
     return res.status(201).json({
-      msg: "Registered for event successfully",
+      msg: "Booking requested. The organizer will review it.",
       registration,
     });
   } catch (error) {
@@ -95,4 +97,32 @@ async function getAttendees(req, res) {
   }
 }
 
-export { registerAttendee, getAttendees };
+const bookingTransitions = {
+  Pending: ["Confirmed", "Rejected", "Cancelled"],
+  Confirmed: ["Cancelled"],
+};
+
+async function updateBookingStatus(req, res) {
+  const { id } = req.params;
+  const status = req.body?.status;
+  if (!mongoose.isObjectIdOrHexString(id)) return res.status(400).json({ msg: "Invalid booking ID" });
+
+  const booking = await Attendee.findById(id).populate("event", "organizer");
+  if (!booking?.event) return res.status(404).json({ msg: "Booking not found" });
+  if (req.user.role !== "admin" && !booking.event.organizer.equals(req.user._id)) {
+    return res.status(403).json({ msg: "You can only manage bookings for your own events" });
+  }
+  if (!bookingTransitions[booking.status]?.includes(status)) {
+    return res.status(409).json({ msg: "That status change is no longer available" });
+  }
+
+  const previous = booking.status === "Confirmed"
+    ? { $or: [{ status: "Confirmed" }, { status: { $exists: false } }] }
+    : { status: booking.status };
+  const updated = await Attendee.findOneAndUpdate({ _id: id, ...previous }, { $set: { status } }, { new: true });
+  if (!updated) return res.status(409).json({ msg: "Booking changed. Refresh and try again." });
+  publishUpdate();
+  return res.json({ status: updated.status });
+}
+
+export { registerAttendee, getAttendees, updateBookingStatus };

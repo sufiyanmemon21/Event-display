@@ -102,3 +102,32 @@
   .celebration-intro, .celebration-package-grid, .celebration-inquiry { grid-template-columns: 1fr; }
   .celebration-package-grid { gap: 20px; }
 }
+
+/* The signed-in attendee entrance uses the venue photography from the public site. */
+.celebration-nav-attendee { width: min(1420px, calc(100% - 40px)); margin-bottom: -84px; }
+.celebration-nav-attendee .celebration-nav-bar { min-height: 72px; border-radius: 40px; padding-inline: clamp(16px, 2vw, 28px); }
+.celebration-nav-attendee .celebration-nav-action { border-radius: 99px; }
+.celebration-nav-attendee a.celebration-nav-action[aria-current] { color: #fff8f3; }
+.celebration-nav-attendee .attendee-nav-icon { position: relative; display: inline-grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 1px solid #e3cdbd; border-radius: 50%; background: #fffaf5; color: #87584d; }
+.celebration-nav-attendee .attendee-nav-icon:hover { background: #f1e2d6; }
+.attendee-inbox[data-slot="dialog-content"] { border-color: #e2c9bd; background: #fff8f2; color: #362824; }
+.attendee-notifications span { position: absolute; top: -3px; right: -4px; min-width: 17px; padding-inline: 3px; border-radius: 20px; background: #a54853; color: #fff; font-size: .68rem; line-height: 17px; text-align: center; }
+.attendee-hero { position: relative; isolation: isolate; padding-block: 126px 54px; background: #efe1d1; }
+.attendee-hero::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #f6ece0ed 24%, #f6ece0a8 100%), var(--attendee-venue) center / cover; }
+.attendee-hero-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, .85fr); gap: clamp(24px, 7vw, 106px); align-items: center; }
+.attendee-hero-layout h1 { max-width: 13ch; font-size: clamp(3rem, 6vw, 5.8rem); }
+.attendee-hero-layout > img { width: 100%; height: clamp(300px, 40vw, 560px); object-fit: cover; border: 1px solid #fff6ee; border-radius: 27px; box-shadow: 0 18px 40px #4b302426; }
+.attendee-hero-copy { max-width: 48ch; margin-block: 22px 24px; font-size: clamp(1rem, 1.5vw, 1.15rem); }
+.attendee-hero-secondary { border: 1px solid #a47a62; background: #fff6ee; color: #694239; }
+.attendee-hero-secondary:hover { background: #f3ddd0; }
+@media (max-width: 1200px) {
+  .celebration-nav-attendee .celebration-nav-links, .celebration-nav-attendee .celebration-nav-actions { display: none; }
+  .celebration-nav-attendee .celebration-nav-toggle { display: block; }
+  .celebration-nav-attendee .celebration-mobile-nav { display: grid; }
+}
+@media (max-width: 720px) {
+  .attendee-hero { padding-block: 106px 30px; }
+  .attendee-hero-layout { grid-template-columns: minmax(0, 1fr); }
+  .attendee-hero-layout > img { height: clamp(210px, 55vw, 350px); border-radius: 15px; }
+  .attendee-hero-layout h1 { font-size: clamp(2.6rem, 9vw, 4rem); }
+}

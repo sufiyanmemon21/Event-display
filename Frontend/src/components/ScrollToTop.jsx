@@ -4,6 +4,8 @@ import { useLocation, useNavigationType } from "react-router-dom";
 const publicPaths = new Set([
   "/",
   "/contact",
+  "/profile",
+  "/passes/verify",
   "/event-listing",
   "/gallery",
   "/event-gallery",

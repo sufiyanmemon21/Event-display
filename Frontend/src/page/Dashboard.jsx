@@ -54,7 +54,7 @@ export default function Dashboard() {
           const response = await API.get("/analytics/summary", options);
           const data = response.data.analytics;
           nextStats = [{
-            label: "Events",
+            label: "Total Listings",
             value: data.totalEvents
           }, {
             label: "Attendee Registrations",
@@ -68,6 +68,15 @@ export default function Dashboard() {
           }, {
             label: "Reserved Booths",
             value: data.reservedBooths
+          }, {
+            label: "Total Booths",
+            value: data.totalBooths
+          }, {
+            label: "Booth Occupancy",
+            value: `${data.boothReservationRate}%`
+          }, {
+            label: "Approved Applications",
+            value: data.approvedApplications
           }, {
             label: "Sessions",
             value: data.totalSessions
@@ -161,6 +170,9 @@ export default function Dashboard() {
   const isOrganizer = ["organizer", "admin"].includes(user?.role);
   const shortcuts = isOrganizer ? [{
     title: "Manage Events",
+    path: "/dashboard/events"
+  }, {
+    title: "Manage Expos",
     path: "/events"
   }, {
     title: "Review Applications",
@@ -181,6 +193,9 @@ export default function Dashboard() {
     title: "Select Booth",
     path: "/booths"
   }, {
+    title: "Company Profile",
+    path: "/exhibitor-profile"
+  }, {
     title: "Search Exhibitors",
     path: "/exhibitor-search"
   }] : [{
@@ -194,19 +209,19 @@ export default function Dashboard() {
     path: "/exhibitor-search"
   }];
   const listTitle = isOrganizer ? "Your Events" : user?.role === "exhibitor" ? "My Applications" : "My Registered Events";
-  const statIcons = [CalendarDays, Users, Building2, Clock3, BarChart3, CalendarDays];
+  const statIcons = [CalendarDays, Users, Building2, Clock3, BarChart3, Building2, BarChart3, Building2, CalendarDays];
   return <div className="space-y-7">
-      <div className="flex flex-col gap-5 rounded-2xl bg-sidebar p-6 text-sidebar-foreground sm:flex-row sm:items-end sm:justify-between lg:p-8">
+      <div className="workspace-heading workspace-overview flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
           <Badge variant="secondary" className="capitalize">
             {user?.role} workspace
           </Badge>
           <div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Welcome back{user?.name ? `, ${user.name}` : ""}
+              {user?.role === "admin" ? "Admin Dashboard" : user?.role === "exhibitor" ? "Exhibitor Dashboard" : `Welcome back${user?.name ? `, ${user.name}` : ""}`}
             </h1>
             <p className="mt-2 text-sm text-sidebar-foreground/65 sm:text-base">
-              Your events. Your community. One connected workspace.
+              {isOrganizer ? "Overview of your listings, booths, exhibitors, and attendee bookings." : "Your events. Your community. One connected workspace."}
             </p>
           </div>
         </div>
@@ -216,7 +231,7 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      {loading ? <div role="status" aria-label="Loading dashboard" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {loading ? <div role="status" aria-label="Loading dashboard" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({
         length: 6
       }, (_, index) => <Card key={index} className="rounded-2xl">
@@ -235,8 +250,8 @@ export default function Dashboard() {
             </Button>
           </CardContent>
         </Card> : <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {stats.map(item => <Card key={item.label} className="group overflow-hidden rounded-2xl border-border/80 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md first:col-span-full first:bg-primary first:text-primary-foreground sm:first:col-span-2">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {stats.map(item => <Card key={item.label} className="workspace-stat-card group relative overflow-hidden rounded-xl border border-border/80 transition hover:border-primary/40">
                 <CardContent className="flex items-center justify-between gap-4 p-5">
                   <div className="space-y-2">
                     <p className="text-sm font-medium opacity-70">
