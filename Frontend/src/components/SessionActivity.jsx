@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import { Button } from "@/components/ui/button";
@@ -95,7 +95,7 @@ function SessionActivityPanel({ session }) {
 
   if (loading) {
     return (
-      <EllipseLoader label="Loading your session details" />
+      <EllipsisLoader label="Loading your session details" />
     );
   }
 

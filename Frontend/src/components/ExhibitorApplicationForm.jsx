@@ -1,6 +1,6 @@
 import { useId, useState } from "react";
 import API from "@/api/api";
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import WorkspaceSelect from "@/components/workspace-select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -81,7 +81,7 @@ export default function ExhibitorApplicationForm({ events, expo, disabled, onBus
       </div>}
 
       <Button type="submit" className={expo ? "justify-self-start sm:col-span-2" : undefined} disabled={!eventId}>
-        {saving && <EllipseLoader inline label="Submitting application" />} Submit Application
+        {saving && <EllipsisLoader scope="inline" label="Submitting application" />} Submit Application
       </Button>
     </fieldset>
     {!expo && events.length === 0 && !disabled && <p className="text-sm text-muted-foreground">No events are available yet.</p>}

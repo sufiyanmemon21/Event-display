@@ -1,5 +1,5 @@
 import { isExpo } from "@/hooks/useExpos";
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { PageHeading } from "@/components/workspace";
 import WorkspaceSelect from "@/components/workspace-select";
@@ -181,11 +181,11 @@ export default function FloorPlan() {
                     {event.title}
                   </option>)}
               </WorkspaceSelect>
-              {loadingEvents && <EllipseLoader inline label="Loading expos" />}
+              {loadingEvents && <EllipsisLoader scope="inline" label="Loading expos" />}
               {!loadingEvents && events.length === 0 && <p className="text-sm text-muted-foreground">No expos are available yet.</p>}
 
               <Button onClick={() => loadFloorPlan()} disabled={!eventId || loadingEvents || busy}>
-                {loading ? <EllipseLoader inline /> : "Load / Reload Floor Plan"}
+                {loading ? <EllipsisLoader scope="inline" /> : "Load / Reload Floor Plan"}
               </Button>
             </>}
         </CardContent>
@@ -195,6 +195,7 @@ export default function FloorPlan() {
           {error}
         </p>}
 
+      {loading && <EllipsisLoader scope="page" label="Loading floor plan" />}
       {layout && !loading && <div className={canEdit ? "workspace-floor-studio" : "min-w-0"}>
           {canEdit && <Card className="workspace-floor-controls">
               <CardHeader>

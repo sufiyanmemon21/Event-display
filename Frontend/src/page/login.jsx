@@ -1,3 +1,4 @@
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useState } from 'react';
 import useAuth from '@/hooks/useAuth';
 import API, { saveAuth } from '@/api/api';
@@ -8,7 +9,7 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom';
-import { ArrowUpRight, LoaderCircle } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import AuthLayout from '@/components/auth/AuthLayout';
 import PasswordField from '@/components/auth/PasswordField';
 function accountDestination(account, returnTo) {
@@ -144,10 +145,7 @@ export default function Login({ signup = false }) {
         >
           {loading ? (
             <>
-              <LoaderCircle
-                className="animate-spin motion-reduce:animate-none"
-                size={18}
-              />{' '}
+              <EllipsisLoader scope="inline" label={signup ? "Creating your account" : "Signing in"} />
               Please wait…
             </>
           ) : (

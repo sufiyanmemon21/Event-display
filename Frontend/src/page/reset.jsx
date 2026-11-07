@@ -1,3 +1,4 @@
+import EllipsisLoader from "@/components/EllipsisLoader";
 import AuthLayout from '@/components/auth/AuthLayout';
 import { useState } from "react";
 import {
@@ -137,7 +138,7 @@ export default function Reset() {
               disabled={loading}
               className="celebration-auth-submit w-full text-sm font-semibold"
             >
-              {loading ? "Updating..." : "Reset password"}
+              {loading ? <EllipsisLoader scope="inline" label="Updating password" /> : "Reset password"}
             </Button>
           </form>
           <Link

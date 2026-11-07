@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { RecordBrowser } from "@/components/workspace";
 import { Badge } from "@/components/ui/badge";
 import { PageHeading } from "@/components/workspace";
@@ -104,7 +104,7 @@ export default function NotificationsManagement() {
           {error}
         </p>}
 
-      {loading ? <EllipseLoader label="Loading notifications" /> : notifications.length === 0 ? !error && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
+      {loading ? <EllipsisLoader scope="page" label="Loading notifications" /> : notifications.length === 0 ? !error && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
             No notifications yet.
           </p> : <RecordBrowser records={notifications.map(item => ({
       ...item,

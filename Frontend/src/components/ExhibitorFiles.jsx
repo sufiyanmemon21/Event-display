@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
@@ -53,7 +53,7 @@ export function LogoPreview({
       </p>;
   }
   if (!url) {
-    return <EllipseLoader label="Loading logo" />;
+    return <EllipsisLoader scope="inline" label="Loading logo" />;
   }
   return <img src={url} alt="Company logo" className="h-24 w-24 rounded-md border object-contain p-2" />;
 }
@@ -160,7 +160,7 @@ function CompanyFiles({
         </Button>
       </div>
 
-      {loading ? <EllipseLoader label="Loading files" /> : error ? <p className="text-sm text-destructive" role="alert">
+      {loading ? <EllipsisLoader label="Loading files" /> : error ? <p className="text-sm text-destructive" role="alert">
           {error}
         </p> : <>
           {hasLogo ? <LogoPreview exhibitorId={exhibitorId} /> : <p className="text-sm text-muted-foreground">

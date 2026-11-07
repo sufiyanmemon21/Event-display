@@ -1,3 +1,4 @@
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import PublicPageShell from '@/components/landing/PublicPageShell';
@@ -25,7 +26,7 @@ export default function PassVerification() {
     <main className="mx-auto min-h-[60vh] max-w-xl px-4 pb-12">
       <section className="space-y-4 rounded-xl border border-[#e2c9bd] bg-[#fffaf6] p-6">
         <h1 className="font-serif text-3xl">EventSphere pass verification</h1>
-        {!current ? <p role="status">Checking pass…</p> : current.error
+        {!current ? <EllipsisLoader label="Checking pass" /> : current.error
           ? <p role="alert" className="text-red-800">{current.error}</p>
           : <div role="status"><p className="font-semibold text-green-800">Valid confirmed booking</p><p>{current.data.title} · {current.data.ticketType}</p></div>}
       </section>

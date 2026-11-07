@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { Textarea } from "@/components/ui/textarea";
 import WorkspaceSelect from "@/components/workspace-select";
@@ -176,7 +176,7 @@ export default function ExhibitorServices({
           to submit service requests.
         </p> : null}
 
-      {loading ? <EllipseLoader label="Loading requests" /> : error ? <p className="text-sm text-destructive" role="alert">
+      {loading ? <EllipsisLoader label="Loading requests" /> : error ? <p className="text-sm text-destructive" role="alert">
           {error}
         </p> : requests.length === 0 ? <p className="text-sm text-muted-foreground">
           No service requests yet.

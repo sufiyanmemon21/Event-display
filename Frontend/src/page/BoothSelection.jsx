@@ -1,5 +1,5 @@
 import { isExpo } from "@/hooks/useExpos";
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableHeader, TableHead, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -245,10 +245,10 @@ export default function BoothSelection({ expo, onBusyChange, onReservationChange
                     {event.title}
                   </option>)}
               </WorkspaceSelect>
-              {loadingEvents && <EllipseLoader inline label="Loading expos" />}
+              {loadingEvents && <EllipsisLoader scope="inline" label="Loading expos" />}
 
               <Button onClick={() => fetchBooths()} disabled={!eventId || busy || loadingEvents}>
-                {loadingBooths ? <EllipseLoader inline label="Loading booths" /> : "Load / Refresh Booths"}
+                {loadingBooths ? <EllipsisLoader scope="inline" label="Loading booths" /> : "Load / Refresh Booths"}
               </Button>
 
               {!loadingEvents && events.length === 0 && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
@@ -280,7 +280,7 @@ export default function BoothSelection({ expo, onBusyChange, onReservationChange
         </Card></FormPanel>}
 
       </>}
-      {loadingBooths ? <EllipseLoader label="Loading booths" /> : boothError ? <div className="space-y-2"><p role="alert">{boothError}</p>{expo && <Button variant="outline" onClick={() => fetchBooths()}>Try again</Button>}</div> : loaded ? <>
+      {loadingBooths ? <EllipsisLoader scope={expo ? "section" : "page"} label="Loading booths" /> : boothError ? <div className="space-y-2"><p role="alert">{boothError}</p>{expo && <Button variant="outline" onClick={() => fetchBooths()}>Try again</Button>}</div> : loaded ? <>
           {canManage && <FormPanel open={assignOpen} onOpenChange={value => {
         if (!busy) setAssignOpen(value);
       }} title="Assign Booth" trigger="Assign a booth"><Card>

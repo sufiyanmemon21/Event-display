@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { Badge } from "@/components/ui/badge";
 import { PageHeading } from "@/components/workspace";
 import { RecordBrowser } from "@/components/workspace";
@@ -188,7 +188,7 @@ export default function FeedbackSupport() {
         </Button>
       </div>
 
-      {loading ? <EllipseLoader label="Loading feedback" /> : loadError ? <p role="alert">{loadError}</p> : feedbacks.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
+      {loading ? <EllipsisLoader scope="page" label="Loading feedback" /> : loadError ? <p role="alert">{loadError}</p> : feedbacks.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
           No feedback requests found.
         </p> : <RecordBrowser records={feedbacks} label="feedbacks" statusKey="status">{visible => <div className="space-y-4">
           {visible.map(feedback => <Card key={feedback._id}>

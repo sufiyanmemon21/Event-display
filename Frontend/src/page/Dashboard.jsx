@@ -1,5 +1,5 @@
 import AnimatedIcon from "@/components/AnimatedIcon";
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { CalendarIcon, UsersIcon, Building2Icon, ClockIcon, ChartNoAxesColumnIcon } from "@animateicons/react/lucide";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
@@ -228,12 +228,12 @@ export default function Dashboard() {
           </div>
         </div>
         <Button variant="outline" className="w-fit rounded-xl bg-card text-foreground" disabled={loading} onClick={() => setRefresh(previous => previous + 1)}>
-          {loading ? <EllipseLoader inline label="Refreshing overview" /> : <RefreshCw className="size-4" />}
+          {loading ? <EllipsisLoader scope="inline" label="Refreshing overview" /> : <RefreshCw className="size-4" />}
           Refresh overview
         </Button>
       </div>
 
-      {loading ? <div className="grid min-h-60 place-items-center"><EllipseLoader label="Loading dashboard" /></div> : error ? <Card className="rounded-2xl border-destructive/30">
+      {loading ? <EllipsisLoader scope="page" label="Loading dashboard" /> : error ? <Card className="rounded-2xl border-destructive/30">
           <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
             <p role="alert" className="text-sm text-destructive">
               {error}

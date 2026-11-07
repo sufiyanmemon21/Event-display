@@ -1,3 +1,4 @@
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Minus, Plus, Heart, ArrowLeft } from "lucide-react";
@@ -52,9 +53,7 @@ export default function ProductDetail() {
     }
   }, [id]);
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center font-bold text-lg bg-background text-foreground">
-        Loading Product Details...
-      </div>;
+    return <EllipsisLoader scope="viewport" label="Loading product details" />;
   }
   if (!product) {
     return <div className="min-h-screen flex flex-col items-center justify-center gap-4 bg-background text-foreground">

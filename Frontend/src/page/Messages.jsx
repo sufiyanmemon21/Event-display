@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { ArrowLeft, MessageSquareText } from "lucide-react";
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { PageHeading } from "@/components/workspace";
 import { Textarea } from "@/components/ui/textarea";
@@ -129,9 +129,9 @@ function Conversation({
             {error}
           </p>}
 
-        {loading ? <EllipseLoader label="Loading messages" /> : <>
+        {loading ? <EllipsisLoader label="Loading messages" /> : <>
             {before && <Button variant="outline" onClick={loadOlder} disabled={loadingOlder || sending || Boolean(error)}>
-                {loadingOlder ? <EllipseLoader inline /> : "Load Older Messages"}
+                {loadingOlder ? <EllipsisLoader scope="inline" /> : "Load Older Messages"}
               </Button>}
 
             <div className={`min-h-52 max-h-[min(48dvh,450px)] space-y-3 overflow-y-auto rounded-md border p-3`}>
@@ -163,7 +163,7 @@ function Conversation({
               {text.length}/2000
             </p>
             <Button type="submit" disabled={sending || loading || Boolean(error) || !text.trim()}>
-              {sending && <EllipseLoader inline label="Sending message" />} Send Message
+              {sending && <EllipsisLoader scope="inline" label="Sending message" />} Send Message
             </Button>
           </div>
         </form>
@@ -295,7 +295,7 @@ export default function Messages() {
             </form>
           </div>}
           <div className="max-h-[min(30rem,65dvh)] space-y-2 overflow-y-auto p-4">
-            {loading ? <EllipseLoader label="Loading inbox" /> : conversations.length === 0 ? <p className="text-sm text-muted-foreground">
+            {loading ? <EllipsisLoader label="Loading inbox" /> : conversations.length === 0 ? <p className="text-sm text-muted-foreground">
                 {error ? "Inbox is currently unavailable." : managesInbox ? "Participant messages will appear here." : "No conversations yet."}
               </p> : conversations.map(item => {
             const active = thread?.eventId === item.event._id && thread?.participantId === item.participant._id;

@@ -229,3 +229,16 @@
   .public-feedback-options { gap: 5px; }
   .public-feedback-options label span { flex-direction: column; font-size: .74rem; }
 }
+
+.public-theme > main:has([data-loading-scope="page"]) {
+  display: flex;
+  min-height: 100svh;
+  flex-direction: column;
+}
+
+.public-theme > main div:has(> [data-loading-scope="page"]) {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+}

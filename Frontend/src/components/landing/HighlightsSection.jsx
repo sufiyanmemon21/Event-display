@@ -1,3 +1,4 @@
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { Link } from 'react-router-dom';
 import EventCard from './EventCard';
 
@@ -19,9 +20,7 @@ export default function HighlightsSection({ data }) {
           </p>
         </div>
         {data.loading ? (
-          <p role="status" className="py-12 text-center text-sm text-[#756a64]">
-            Finding upcoming events…
-          </p>
+          <EllipsisLoader label="Finding upcoming events" />
         ) : data.error ? (
           <p role="alert" className="py-12 text-center text-sm text-[#756a64]">
             {data.error}

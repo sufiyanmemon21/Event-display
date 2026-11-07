@@ -1,3 +1,4 @@
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CalendarDays, Search } from 'lucide-react';
@@ -49,12 +50,7 @@ export default function ExpoCollection({
           </label>
         )}
         {data.loading ? (
-          <div
-            className="flex min-h-48 flex-col items-center justify-center gap-4 rounded-2xl border border-[#eadfd5] bg-white p-8 text-center text-[#665b54]"
-            role="status"
-          >
-            Finding your next experience…
-          </div>
+          <EllipsisLoader label="Finding your next experience" />
         ) : data.error ? (
           <div
             className="flex min-h-48 flex-col items-center justify-center gap-4 rounded-2xl border border-[#eadfd5] bg-white p-8 text-center text-[#665b54]"

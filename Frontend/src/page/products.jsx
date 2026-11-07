@@ -1,3 +1,4 @@
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { toast } from "react-toastify";
 import { PageHeading } from "@/components/workspace";
@@ -102,9 +103,7 @@ export default function ProductsList() {
     }
   };
   const filteredProducts = selectedCategory === "All" ? products : products.filter(product => product.category === selectedCategory);
-  if (loading) return <p className="p-8 text-center font-bold text-foreground bg-background min-h-full">
-        Products Are Loading Please Wait
-      </p>;
+  if (loading) return <EllipsisLoader scope="page" label="Loading products" />;
   return <div className="min-h-full bg-background text-foreground py-2">
       <div className="max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">

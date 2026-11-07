@@ -1,3 +1,4 @@
+import EllipsisLoader from "@/components/EllipsisLoader";
 import AuthLayout from '@/components/auth/AuthLayout';
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -59,7 +60,7 @@ export default function Forget() {
           disabled={loading}
           className="celebration-auth-submit w-full text-sm font-semibold"
         >
-          {loading ? "Sending..." : "Send reset link"}
+          {loading ? <EllipsisLoader scope="inline" label="Sending reset link" /> : "Send reset link"}
         </Button>
       </form>
 

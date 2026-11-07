@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Building2, Pencil, RefreshCw } from 'lucide-react';
@@ -49,7 +49,7 @@ export default function ExhibitorProfile() {
     <PageHeading title="Profile" description="Manage your company details and the profiles attached to your event applications.">
       <Button variant="outline" disabled={loading} onClick={reload}><RefreshCw size={16} /> Refresh profile</Button>
     </PageHeading>
-    {loading && <EllipseLoader label="Loading company profiles" />}
+    {loading && <EllipsisLoader scope="page" label="Loading company profiles" />}
     {!loading && error && <p role="alert" className="text-destructive">{error}</p>}
     {!loading && !error && !profile && <Card><CardContent className="space-y-3">
       <p>Create an exhibitor application to set up a company profile.</p>

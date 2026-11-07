@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { PageHeading } from "@/components/workspace";
 import WorkspaceSelect from "@/components/workspace-select";
@@ -210,7 +210,7 @@ export default function AnalyticsDashboard() {
           {error}
         </p>}
 
-      {loading ? <EllipseLoader label="Loading analytics" /> : currentReport ? <>
+      {loading ? <EllipsisLoader scope="page" label="Loading analytics" /> : currentReport ? <>
           <p className="text-sm text-muted-foreground">
             Updated: {new Date(report.generatedAt).toLocaleString("en-GB")}.
             Refreshes every 30 seconds.

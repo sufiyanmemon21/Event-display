@@ -1,7 +1,7 @@
 import BoothSelection from "@/page/BoothSelection";
 import ExhibitorApplicationForm from "@/components/ExhibitorApplicationForm";
 import { useRef } from "react";
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { Textarea } from "@/components/ui/textarea";
@@ -342,7 +342,7 @@ export default function EventsManagement({ listingType = "expo" }) {
               <p role="status" className="text-sm">Application status <Badge variant="secondary">{activeApplication.status}</Badge> {activeApplication.status === "Pending" && "You can reserve a booth after the organizer approves your application."}</p>}
           </CardContent>
         </Card>}
-        {loading ? <EllipseLoader label="Loading events" /> : loadError ? <div className="space-y-3">
+        {loading ? <EllipsisLoader scope="page" label="Loading events" /> : loadError ? <div className="space-y-3">
             <p role="alert">{loadError}</p>
             <Button variant="outline" onClick={() => fetchEvents()}>
               Try Again

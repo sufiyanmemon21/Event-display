@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -154,7 +154,7 @@ export default function AttendeesManagement() {
                 </div>
 
                 <Button type="submit" disabled={!eventId || events.length === 0}>
-                  {saving && <EllipseLoader inline label="Registering" />} Register
+                  {saving && <EllipsisLoader scope="inline" label="Registering" />} Register
                 </Button>
 
                 {!loading && events.length === 0 && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
@@ -165,7 +165,7 @@ export default function AttendeesManagement() {
           </CardContent>
         </Card></FormPanel>}
 
-      {loading ? <EllipseLoader label="Loading registrations" /> : loadError ? <div className="space-y-3">
+      {loading ? <EllipsisLoader scope="page" label="Loading registrations" /> : loadError ? <div className="space-y-3">
           <p role="alert">{loadError}</p>
 
           <Button variant="outline" onClick={refreshData}>

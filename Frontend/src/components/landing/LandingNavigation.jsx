@@ -1,5 +1,5 @@
 import BookLink from "@/components/landing/BookLink";
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowUpRight, Bell, Menu, MessageSquareText, X } from 'lucide-react';
@@ -32,7 +32,7 @@ function NotificationBell({ items, unread, loading, error, saving, onRefresh, on
               {item.createdAt && <time dateTime={item.createdAt} className="mt-1 block text-xs text-[#69534b]">{notificationDate.format(new Date(item.createdAt))}</time>}
             </div>
           </li>)}
-        </ul> : !error && (loading ? <EllipseLoader label="Loading notifications" /> : <p className="px-4 py-6 text-sm text-[#69534b]">You have no notifications yet.</p>)}
+        </ul> : !error && (loading ? <EllipsisLoader label="Loading notifications" /> : <p className="px-4 py-6 text-sm text-[#69534b]">You have no notifications yet.</p>)}
       </Popover.Content>
     </Popover.Portal>
   </Popover.Root>;

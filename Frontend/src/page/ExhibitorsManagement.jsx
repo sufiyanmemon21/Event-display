@@ -1,5 +1,5 @@
 import ExhibitorApplicationForm from "@/components/ExhibitorApplicationForm";
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PageHeading } from "@/components/workspace";
@@ -122,7 +122,7 @@ export default function ExhibitorsManagement() {
           </CardContent>
         </Card></FormPanel>}
 
-      {loading ? <EllipseLoader label="Loading applications" /> : loadError ? <p role="alert">{loadError}</p> : exhibitors.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">No applications found.</p> : <RecordBrowser records={exhibitors} label="exhibitors" statusKey="status">{visible => <div className="space-y-4">
+      {loading ? <EllipsisLoader scope="page" label="Loading applications" /> : loadError ? <p role="alert">{loadError}</p> : exhibitors.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">No applications found.</p> : <RecordBrowser records={exhibitors} label="exhibitors" statusKey="status">{visible => <div className="space-y-4">
           {visible.map(item => <Card key={item._id}>
               <CardContent className="space-y-5 p-6">
                 <h2 className="break-words text-lg font-semibold">

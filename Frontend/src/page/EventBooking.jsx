@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { ArrowLeft, CalendarDays, ClipboardList, UserRound } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import API from '@/api/api';
-import EllipseLoader from '@/components/EllipseLoader';
+import EllipsisLoader from '@/components/EllipsisLoader';
 import PublicPageShell from '@/components/landing/PublicPageShell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -105,7 +105,7 @@ function BookingForm({ initialEventId }) {
           <p role="alert" className="text-sm text-red-800">{catalog.error ? 'Unable to load bookable events.' : bookingError}</p>
           <Button type="button" variant="outline" onClick={catalog.error ? catalog.retry : refreshBookings}>Try again</Button>
         </div>}
-        {busy && !saving && <EllipseLoader inline label="Loading booking options" />}
+        {busy && !saving && <EllipsisLoader label="Loading booking options" />}
         {!catalog.loading && !catalog.error && (available.length === 0 || (eventId && !selected)) && <p className="mb-4 text-sm text-[#69534b]">{available.length === 0 ? 'No bookable events are available right now.' : 'This listing is unavailable for booking. Choose another event.'}</p>}
         {alreadyBooked && !notice && <p className="mb-4 text-sm text-[#69534b]">You already have a booking for this listing. <Link className="underline" to="/profile">View My bookings</Link></p>}
         <form onSubmit={submit} className="space-y-6">
@@ -142,7 +142,7 @@ function BookingForm({ initialEventId }) {
           <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#e2c9bd] pt-4">
             <p className="text-sm text-[#69534b]">Track the organizer’s decision in My bookings.</p>
             <Button type="submit" className="bg-[#87584d] text-white hover:bg-[#694239]" disabled={busy || !selected || alreadyBooked || Boolean(bookingError)}>
-              {saving && <EllipseLoader inline label="Submitting booking" />} Submit Booking
+              {saving && <EllipsisLoader scope="inline" label="Submitting booking" />} Submit Booking
             </Button>
           </div>
         </form>

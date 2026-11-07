@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   Link,
@@ -23,7 +23,7 @@ function subscribeToAuth(callback) {
   };
 }
 
-export default function ProtectedRoute({ allowedRoles }) {
+export default function ProtectedRoute({ allowedRoles, loadingScope = "viewport" }) {
   const location = useLocation();
   const token = useSyncExternalStore(subscribeToAuth, readToken);
   const [retry, setRetry] = useState(0);
@@ -100,7 +100,7 @@ export default function ProtectedRoute({ allowedRoles }) {
 
   if (!currentCheck) {
     return (
-      <EllipseLoader label="Loading" />
+      <EllipsisLoader scope={loadingScope} label="Verifying your account" />
     );
   }
 

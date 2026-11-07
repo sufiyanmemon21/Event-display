@@ -1,5 +1,5 @@
 import BookLink from "@/components/landing/BookLink";
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from 'lucide-react';
@@ -130,7 +130,7 @@ export function ExpoDetailPage() {
             <ArrowLeft size={16} /> {backToEvents ? 'Back to events' : 'Back to expos'}
           </Link>
           {data.loading ? (
-            <EllipseLoader label="Loading event details" />
+            <EllipsisLoader scope="page" label="Loading event details" />
           ) : data.error ? (
             <div role="alert" className="rounded-2xl border border-[#eadfd5] bg-white p-8 text-center">
               <p className="text-sm text-[#756a64]">{data.error}</p>

@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { RecordBrowser } from "@/components/workspace";
 import { Badge } from "@/components/ui/badge";
 import { useConfirmation } from "@/hooks/useConfirmation";
@@ -232,10 +232,10 @@ export default function SessionsManagement() {
                     {event.title}
                   </option>)}
               </WorkspaceSelect>
-              {loadingEvents && <EllipseLoader inline label="Loading events" />}
+              {loadingEvents && <EllipsisLoader scope="inline" label="Loading events" />}
 
               <Button onClick={fetchSessions} disabled={!eventId || loadingEvents || busy}>
-                {loadingSessions ? <EllipseLoader inline /> : "Load Schedule"}
+                {loadingSessions ? <EllipsisLoader scope="inline" /> : "Load Schedule"}
               </Button>
 
               {!loadingEvents && events.length === 0 && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
@@ -301,7 +301,7 @@ export default function SessionsManagement() {
           </CardContent>
         </Card></FormPanel>}
 
-      {loadingSessions ? <EllipseLoader label="Loading sessions" /> : sessionError ? <p role="alert">{sessionError}</p> : loadedEventId === eventId && eventId ? sessions.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
+      {loadingSessions ? <EllipsisLoader scope="page" label="Loading sessions" /> : sessionError ? <p role="alert">{sessionError}</p> : loadedEventId === eventId && eventId ? sessions.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
             No sessions have been added for this event.
           </p> : <RecordBrowser records={sessions} label="sessions">{visible => <div className="space-y-4">
             <h2 className="text-xl font-semibold">Event Schedule</h2>

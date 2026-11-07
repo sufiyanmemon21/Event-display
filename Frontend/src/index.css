@@ -137,6 +137,11 @@
   }
 }
 
-@keyframes ellipse-orbit {
-  to { stroke-dashoffset: -100; }
+
+:is(button[data-variant="default"], .celebration-auth-submit) [data-loading-scope="inline"] {
+  color: #edc99c;
+}
+
+.dark button[data-variant="default"] [data-loading-scope="inline"] {
+  color: #694239;
 }

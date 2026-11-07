@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { lazy, Suspense, useLayoutEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import DashboardLayout from "./layout/DashboardLayout";
@@ -49,7 +49,7 @@ function App() {
     if (!hash) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [key, hash]);
 
-  return <Suspense fallback={<EllipseLoader />}>
+  return <Suspense fallback={<EllipsisLoader scope="viewport" />}>
       <Routes>
         <Route path="/" element={<EventSphereHome />} />
         <Route path="/contact" element={<Contact />} />
@@ -101,7 +101,7 @@ function App() {
           <Route path="dashboard" element={<Dashboard />} />
 
 
-          <Route element={<ProtectedRoute allowedRoles={allRoles} />}>
+          <Route element={<ProtectedRoute loadingScope="page" allowedRoles={allRoles} />}>
             <Route path="events" element={<EventsManagement key="expo" />} />
             <Route path="dashboard/events" element={<EventsManagement key="event" listingType="event" />} />
             <Route path="sessions" element={<SessionsManagement />} />
@@ -113,31 +113,31 @@ function App() {
             <Route path="products" element={<Navigate to="/dashboard" replace />} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={allRoles} />}>
+          <Route element={<ProtectedRoute loadingScope="page" allowedRoles={allRoles} />}>
             <Route path="messages" element={<Messages />} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={["admin", "organizer", "exhibitor"]} />}>
+          <Route element={<ProtectedRoute loadingScope="page" allowedRoles={["admin", "organizer", "exhibitor"]} />}>
             <Route path="exhibitors" element={<ExhibitorsManagement />} />
             <Route path="booths" element={<BoothSelection />} />
           </Route>
-          <Route element={<ProtectedRoute allowedRoles={["exhibitor"]} />}>
+          <Route element={<ProtectedRoute loadingScope="page" allowedRoles={["exhibitor"]} />}>
             <Route path="exhibitor-profile" element={<ExhibitorProfile />} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={["admin", "organizer", "attendee"]} />}>
+          <Route element={<ProtectedRoute loadingScope="page" allowedRoles={["admin", "organizer", "attendee"]} />}>
             <Route path="attendees" element={<AttendeesManagement />} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+          <Route element={<ProtectedRoute loadingScope="page" allowedRoles={["admin"]} />}>
             <Route path="users" element={<UsersManagement />} />
             <Route path="website-settings" element={<WebsiteSettings />} />
             <Route path="contact-messages" element={<ContactMessages />} />
           </Route>
-          <Route element={<ProtectedRoute allowedRoles={["admin", "organizer", "attendee"]} />}>
+          <Route element={<ProtectedRoute loadingScope="page" allowedRoles={["admin", "organizer", "attendee"]} />}>
             <Route path="expo-tickets" element={<ExpoTickets />} />
           </Route>
-          <Route element={<ProtectedRoute allowedRoles={["admin", "organizer"]} />}>
+          <Route element={<ProtectedRoute loadingScope="page" allowedRoles={["admin", "organizer"]} />}>
             <Route path="analytics" element={<AnalyticsDashboard />} />
             <Route path="event-approvals" element={<EventApprovals />} />
             <Route path="add-product" element={<Navigate to="/dashboard" replace />} />

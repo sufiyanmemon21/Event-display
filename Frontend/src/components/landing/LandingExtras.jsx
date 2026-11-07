@@ -1,4 +1,4 @@
-import EllipseLoader from "@/components/EllipseLoader";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, ChevronDown, MessageSquare, Quote } from 'lucide-react';
@@ -36,7 +36,7 @@ function ClientReviews() {
         <h2 id="reviews-title">Client reviews</h2>
       </header>
       {loadError && <p role="status">Reviews couldn’t be loaded. <button className="celebration-text-link" type="button" onClick={() => setRevision((current) => current + 1)}>Try again</button></p>}
-      {!loadError && !reviews && <EllipseLoader label="Loading reviews" />}
+      {!loadError && !reviews && <EllipsisLoader label="Loading reviews" />}
       {!loadError && reviews?.length === 0 && <p>No client reviews yet.</p>}
       {!!reviews?.length && (
         <div className="celebration-extras-grid">
