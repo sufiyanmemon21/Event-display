@@ -1,0 +1,351 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { ArrowUpRight, BarChart3, Building2, CalendarDays, Clock3, RefreshCw, Users } from "lucide-react";
+import API from "@/api/api";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+export default function Dashboard() {
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [user, setUser] = useState(null);
+  const [stats, setStats] = useState([]);
+  const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(Boolean(token));
+  const [error, setError] = useState("");
+  const [refresh, setRefresh] = useState(0);
+  useEffect(() => {
+    function updateAuth() {
+      setToken(localStorage.getItem("token"));
+      setRefresh(previous => previous + 1);
+    }
+    window.addEventListener("auth-changed", updateAuth);
+    window.addEventListener("storage", updateAuth);
+    return () => {
+      window.removeEventListener("auth-changed", updateAuth);
+      window.removeEventListener("storage", updateAuth);
+    };
+  }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    async function loadDashboard() {
+      setUser(null);
+      setStats([]);
+      setRecords([]);
+      setError("");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
+      try {
+        const options = {
+          signal: controller.signal
+        };
+        const account = await API.get("/auth/me", options);
+        const currentUser = account.data.user || account.data.data || account.data;
+        if (!currentUser.role) {
+          throw new Error("Unable to identify account role.");
+        }
+        let nextStats = [];
+        let nextRecords = [];
+        if (["organizer", "admin"].includes(currentUser.role)) {
+          const response = await API.get("/analytics/summary", options);
+          const data = response.data.analytics;
+          nextStats = [{
+            label: "Total Listings",
+            value: data.totalEvents
+          }, {
+            label: "Attendee Registrations",
+            value: data.attendeeRegistrations
+          }, {
+            label: "Exhibitor Applications",
+            value: data.exhibitorApplications
+          }, {
+            label: "Pending Applications",
+            value: data.pendingApplications
+          }, {
+            label: "Reserved Booths",
+            value: data.reservedBooths
+          }, {
+            label: "Total Booths",
+            value: data.totalBooths
+          }, {
+            label: "Booth Occupancy",
+            value: `${data.boothReservationRate}%`
+          }, {
+            label: "Approved Applications",
+            value: data.approvedApplications
+          }, {
+            label: "Sessions",
+            value: data.totalSessions
+          }];
+          nextRecords = response.data.events.map(event => ({
+            id: event._id,
+            title: event.title,
+            detail: "Manage this event from the Events page."
+          }));
+        } else if (currentUser.role === "exhibitor") {
+          const response = await API.get("/exhibitors/all", options);
+          const applications = response.data.exhibitors;
+          nextStats = [{
+            label: "My Applications",
+            value: applications.length
+          }, {
+            label: "Approved",
+            value: applications.filter(item => item.status === "Approved").length
+          }, {
+            label: "Pending",
+            value: applications.filter(item => item.status === "Pending").length
+          }, {
+            label: "Rejected",
+            value: applications.filter(item => item.status === "Rejected").length
+          }];
+          nextRecords = applications.map(item => ({
+            id: item._id,
+            title: item.companyName,
+            detail: `${item.event?.title || "Unavailable event"} · ${item.status} · Booth: ${item.boothNumber || "Not assigned"}`
+          }));
+        } else if (currentUser.role === "attendee") {
+          const response = await API.get("/attendees/all", options);
+          const registrations = response.data.attendees;
+          nextStats = [{
+            label: "My Event Registrations",
+            value: registrations.length
+          }];
+          nextRecords = registrations.map(item => ({
+            id: item._id,
+            title: item.event?.title || "Unavailable event",
+            detail: `Ticket: ${item.ticketType || "Standard"} · ${item.event?.location || "Location unavailable"}`
+          }));
+        } else {
+          throw new Error("This account role is not supported.");
+        }
+        if (controller.signal.aborted) return;
+        setUser(currentUser);
+        setStats(nextStats);
+        setRecords(nextRecords);
+      } catch (err) {
+        if (!controller.signal.aborted) {
+          setError(err.response?.data?.msg || err.message || "Unable to load dashboard.");
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
+      }
+    }
+    loadDashboard();
+    return () => controller.abort();
+  }, [token, refresh]);
+  if (!token) {
+    return <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">
+              Welcome to EventSphere
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="space-y-5">
+            <p className="text-muted-foreground">
+              Manage events, discover exhibitors and plan your
+              sessions in one place.
+            </p>
+
+            <div className="flex flex-wrap gap-3">
+              <Button asChild>
+                <Link to="/dashboard/login">Login</Link>
+              </Button>
+
+              <Button asChild variant="outline">
+                <Link to="/dashboard/signup">Create Account</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>;
+  }
+  const isOrganizer = ["organizer", "admin"].includes(user?.role);
+  const shortcuts = isOrganizer ? [{
+    title: "Manage Events",
+    path: "/dashboard/events"
+  }, {
+    title: "Manage Expos",
+    path: "/events"
+  }, {
+    title: "Review Applications",
+    path: "/exhibitors"
+  }, {
+    title: "Manage Booths",
+    path: "/booths"
+  }, {
+    title: "Manage Sessions",
+    path: "/sessions"
+  }, {
+    title: "View Analytics",
+    path: "/analytics"
+  }] : user?.role === "exhibitor" ? [{
+    title: "My Applications",
+    path: "/exhibitors"
+  }, {
+    title: "Select Booth",
+    path: "/booths"
+  }, {
+    title: "Company Profile",
+    path: "/exhibitor-profile"
+  }, {
+    title: "Search Exhibitors",
+    path: "/exhibitor-search"
+  }] : [{
+    title: "Event Registration",
+    path: "/attendees"
+  }, {
+    title: "Session Schedule",
+    path: "/sessions"
+  }, {
+    title: "Search Exhibitors",
+    path: "/exhibitor-search"
+  }];
+  const listTitle = isOrganizer ? "Your Events" : user?.role === "exhibitor" ? "My Applications" : "My Registered Events";
+  const statIcons = [CalendarDays, Users, Building2, Clock3, BarChart3, Building2, BarChart3, Building2, CalendarDays];
+  return <div className="space-y-7">
+      <div className="workspace-heading workspace-overview flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <Badge variant="secondary" className="capitalize">
+            {user?.role} workspace
+          </Badge>
+          <div>
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              {user?.role === "admin" ? "Admin Dashboard" : user?.role === "exhibitor" ? "Exhibitor Dashboard" : `Welcome back${user?.name ? `, ${user.name}` : ""}`}
+            </h1>
+            <p className="mt-2 text-sm text-sidebar-foreground/65 sm:text-base">
+              {isOrganizer ? "Overview of your listings, booths, exhibitors, and attendee bookings." : "Your events. Your community. One connected workspace."}
+            </p>
+          </div>
+        </div>
+        <Button variant="outline" className="w-fit rounded-xl bg-card text-foreground" disabled={loading} onClick={() => setRefresh(previous => previous + 1)}>
+          <RefreshCw className={`mr-2 size-4 ${loading ? "animate-spin" : ""}`} />
+          Refresh overview
+        </Button>
+      </div>
+
+      {loading ? <div role="status" aria-label="Loading dashboard" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({
+        length: 6
+      }, (_, index) => <Card key={index} className="rounded-2xl">
+              <CardHeader className="space-y-3">
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-8 w-20" />
+              </CardHeader>
+            </Card>)}
+        </div> : error ? <Card className="rounded-2xl border-destructive/30">
+          <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+            <Button variant="outline" onClick={() => setRefresh(previous => previous + 1)}>
+              Try again
+            </Button>
+          </CardContent>
+        </Card> : <>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {stats.map(item => <Card key={item.label} className="workspace-stat-card group relative overflow-hidden rounded-xl border border-border/80 transition hover:border-primary/40">
+                <CardContent className="flex items-center justify-between gap-4 p-5">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium opacity-70">
+                      {item.label}
+                    </p>
+                    <p className="text-3xl font-semibold tracking-tight tabular-nums">
+                      {item.value}
+                    </p>
+                  </div>
+                  <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
+                    {(() => {
+                const Icon = statIcons[stats.indexOf(item) % statIcons.length];
+                return <Icon className="size-5" />;
+              })()}
+                  </span>
+                </CardContent>
+              </Card>)}
+          </div>
+
+          <Card className="overflow-hidden rounded-2xl">
+            <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-border/70 px-5 py-4 sm:px-6">
+              <div>
+                <CardTitle className="text-base">Your workspace</CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Jump back into the tools you use most.
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent className="grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3 sm:p-5">
+              {shortcuts.map(item => <Link key={item.path} to={item.path} className="group flex min-h-16 items-center justify-between gap-3 rounded-xl border border-border/80 bg-background px-4 py-3 text-sm font-medium transition hover:border-primary/40 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  <span>{item.title}</span>
+                  <ArrowUpRight className="size-4 text-muted-foreground transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+                </Link>)}
+              <Link to="/notifications" className="group flex min-h-16 items-center justify-between gap-3 rounded-xl border border-border/80 bg-background px-4 py-3 text-sm font-medium transition hover:border-primary/40 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <span>Notifications</span>
+                <ArrowUpRight className="size-4 text-muted-foreground transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+              </Link>
+              <Link to="/feedback" className="group flex min-h-16 items-center justify-between gap-3 rounded-xl border border-border/80 bg-background px-4 py-3 text-sm font-medium transition hover:border-primary/40 hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <span>Feedback & support</span>
+                <ArrowUpRight className="size-4 text-muted-foreground transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+              </Link>
+            </CardContent>
+          </Card>
+
+          <Card className="overflow-hidden rounded-2xl">
+            <CardHeader className="flex flex-row items-center justify-between gap-4 border-b border-border/70 px-5 py-4 sm:px-6">
+              <div>
+                <CardTitle className="text-base">{listTitle}</CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Recent activity from your account.
+                </p>
+              </div>
+              <Badge variant="outline" className="tabular-nums">
+                {records.length}
+              </Badge>
+            </CardHeader>
+            <CardContent className="p-0">
+              {records.length === 0 ? <div className="flex min-h-36 flex-col items-center justify-center gap-2 px-6 py-10 text-center">
+                  <span className="grid size-10 place-items-center rounded-full bg-muted text-muted-foreground">
+                    <CalendarDays className="size-5" />
+                  </span>
+                  <p className="font-medium">Nothing here yet</p>
+                  <p className="max-w-sm text-sm text-muted-foreground">
+                    Your {listTitle.toLowerCase()} will appear here when available.
+                  </p>
+                </div> : <Table>
+                  <TableHeader>
+                    <TableRow className="bg-muted/40">
+                      <TableHead className="px-5">Name</TableHead>
+                      <TableHead className="px-5">Details</TableHead>
+                      <TableHead className="px-5 text-right">Open</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                  {records.map(item => <TableRow key={item.id}>
+                      <TableCell className="max-w-xs whitespace-normal px-5 py-4 font-medium">
+                        {item.title}
+                      </TableCell>
+                      <TableCell className="max-w-lg whitespace-normal px-5 py-4 text-muted-foreground">
+                        {item.detail}
+                      </TableCell>
+                      <TableCell className="px-5 py-4 text-right">
+                        <Button asChild variant="ghost" size="sm" className="rounded-lg">
+                          <Link to={isOrganizer ? "/events" : user?.role === "exhibitor" ? "/exhibitors" : "/attendees"} aria-label={`Open ${item.title}`}>
+                            Open
+                            <ArrowUpRight className="ml-1 size-4" />
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>)}
+                  </TableBody>
+                </Table>}
+            </CardContent>
+          </Card>
+        </>}
+    </div>;
+}
