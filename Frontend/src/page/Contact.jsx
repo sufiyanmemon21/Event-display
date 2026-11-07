@@ -1,3 +1,4 @@
+import BookLink from "@/components/landing/BookLink";
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Clock3, Mail, MapPin, MessageCircle, Phone, Send } from 'lucide-react';
@@ -220,12 +221,11 @@ export default function Contact() {
           <p className="mt-2 text-xs text-white/85">
             Tell us about your event and turn your idea into a memorable experience.
           </p>
-          <Link
-            to="/signup?role=attendee"
+          <BookLink
             className="mt-5 inline-flex min-h-10 items-center rounded-full bg-white px-5 text-xs font-semibold text-[#6d4a0f] transition hover:bg-[#fff7e8]"
           >
             Book your event
-          </Link>
+          </BookLink>
         </section>
       </main>
     </PublicPageShell>

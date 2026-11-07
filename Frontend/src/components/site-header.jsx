@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ArrowUpRight, Moon, Sun } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Moon, Sun } from "lucide-react";
 import { ThemeContext } from "@/context/theme-context";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -57,14 +57,14 @@ export function SiteHeader({
       <div className="flex w-full items-center gap-3 px-4 sm:px-6">
         <SidebarTrigger className="-ml-1 rounded-xl" />
         <Separator orientation="vertical" className="h-5" />
-        <Breadcrumb className="min-w-0">
+        <Breadcrumb className="min-w-0 flex-1">
           <BreadcrumbList className="flex-nowrap gap-2">
-            <BreadcrumbItem className="hidden sm:inline-flex">
+            <BreadcrumbItem className="hidden lg:inline-flex">
               <BreadcrumbLink asChild>
                 <Link to="/dashboard">{portal}</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator className="hidden sm:inline-flex" />
+            <BreadcrumbSeparator className="hidden lg:inline-flex" />
             <BreadcrumbItem className="min-w-0">
               <BreadcrumbPage className="truncate font-medium">
                 {title}
@@ -73,8 +73,8 @@ export function SiteHeader({
           </BreadcrumbList>
         </Breadcrumb>
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          <Button asChild variant="ghost" size="sm" className="hidden text-muted-foreground sm:inline-flex">
+        <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          <Button asChild variant="ghost" size="sm" className="hidden text-muted-foreground lg:inline-flex">
             <Link to="/">
               View website
               <ArrowUpRight className="ml-1 size-4" />
@@ -86,20 +86,21 @@ export function SiteHeader({
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button type="button" variant="ghost" className="h-10 gap-2 rounded-xl px-2 sm:gap-3 sm:px-3">
-                <Avatar className="size-8">
+              <Button type="button" variant="ghost" aria-label={`Account menu for ${user?.name || "member"}`} className="h-11 gap-2 rounded-xl border border-border bg-card px-1.5 sm:px-2.5">
+                <Avatar className="size-8 sm:size-9">
                   <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
                     {initials(user?.name)}
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden max-w-36 text-left sm:grid">
-                  <span className="truncate text-xs font-semibold">
+                  <span className="truncate text-sm font-semibold">
                     {user?.name || "Account"}
                   </span>
-                  <span className="truncate text-[11px] capitalize text-muted-foreground">
+                  <span className="truncate text-xs capitalize text-muted-foreground">
                     {user?.role || "member"}
                   </span>
                 </span>
+                <ChevronDown className="hidden size-4 text-muted-foreground sm:block" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-60">
@@ -115,6 +116,7 @@ export function SiteHeader({
                 </Badge>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              {user?.role === "exhibitor" && <DropdownMenuItem asChild><Link to="/exhibitor-profile">Exhibitor profile</Link></DropdownMenuItem>}
               <DropdownMenuItem onSelect={onSignOut}>
                 <LogOut className="size-4" />
                 Sign out

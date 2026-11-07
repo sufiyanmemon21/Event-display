@@ -1,10 +1,11 @@
+import EllipseLoader from "@/components/EllipseLoader";
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight, ChevronDown, MessageSquare, Quote } from 'lucide-react';
 import api from '@/api/api';
 
 const questions = [
-  ['How do I book an event?', 'Choose an event from the listings, open its details, and sign in to submit a booking request.'],
+  ['How do I book an event?', 'Select Book Now, sign in with your attendee account, and choose an event on the booking form.'],
   ['Where can I find my ticket?', 'Open your attendee profile to check your booking status and download your QR pass once confirmed.'],
   ['Can I get help planning a private celebration?', 'Use the inquiry form below to tell us your occasion, preferred date, and what you have in mind.'],
   ['How do I leave a review?', 'Sign in and use the floating Feedback button. Your first name and review will appear in Client Reviews.'],
@@ -35,7 +36,7 @@ function ClientReviews() {
         <h2 id="reviews-title">Client reviews</h2>
       </header>
       {loadError && <p role="status">Reviews couldn’t be loaded. <button className="celebration-text-link" type="button" onClick={() => setRevision((current) => current + 1)}>Try again</button></p>}
-      {!loadError && !reviews && <p role="status">Loading reviews…</p>}
+      {!loadError && !reviews && <EllipseLoader label="Loading reviews" />}
       {!loadError && reviews?.length === 0 && <p>No client reviews yet.</p>}
       {!!reviews?.length && (
         <div className="celebration-extras-grid">

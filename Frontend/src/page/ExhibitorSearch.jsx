@@ -1,3 +1,4 @@
+import EllipseLoader from "@/components/EllipseLoader";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { PageHeading } from "@/components/workspace";
 import { useEffect, useState } from "react";
@@ -170,7 +171,7 @@ export default function ExhibitorSearch() {
           </p>
 
           <Button variant="outline" disabled={loadingVisits || Boolean(savingVisitId)} onClick={() => setVisitRefresh(previous => previous + 1)}>
-            {loadingVisits ? "Loading Visit Status..." : "Refresh Visit Status"}
+            {loadingVisits ? <EllipseLoader inline /> : "Refresh Visit Status"}
           </Button>
 
           {visitError && <p role="alert" className="text-sm text-destructive">
@@ -178,7 +179,7 @@ export default function ExhibitorSearch() {
             </p>}
         </div>}
 
-      {loading ? <p role="status">Loading exhibitors...</p> : error ? <div className="space-y-3">
+      {loading ? <EllipseLoader label="Loading exhibitors" /> : error ? <div className="space-y-3">
           <p role="alert">{error}</p>
           <Button variant="outline" onClick={() => setFilters({
         ...filters

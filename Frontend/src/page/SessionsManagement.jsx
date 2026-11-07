@@ -1,3 +1,4 @@
+import EllipseLoader from "@/components/EllipseLoader";
 import { RecordBrowser } from "@/components/workspace";
 import { Badge } from "@/components/ui/badge";
 import { useConfirmation } from "@/hooks/useConfirmation";
@@ -224,16 +225,17 @@ export default function SessionsManagement() {
               <Label htmlFor="session-event">Event</Label>
               <WorkspaceSelect id="session-event" value={eventId} onChange={changeEvent} disabled={loadingEvents || busy} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
                 <option value="">
-                  {loadingEvents ? "Loading events..." : "Select an event"}
+                  Select an event
                 </option>
 
                 {events.map(event => <option key={event._id} value={event._id}>
                     {event.title}
                   </option>)}
               </WorkspaceSelect>
+              {loadingEvents && <EllipseLoader inline label="Loading events" />}
 
               <Button onClick={fetchSessions} disabled={!eventId || loadingEvents || busy}>
-                {loadingSessions ? "Loading..." : "Load Schedule"}
+                {loadingSessions ? <EllipseLoader inline /> : "Load Schedule"}
               </Button>
 
               {!loadingEvents && events.length === 0 && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
@@ -299,7 +301,7 @@ export default function SessionsManagement() {
           </CardContent>
         </Card></FormPanel>}
 
-      {loadingSessions ? <p role="status">Loading sessions...</p> : sessionError ? <p role="alert">{sessionError}</p> : loadedEventId === eventId && eventId ? sessions.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
+      {loadingSessions ? <EllipseLoader label="Loading sessions" /> : sessionError ? <p role="alert">{sessionError}</p> : loadedEventId === eventId && eventId ? sessions.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
             No sessions have been added for this event.
           </p> : <RecordBrowser records={sessions} label="sessions">{visible => <div className="space-y-4">
             <h2 className="text-xl font-semibold">Event Schedule</h2>

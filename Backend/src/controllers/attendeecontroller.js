@@ -6,7 +6,7 @@ import { isPastEvent } from "../services/eventdates.js";
 
 async function registerAttendee(req, res) {
   try {
-    const { event, ticketType = "Standard" } = req.body || {};
+    const { event, ticketType = "Standard", phone, guestCount, details } = req.body || {};
 
     if (!mongoose.isObjectIdOrHexString(event)) {
       return res.status(400).json({
@@ -18,6 +18,16 @@ async function registerAttendee(req, res) {
       return res.status(400).json({
         msg: "Select a valid ticket type",
       });
+    }
+
+    if (phone !== undefined && (typeof phone !== "string" || !/^[+0-9(). -]{5,32}$/.test(phone.trim()) || !/\d/.test(phone))) {
+      return res.status(400).json({ msg: "Enter a valid phone number." });
+    }
+    if (guestCount !== undefined && (!Number.isSafeInteger(guestCount) || guestCount < 1)) {
+      return res.status(400).json({ msg: "Enter a positive whole number of guests." });
+    }
+    if (details !== undefined && (typeof details !== "string" || details.length > 2000)) {
+      return res.status(400).json({ msg: "Additional details must be 2,000 characters or fewer." });
     }
 
     const selectedEvent = await Event.findById(event);
@@ -47,6 +57,9 @@ async function registerAttendee(req, res) {
       user: req.user._id,
       event,
       ticketType,
+      phone,
+      guestCount,
+      details,
       status: "Pending",
     });
 

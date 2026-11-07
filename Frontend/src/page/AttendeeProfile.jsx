@@ -1,3 +1,4 @@
+import EllipseLoader from "@/components/EllipseLoader";
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowUpRight, CalendarDays, Download, QrCode } from 'lucide-react';
@@ -214,7 +215,7 @@ export default function AttendeeProfile() {
             </div>
           </div>
           {error && <p role="alert" className="mb-3 text-sm text-red-800">{error}</p>}
-          {loading ? <p role="status">Loading your bookings…</p> : visible.length ? (
+          {loading ? <EllipseLoader label="Loading your bookings" /> : visible.length ? (
             <div className="grid gap-4 md:grid-cols-2">{visible.map(item => <BookingCard key={item._id} booking={item} />)}</div>
           ) : !error && <div className="rounded-xl border border-[#e2c9bd] bg-[#fffaf6] p-6">
             <p>{status === 'All' ? 'You don’t have any bookings yet.' : `No ${status.toLowerCase()} bookings.`}</p>

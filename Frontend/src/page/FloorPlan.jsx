@@ -1,3 +1,5 @@
+import { isExpo } from "@/hooks/useExpos";
+import EllipseLoader from "@/components/EllipseLoader";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { PageHeading } from "@/components/workspace";
 import WorkspaceSelect from "@/components/workspace-select";
@@ -41,11 +43,11 @@ export default function FloorPlan() {
           signal: controller.signal
         });
         if (!controller.signal.aborted) {
-          setEvents(response.data.events);
+          setEvents(response.data.events.filter(isExpo));
         }
       } catch {
         if (!controller.signal.aborted) {
-          setEventError("Unable to load events.");
+          setEventError("Unable to load expos.");
         }
       } finally {
         if (!controller.signal.aborted) setLoadingEvents(false);
@@ -55,26 +57,29 @@ export default function FloorPlan() {
     return () => controller.abort();
   }, [eventRetry]);
   async function changeEvent(event) {
+    const id = event.target.value;
+    if (id === eventId || busy) return;
     if (dirty && !(await confirm("Discard unsaved floor plan changes?"))) {
       return;
     }
-    setEventId(event.target.value);
+    setEventId(id);
     setLayout(null);
     setSavedLayout("");
     setBooths([]);
     setSelectedBoothId("");
     setError("");
     setConflict(false);
+    if (id) void loadFloorPlan(id, { switching: true });
   }
-  async function loadFloorPlan() {
-    if (!eventId || busy) return;
-    if (dirty && !(await confirm("Reload and discard unsaved floor plan changes?"))) {
+  async function loadFloorPlan(id = eventId, { switching = false } = {}) {
+    if (!id || busy) return;
+    if (!switching && dirty && !(await confirm("Reload and discard unsaved floor plan changes?"))) {
       return;
     }
     setLoading(true);
     setError("");
     try {
-      const [layoutResponse, boothResponse] = await Promise.all([API.get(`/booths/layout/${eventId}`), API.get(`/booths/event/${eventId}`)]);
+      const [layoutResponse, boothResponse] = await Promise.all([API.get(`/booths/layout/${id}`), API.get(`/booths/event/${id}`)]);
       const nextLayout = layoutResponse.data.layout;
       setLayout(nextLayout);
       setSavedLayout(JSON.stringify(nextLayout));
@@ -157,7 +162,7 @@ export default function FloorPlan() {
 
       <Card className="workspace-event-scope">
         <CardHeader>
-          <CardTitle>Select an Event</CardTitle>
+          <CardTitle>Select an Expo</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -167,18 +172,20 @@ export default function FloorPlan() {
                 Try Again
               </Button>
             </> : <>
-              <Label htmlFor="floor-plan-event">Event</Label>
+              <Label htmlFor="floor-plan-event">Expo</Label>
               <WorkspaceSelect id="floor-plan-event" value={eventId} onChange={changeEvent} disabled={loadingEvents || busy} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
                 <option value="">
-                  {loadingEvents ? "Loading events..." : "Select an event"}
+                  Select an Expo
                 </option>
                 {events.map(event => <option key={event._id} value={event._id}>
                     {event.title}
                   </option>)}
               </WorkspaceSelect>
+              {loadingEvents && <EllipseLoader inline label="Loading expos" />}
+              {!loadingEvents && events.length === 0 && <p className="text-sm text-muted-foreground">No expos are available yet.</p>}
 
-              <Button onClick={loadFloorPlan} disabled={!eventId || loadingEvents || busy}>
-                {loading ? "Loading..." : "Load / Reload Floor Plan"}
+              <Button onClick={() => loadFloorPlan()} disabled={!eventId || loadingEvents || busy}>
+                {loading ? <EllipseLoader inline /> : "Load / Reload Floor Plan"}
               </Button>
             </>}
         </CardContent>

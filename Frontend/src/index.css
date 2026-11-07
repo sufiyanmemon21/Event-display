@@ -136,3 +136,7 @@
     color: var(--foreground);
   }
 }
+
+@keyframes ellipse-orbit {
+  to { stroke-dashoffset: -100; }
+}

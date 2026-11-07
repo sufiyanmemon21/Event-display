@@ -1,6 +1,7 @@
+import PublicPageShell from "@/components/landing/PublicPageShell";
 import { ConfirmationProvider } from "@/components/workspace-confirmation";
 import { useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 import { clearAuth } from "@/api/api";
 import { AppSidebar } from "@/components/app-sidebar";
@@ -11,6 +12,7 @@ import './workspace-theme.css';
 export default function DashboardLayout() {
   const user = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [error, setError] = useState("");
   function signOut() {
     try {
@@ -21,6 +23,11 @@ export default function DashboardLayout() {
     } catch {
       setError("Sign out failed. Please try again.");
     }
+  }
+  if (user?.role === "attendee" && /^\/messages\/?$/i.test(pathname)) {
+    return <PublicPageShell><main className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-8 sm:py-10 [--background:var(--public-paper)] [--foreground:var(--public-ink)] [--card:#fffcf8] [--card-foreground:var(--public-ink)] [--primary:var(--public-teal)] [--primary-foreground:white] [--border:var(--public-line)] [--input:var(--public-line)] [--muted:var(--public-wash)] [--muted-foreground:var(--public-copy)]">
+      <ConfirmationProvider><Outlet /></ConfirmationProvider>
+    </main></PublicPageShell>;
   }
   return <SidebarProvider className="eventsphere-workspace min-h-svh bg-background text-foreground">
       <AppSidebar onSignOut={signOut} />

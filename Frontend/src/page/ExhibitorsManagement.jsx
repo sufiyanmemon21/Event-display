@@ -1,18 +1,16 @@
+import ExhibitorApplicationForm from "@/components/ExhibitorApplicationForm";
+import EllipseLoader from "@/components/EllipseLoader";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { PageHeading } from "@/components/workspace";
 import { RecordBrowser } from "@/components/workspace";
 import { FormPanel } from "@/components/workspace";
-import { Textarea } from "@/components/ui/textarea";
-import WorkspaceSelect from "@/components/workspace-select";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import ExhibitorProfileForm from "@/components/ExhibitorProfileForm";
 import ExhibitorServices from "@/components/ExhibitorServices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 async function fetchApplicationData(isExhibitor, signal) {
   const [applicationResponse, eventResponse] = await Promise.all([API.get("/exhibitors/all", {
@@ -29,10 +27,6 @@ export default function ExhibitorsManagement() {
   const [formOpen, setFormOpen] = useState(false);
   const [exhibitors, setExhibitors] = useState([]);
   const [events, setEvents] = useState([]);
-  const [companyName, setCompanyName] = useState("");
-  const [category, setCategory] = useState("");
-  const [description, setDescription] = useState("");
-  const [eventId, setEventId] = useState("");
   const [editingId, setEditingId] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -74,34 +68,6 @@ export default function ExhibitorsManagement() {
       setLoadError("Unable to load data. Please try again.");
     } finally {
       setLoading(false);
-    }
-  }
-  async function handleSubmit(event) {
-    event.preventDefault();
-    if (saving || editingId) return;
-    if (!companyName.trim() || !category.trim() || !description.trim() || !eventId) {
-      toast.error("Please fill all fields.");
-      return;
-    }
-    setSaving(true);
-    try {
-      await API.post("/exhibitors/register", {
-        companyName: companyName.trim(),
-        category: category.trim(),
-        description: description.trim(),
-        event: eventId
-      });
-      toast.success("Application submitted successfully.");
-      setCompanyName("");
-      setCategory("");
-      setDescription("");
-      setEventId("");
-      setFormOpen(false);
-      await refreshData();
-    } catch (error) {
-      toast.error(error.response?.data?.msg || "Unable to submit application.");
-    } finally {
-      setSaving(false);
     }
   }
   async function handleStatus(id, status) {
@@ -149,48 +115,14 @@ export default function ExhibitorsManagement() {
           </CardHeader>
 
           <CardContent>
-            <form onSubmit={handleSubmit}>
-              <fieldset disabled={saving || loading || Boolean(loadError) || Boolean(editingId)} className="workspace-field-grid">
-                <div className="space-y-2">
-                  <Label htmlFor="company-name">Company Name</Label>
-                  <Input id="company-name" value={companyName} onChange={event => setCompanyName(event.target.value)} maxLength={150} required />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="company-category">Category</Label>
-                  <Input id="company-category" value={category} onChange={event => setCategory(event.target.value)} maxLength={100} required />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="company-description">
-                    Company Description
-                  </Label>
-                  <Textarea id="company-description" value={description} onChange={event => setDescription(event.target.value)} maxLength={2000} rows={4} className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="application-event">Event</Label>
-                  <WorkspaceSelect id="application-event" value={eventId} onChange={event => setEventId(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" required>
-                    <option value="">Select an event</option>
-                    {events.map(event => <option key={event._id} value={event._id}>
-                        {event.title}
-                      </option>)}
-                  </WorkspaceSelect>
-                </div>
-
-                <Button type="submit" disabled={events.length === 0}>
-                  {saving ? "Submitting..." : "Submit Application"}
-                </Button>
-
-                {!loading && events.length === 0 && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
-                    No events are available yet.
-                  </p>}
-              </fieldset>
-            </form>
+            {formOpen && <ExhibitorApplicationForm events={events} disabled={loading || Boolean(loadError) || Boolean(editingId)} onBusyChange={setSaving} onSaved={async () => {
+              setFormOpen(false);
+              await refreshData();
+            }} />}
           </CardContent>
         </Card></FormPanel>}
 
-      {loading ? <p role="status">Loading applications...</p> : loadError ? <p role="alert">{loadError}</p> : exhibitors.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">No applications found.</p> : <RecordBrowser records={exhibitors} label="exhibitors" statusKey="status">{visible => <div className="space-y-4">
+      {loading ? <EllipseLoader label="Loading applications" /> : loadError ? <p role="alert">{loadError}</p> : exhibitors.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">No applications found.</p> : <RecordBrowser records={exhibitors} label="exhibitors" statusKey="status">{visible => <div className="space-y-4">
           {visible.map(item => <Card key={item._id}>
               <CardContent className="space-y-5 p-6">
                 <h2 className="break-words text-lg font-semibold">

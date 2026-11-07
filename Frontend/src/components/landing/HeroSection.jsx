@@ -1,3 +1,4 @@
+import BookLink from "@/components/landing/BookLink";
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import birthdayImage from '@/assets/birthday.avif';
@@ -18,7 +19,7 @@ export default function HeroSection() {
           <p className="attendee-hero-copy">{bannerDescription || 'Explore events and expos, book your place, and keep your passes ready in your EventSphere profile.'}</p>
           <div className="flex flex-wrap gap-3">
             <Link className="celebration-button" to="/#catalog-events">Explore events <ArrowUpRight size={16} /></Link>
-            <Link className="celebration-button attendee-hero-secondary" to="/event-listing">{bannerButton || 'Book now'}</Link>
+            <BookLink className="celebration-button attendee-hero-secondary">{bannerButton || 'Book Now'}</BookLink>
           </div>
         </div>
         <img src={image} alt={bannerImage ? '' : 'Tables set for an evening reception'} fetchPriority="high" />

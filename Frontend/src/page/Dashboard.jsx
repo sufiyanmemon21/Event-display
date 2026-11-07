@@ -1,11 +1,13 @@
+import AnimatedIcon from "@/components/AnimatedIcon";
+import EllipseLoader from "@/components/EllipseLoader";
+import { CalendarIcon, UsersIcon, Building2Icon, ClockIcon, ChartNoAxesColumnIcon } from "@animateicons/react/lucide";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, BarChart3, Building2, CalendarDays, Clock3, RefreshCw, Users } from "lucide-react";
+import { ArrowUpRight, CalendarDays, RefreshCw } from "lucide-react";
 import API from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 export default function Dashboard() {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
@@ -209,7 +211,7 @@ export default function Dashboard() {
     path: "/exhibitor-search"
   }];
   const listTitle = isOrganizer ? "Your Events" : user?.role === "exhibitor" ? "My Applications" : "My Registered Events";
-  const statIcons = [CalendarDays, Users, Building2, Clock3, BarChart3, Building2, BarChart3, Building2, CalendarDays];
+  const statIcons = [CalendarIcon, UsersIcon, Building2Icon, ClockIcon, ChartNoAxesColumnIcon, Building2Icon, ChartNoAxesColumnIcon, Building2Icon, CalendarIcon];
   return <div className="space-y-7">
       <div className="workspace-heading workspace-overview flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div className="space-y-2">
@@ -226,21 +228,12 @@ export default function Dashboard() {
           </div>
         </div>
         <Button variant="outline" className="w-fit rounded-xl bg-card text-foreground" disabled={loading} onClick={() => setRefresh(previous => previous + 1)}>
-          <RefreshCw className={`mr-2 size-4 ${loading ? "animate-spin" : ""}`} />
+          {loading ? <EllipseLoader inline label="Refreshing overview" /> : <RefreshCw className="size-4" />}
           Refresh overview
         </Button>
       </div>
 
-      {loading ? <div role="status" aria-label="Loading dashboard" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          {Array.from({
-        length: 6
-      }, (_, index) => <Card key={index} className="rounded-2xl">
-              <CardHeader className="space-y-3">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-8 w-20" />
-              </CardHeader>
-            </Card>)}
-        </div> : error ? <Card className="rounded-2xl border-destructive/30">
+      {loading ? <div className="grid min-h-60 place-items-center"><EllipseLoader label="Loading dashboard" /></div> : error ? <Card className="rounded-2xl border-destructive/30">
           <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
             <p role="alert" className="text-sm text-destructive">
               {error}
@@ -251,7 +244,7 @@ export default function Dashboard() {
           </CardContent>
         </Card> : <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-            {stats.map(item => <Card key={item.label} className="workspace-stat-card group relative overflow-hidden rounded-xl border border-border/80 transition hover:border-primary/40">
+            {stats.map((item, index) => <AnimatedIcon key={item.label} icon={statIcons[index % statIcons.length]} size={20}>{(icon, triggerProps) => <Card {...triggerProps} className="workspace-stat-card group relative overflow-hidden rounded-xl border border-border/80 transition hover:border-primary/40">
                 <CardContent className="flex items-center justify-between gap-4 p-5">
                   <div className="space-y-2">
                     <p className="text-sm font-medium opacity-70">
@@ -262,13 +255,10 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-primary/10 text-primary transition group-hover:bg-primary group-hover:text-primary-foreground">
-                    {(() => {
-                const Icon = statIcons[stats.indexOf(item) % statIcons.length];
-                return <Icon className="size-5" />;
-              })()}
+                    {icon}
                   </span>
                 </CardContent>
-              </Card>)}
+              </Card>}</AnimatedIcon>)}
           </div>
 
           <Card className="overflow-hidden rounded-2xl">

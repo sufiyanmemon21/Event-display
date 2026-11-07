@@ -1,3 +1,4 @@
+import EllipseLoader from "@/components/EllipseLoader";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import { Button } from "@/components/ui/button";
@@ -94,9 +95,7 @@ function SessionActivityPanel({ session }) {
 
   if (loading) {
     return (
-      <p className="text-sm text-muted-foreground" role="status">
-        Loading your session details...
-      </p>
+      <EllipseLoader label="Loading your session details" />
     );
   }
 

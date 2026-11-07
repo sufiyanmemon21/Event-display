@@ -21,7 +21,7 @@
 .celebration-footer-brand svg { color: var(--footer-gold); }
 .celebration-footer-brand .celebration-brand-mark { max-width: min(112px, 32vw); height: 42px; padding: 3px 5px; border-radius: 5px; background: var(--footer-cream); }
 .celebration-footer-copy { margin-top: 12px; max-width: 43ch; line-height: 1.65; color: var(--footer-copy); }
-.celebration-footer-newsletter { display: grid; min-width: 0; gap: 9px; padding: clamp(14px, 2vw, 22px); border: 1px solid var(--footer-line); border-radius: 12px; background: #fff5eb08; }
+.celebration-footer-newsletter { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 9px; padding: clamp(14px, 2vw, 22px); border: 1px solid var(--footer-line); border-radius: 12px; background: #fff5eb08; }
 .celebration-footer-newsletter p { font-size: .76rem; color: var(--footer-copy); }
 .celebration-footer-email { display: flex; gap: 6px; padding: 4px; border: 1px solid var(--footer-line); border-radius: 8px; background: #231814; }
 .celebration-footer-email input { flex: 1; min-width: 0; padding-inline: 12px; border-radius: 99px; color: var(--footer-cream); }

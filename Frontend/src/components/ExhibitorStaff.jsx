@@ -1,3 +1,4 @@
+import EllipseLoader from "@/components/EllipseLoader";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import { Button } from "@/components/ui/button";
@@ -83,9 +84,7 @@ export default function ExhibitorStaff({
         </Button>
       </div>
 
-      {loading ? <p className="text-sm" role="status">
-          Loading staff...
-        </p> : error ? <p className="text-sm text-destructive" role="alert">
+      {loading ? <EllipseLoader label="Loading staff" /> : error ? <p className="text-sm text-destructive" role="alert">
           {error}
         </p> : canEdit ? <form onSubmit={handleSave} className="space-y-4">
           <fieldset disabled={saving} className="space-y-4">

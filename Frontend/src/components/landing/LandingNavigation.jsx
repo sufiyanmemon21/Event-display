@@ -1,14 +1,13 @@
-import { lazy, Suspense, useEffect, useId, useRef, useState } from 'react';
+import BookLink from "@/components/landing/BookLink";
+import EllipseLoader from "@/components/EllipseLoader";
+import { useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowUpRight, Bell, Menu, MessageSquareText, X } from 'lucide-react';
 import { Popover } from 'radix-ui';
 import WebsiteMark from './WebsiteMark';
 import useAuth from '@/hooks/useAuth';
 import API, { clearAuth } from '@/api/api';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ConfirmationProvider } from '@/components/workspace-confirmation';
 
-const Messages = lazy(() => import('@/page/Messages'));
 const notificationDate = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' });
 
 function NotificationBell({ items, unread, loading, error, saving, onRefresh, onReadAll }) {
@@ -33,7 +32,7 @@ function NotificationBell({ items, unread, loading, error, saving, onRefresh, on
               {item.createdAt && <time dateTime={item.createdAt} className="mt-1 block text-xs text-[#69534b]">{notificationDate.format(new Date(item.createdAt))}</time>}
             </div>
           </li>)}
-        </ul> : !error && <p role="status" className="px-4 py-6 text-sm text-[#69534b]">{loading ? 'Loading notifications…' : 'You have no notifications yet.'}</p>}
+        </ul> : !error && (loading ? <EllipseLoader label="Loading notifications" /> : <p className="px-4 py-6 text-sm text-[#69534b]">You have no notifications yet.</p>)}
       </Popover.Content>
     </Popover.Portal>
   </Popover.Root>;
@@ -51,12 +50,10 @@ const links = [
 export default function LandingNavigation() {
   const menuId = useId();
   const menuButton = useRef(null);
-  const inboxButton = useRef(null);
   const [open, setOpen] = useState(false);
-  const [inboxOpen, setInboxOpen] = useState(false);
   const [error, setError] = useState('');
   const user = useAuth();
-  const { pathname, hash } = useLocation();
+  const { pathname, search, hash } = useLocation();
   const [unread, setUnread] = useState(0);
   const [notifications, setNotifications] = useState([]);
   const [notificationError, setNotificationError] = useState('');
@@ -123,11 +120,8 @@ export default function LandingNavigation() {
   ));
   const actions = isAttendee ? (
     <>
-      <Link to="/#catalog-events" onClick={closeMenu}>Book now</Link>
-      <button type="button" className="attendee-nav-icon" aria-label="Open messages" aria-haspopup="dialog" title="Messages" onClick={event => {
-        inboxButton.current = event.currentTarget;
-        setInboxOpen(true);
-      }}><MessageSquareText size={19} aria-hidden="true" /></button>
+      <BookLink onClick={closeMenu}>Book Now</BookLink>
+      <Link to="/messages" className="attendee-nav-icon" aria-label="Messages" title="Messages" aria-current={pathname === "/messages" ? "page" : undefined} state={pathname === "/messages" ? undefined : { from: pathname + search + hash }} onClick={closeMenu}><MessageSquareText size={19} aria-hidden="true" /></Link>
       <Link to="/profile" className="celebration-nav-action" aria-current={pathname === '/profile' ? 'page' : undefined} onClick={closeMenu}>Profile</Link>
       <button type="button" onClick={signOut}>Log out</button>
       <NotificationBell items={notifications} unread={unread} loading={notificationLoading} error={notificationError} saving={markingRead} onRefresh={() => {
@@ -142,6 +136,7 @@ export default function LandingNavigation() {
     </>
   ) : (
     <>
+      <BookLink onClick={closeMenu}>Book Now</BookLink>
       <Link to="/login" onClick={closeMenu}>Log in</Link>
       <Link to="/signup" className="celebration-nav-action" onClick={closeMenu}>Sign up <ArrowUpRight size={13} aria-hidden="true" className="inline" /></Link>
     </>
@@ -167,21 +162,5 @@ export default function LandingNavigation() {
       {open && <nav id={menuId} aria-label="Mobile navigation" className="celebration-mobile-nav">{navigation}{actions}</nav>}
       {error && <p className="celebration-nav-error" role="alert">{error}</p>}
     </header>
-    {isAttendee && <Dialog open={inboxOpen} onOpenChange={setInboxOpen}>
-      <DialogContent className="attendee-inbox max-w-md" onCloseAutoFocus={event => {
-        event.preventDefault();
-        const trigger = inboxButton.current;
-        if (trigger?.isConnected && trigger.getClientRects().length) trigger.focus();
-        else menuButton.current?.focus();
-      }}>
-        <DialogHeader className="border-b border-[#e2c9bd] pb-3 pr-8 text-left">
-          <DialogTitle className="font-serif text-2xl">Messages</DialogTitle>
-          <DialogDescription>Chat with the organizers of your events.</DialogDescription>
-        </DialogHeader>
-        {inboxOpen && <Suspense fallback={<p role="status">Opening inbox…</p>}>
-          <ConfirmationProvider><Messages compact /></ConfirmationProvider>
-        </Suspense>}
-      </DialogContent>
-    </Dialog>}
   </>);
 }

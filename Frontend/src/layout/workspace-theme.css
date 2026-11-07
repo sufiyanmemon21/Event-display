@@ -320,3 +320,19 @@ body:has(.eventsphere-workspace) [data-slot="select-trigger"][data-state="open"]
   body:has(.eventsphere-workspace) :is([data-slot="sidebar-menu-button"], [data-slot="input"], [data-slot="textarea"], [data-slot="select-trigger"]),
   .workspace-booth-tile { transition: none; }
 }
+
+.eventsphere-workspace .workspace-content {
+  font-size: 1rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.eventsphere-workspace .workspace-heading p:last-child {
+  font-size: 1rem;
+}
+
+.eventsphere-workspace [data-slot="table"] { font-size: .9375rem; }
+.eventsphere-workspace [data-slot="table-head"] { font-size: .8125rem; }
+.eventsphere-workspace [data-slot="table-container"] { overscroll-behavior-x: contain; }
+.eventsphere-workspace [data-slot="label"] { line-height: 1.4; }
+.eventsphere-workspace [data-slot="card-title"] { line-height: 1.3; }

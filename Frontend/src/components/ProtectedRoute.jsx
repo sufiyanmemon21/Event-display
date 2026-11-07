@@ -1,3 +1,4 @@
+import EllipseLoader from "@/components/EllipseLoader";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import {
   Link,
@@ -99,9 +100,7 @@ export default function ProtectedRoute({ allowedRoles }) {
 
   if (!currentCheck) {
     return (
-      <p className="p-6 text-center" role="status">
-        Loading...
-      </p>
+      <EllipseLoader label="Loading" />
     );
   }
 

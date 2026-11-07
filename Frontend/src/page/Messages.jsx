@@ -1,3 +1,6 @@
+import { Link, useLocation } from "react-router-dom";
+import { ArrowLeft, MessageSquareText } from "lucide-react";
+import EllipseLoader from "@/components/EllipseLoader";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { PageHeading } from "@/components/workspace";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,8 +23,7 @@ function Conversation({
   userId,
   onSent,
   sending,
-  setSending,
-  compact
+  setSending
 }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState("");
@@ -104,14 +106,14 @@ function Conversation({
       setSending(false);
     }
   }
-  return <Card>
-      <CardHeader>
+  return <Card className="min-w-0 rounded-none border-0 shadow-none">
+      <CardHeader className="border-b">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="min-w-0 space-y-1">
-            <CardTitle className="break-words">
+            <CardTitle className="[overflow-wrap:anywhere]">
               {thread.title}
             </CardTitle>
-            <p className="break-words text-sm text-muted-foreground">
+            <p className="[overflow-wrap:anywhere] text-sm text-muted-foreground">
               {thread.person}
             </p>
           </div>
@@ -127,12 +129,12 @@ function Conversation({
             {error}
           </p>}
 
-        {loading ? <p role="status">Loading messages...</p> : <>
+        {loading ? <EllipseLoader label="Loading messages" /> : <>
             {before && <Button variant="outline" onClick={loadOlder} disabled={loadingOlder || sending || Boolean(error)}>
-                {loadingOlder ? "Loading..." : "Load Older Messages"}
+                {loadingOlder ? <EllipseLoader inline /> : "Load Older Messages"}
               </Button>}
 
-            <div className={`${compact ? "max-h-64" : "max-h-[450px]"} space-y-3 overflow-y-auto rounded-md border p-3`}>
+            <div className={`min-h-52 max-h-[min(48dvh,450px)] space-y-3 overflow-y-auto rounded-md border p-3`}>
               {messages.length === 0 ? <p className="text-sm text-muted-foreground">
                   {error ? "Messages are currently unavailable." : "No messages yet. Send the first message below."}
                 </p> : messages.map(message => {
@@ -141,7 +143,7 @@ function Conversation({
                       <p className="text-xs font-semibold">
                         {mine ? "You" : message.sender?.name || "User"}
                       </p>
-                      <p className="mt-1 whitespace-pre-wrap break-words text-sm">
+                      <p className="mt-1 whitespace-pre-wrap [overflow-wrap:anywhere] text-sm">
                         {message.text}
                       </p>
                       <p className="mt-2 text-xs">
@@ -161,14 +163,14 @@ function Conversation({
               {text.length}/2000
             </p>
             <Button type="submit" disabled={sending || loading || Boolean(error) || !text.trim()}>
-              {sending ? "Sending..." : "Send Message"}
+              {sending && <EllipseLoader inline label="Sending message" />} Send Message
             </Button>
           </div>
         </form>
       </CardContent>
     </Card>;
 }
-export default function Messages({ compact = false }) {
+export default function Messages() {
   const confirm = useConfirmation();
   const [conversations, setConversations] = useState([]);
   const [events, setEvents] = useState([]);
@@ -180,6 +182,8 @@ export default function Messages({ compact = false }) {
   const [refresh, setRefresh] = useState(0);
   const role = localStorage.getItem("userRole");
   const userId = localStorage.getItem("userId");
+  const { state } = useLocation();
+  const from = typeof state?.from === "string" && /^\/(?![/\\])/.test(state.from) ? state.from : "/expos";
   const managesInbox = role === "organizer" || role === "admin";
   useEffect(() => {
     const controller = new AbortController();
@@ -256,37 +260,24 @@ export default function Messages({ compact = false }) {
   async function backToInbox() {
     if (!sending && await confirm("Return to the inbox? Any unsent draft will be cleared.")) setThread(null);
   }
-  return <div className={compact ? "w-full space-y-3" : "w-full space-y-6"}>
-      {compact && thread && <Button type="button" variant="outline" size="sm" disabled={sending} onClick={backToInbox}>Back to inbox</Button>}
-      {(!compact || !thread) && (
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {!compact && (
-        <div className="space-y-1">
-          <PageHeading title="Messages" description="Keep event conversations together in one place." />
-          <p className="text-sm text-muted-foreground">
-            Messages update automatically while this page is open.
-          </p>
-        </div>
-        )}
-
-        <Button variant="outline" disabled={loading || sending} onClick={() => setRefresh(previous => previous + 1)}>
-          Refresh Inbox
-        </Button>
-      </div>
-      )}
-
-      {error && <p role="alert" className="text-sm text-destructive">
-          {error}
-        </p>}
-
-      {!managesInbox && (!compact || !thread) && <Card>
-          <CardHeader>
-            <CardTitle>Contact Event Organizer</CardTitle>
-          </CardHeader>
-
-          <CardContent>
+  return <div className="w-full space-y-5">
+      {role === "attendee" && <Button variant="ghost" asChild className="-ml-2">
+        <Link to={from}><ArrowLeft className="size-4" /> Back to {from === "/expos" ? "Expos" : "previous page"}</Link>
+      </Button>}
+      {role === "attendee" ? <div className="space-y-2">
+        <h1 className="font-serif text-4xl font-semibold tracking-tight sm:text-5xl">Messages</h1>
+        <p className="text-base text-muted-foreground">Chat with the organizers of your events.</p>
+      </div> : <PageHeading title="Messages" description={managesInbox ? "Keep event conversations together in one place." : "Chat with the organizers of your events."} />}
+      {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+      <div className="grid min-h-[min(34rem,75dvh)] overflow-hidden rounded-2xl border bg-card md:grid-cols-[minmax(15rem,1fr)_minmax(0,2fr)]">
+        <aside aria-label="Conversations" className={`min-w-0 bg-muted/20 md:block md:border-r ${thread ? "hidden" : ""}`}>
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b px-4 py-3">
+            <h2 className="font-semibold">Conversations</h2>
+            <Button size="sm" variant="outline" disabled={loading || sending} onClick={() => setRefresh(previous => previous + 1)}>Refresh inbox</Button>
+          </div>
+          {!managesInbox && <div className="border-b p-4">
             <form onSubmit={openEvent} className="space-y-3">
-              <Label htmlFor="message-event">Your Event</Label>
+              <Label htmlFor="message-event">Contact an event organizer</Label>
               <WorkspaceSelect id="message-event" value={eventId} onChange={event => setEventId(event.target.value)} disabled={loading || sending || Boolean(error)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" required>
                 <option value="">Select an event</option>
                 {events.map(event => <option key={event._id} value={event._id}>
@@ -295,48 +286,42 @@ export default function Messages({ compact = false }) {
               </WorkspaceSelect>
 
               <Button type="submit" disabled={!eventId || loading || sending || Boolean(error)}>
-                Open Conversation
+                Open conversation
               </Button>
 
               {!loading && !error && events.length === 0 && <p className="text-sm text-muted-foreground">
-                  Register for an event or submit an exhibitor application
-                  before contacting its organizer.
+                  {role === "attendee" ? "Register for an event before contacting its organizer." : "Submit an exhibitor application before contacting its organizer."}
                 </p>}
             </form>
-          </CardContent>
-        </Card>}
-
-      <div className={compact ? "grid gap-3" : "grid items-start gap-6 lg:grid-cols-[320px_minmax(0,1fr)]"}>
-        {(!compact || !thread) && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Conversations</CardTitle>
-          </CardHeader>
-
-          <CardContent className="space-y-3">
-            {loading ? <p role="status">Loading inbox...</p> : conversations.length === 0 ? <p className="text-sm text-muted-foreground">
+          </div>}
+          <div className="max-h-[min(30rem,65dvh)] space-y-2 overflow-y-auto p-4">
+            {loading ? <EllipseLoader label="Loading inbox" /> : conversations.length === 0 ? <p className="text-sm text-muted-foreground">
                 {error ? "Inbox is currently unavailable." : managesInbox ? "Participant messages will appear here." : "No conversations yet."}
               </p> : conversations.map(item => {
             const active = thread?.eventId === item.event._id && thread?.participantId === item.participant._id;
-            return <Button variant="ghost" key={`${item.event._id}-${item.participant._id}`} type="button" disabled={sending} onClick={() => openConversation(item)} aria-pressed={active} className={`h-auto w-full flex-col items-start space-y-1 rounded-xl border p-4 text-left disabled:opacity-50 ${active ? "bg-muted" : "hover:bg-muted"}`}>
-                    <p className="break-words text-sm font-semibold">
+            return <Button variant="ghost" key={`${item.event._id}-${item.participant._id}`} type="button" disabled={sending} onClick={() => openConversation(item)} aria-pressed={active} className={`whitespace-normal h-auto w-full flex-col items-start space-y-1 rounded-xl border p-4 text-left disabled:opacity-50 ${active ? "bg-muted" : "hover:bg-muted"}`}>
+                    <p className="[overflow-wrap:anywhere] text-sm font-semibold">
                       {item.event.title}
                     </p>
-                    <p className="break-words text-sm">
+                    <p className="[overflow-wrap:anywhere] text-sm">
                       {managesInbox ? item.participant.name : "Organizer"}
                     </p>
-                    <p className="line-clamp-2 break-words text-xs text-muted-foreground">
+                    <p className="line-clamp-2 [overflow-wrap:anywhere] text-xs text-muted-foreground">
                       {item.lastMessage}
                     </p>
                   </Button>;
           })}
-          </CardContent>
-        </Card>
-        )}
-
-        {thread ? <Conversation key={`${thread.eventId}-${thread.participantId}`} thread={thread} userId={userId} sending={sending} setSending={setSending} compact={compact} onSent={() => setRefresh(previous => previous + 1)} /> : !compact && <p className="grid min-h-[480px] place-content-center rounded-2xl border border-dashed bg-card p-8 text-center text-sm text-muted-foreground">
-            Open a conversation to view or send messages.
-          </p>}
+          </div>
+        </aside>
+        {thread ? <section aria-label="Selected conversation" className="min-w-0">
+          <div className="border-b px-4 py-2 md:hidden">
+            <Button type="button" variant="ghost" size="sm" disabled={sending} onClick={backToInbox}><ArrowLeft className="size-4" /> Back to inbox</Button>
+          </div>
+          <Conversation key={`${thread.eventId}-${thread.participantId}`} thread={thread} userId={userId} sending={sending} setSending={setSending} onSent={() => setRefresh(previous => previous + 1)} />
+        </section> : <div className="hidden place-content-center justify-items-center gap-3 p-8 text-center text-sm text-muted-foreground md:grid">
+          <MessageSquareText aria-hidden="true" className="size-7 text-primary" />
+          Select a conversation to view or send messages.
+        </div>}
       </div>
     </div>;
 }

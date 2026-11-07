@@ -1,9 +1,11 @@
+import EllipseLoader from "@/components/EllipseLoader";
 import { lazy, Suspense, useLayoutEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import DashboardLayout from "./layout/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EventSphereHome from "./page/EventSphereHome";
 const Dashboard = lazy(() => import("./page/Dashboard"));
+const EventBooking = lazy(() => import("./page/EventBooking"));
 const AttendeeProfile = lazy(() => import("./page/AttendeeProfile"));
 const PassVerification = lazy(() => import("./page/PassVerification"));
 const Contact = lazy(() => import("./page/Contact"));
@@ -47,7 +49,7 @@ function App() {
     if (!hash) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
   }, [key, hash]);
 
-  return <Suspense fallback={null}>
+  return <Suspense fallback={<EllipseLoader />}>
       <Routes>
         <Route path="/" element={<EventSphereHome />} />
         <Route path="/contact" element={<Contact />} />
@@ -91,6 +93,7 @@ function App() {
         <Route path="/passes/verify" element={<PassVerification />} />
         <Route element={<ProtectedRoute allowedRoles={["attendee"]} />}>
           <Route path="profile" element={<AttendeeProfile />} />
+          <Route path="book" element={<EventBooking />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={allRoles} />}>

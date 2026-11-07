@@ -1,5 +1,7 @@
+import BookLink from "@/components/landing/BookLink";
 import { ArrowUpRight, CalendarDays, Clock, MapPin, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { isPastEvent } from '@/lib/eventDates';
 import { isExpo } from '@/hooks/useExpos';
 import { getEventImage } from './eventImages';
 import './catalog-finishes.css';
@@ -19,7 +21,7 @@ export default function EventCard({ event, index = 0 }) {
   const date = new Date(event.date);
   const hasDate = Boolean(event.date) && Number.isFinite(date.getTime());
   const kind = isExpo(event) ? 'Expo' : 'Event';
-  const action = 'Book now';
+  const closed = isPastEvent(event.date);
   const startTime = formatTime(event.time);
   const endTime = formatTime(event.endTime);
   const schedule = endTime ? (startTime ? `${startTime} – ${endTime}` : `Ends at ${endTime}`) : startTime;
@@ -31,7 +33,7 @@ export default function EventCard({ event, index = 0 }) {
   ];
 
   return (
-    <Link to={`/expos/${event._id}`} className="celebration-listing" data-kind={kind} aria-label={`${action}: ${event.title}`}>
+    <div className="celebration-listing" data-kind={kind}>
       <article className="celebration-listing-ticket">
         <div className="celebration-listing-photo">
           <img src={getEventImage(event, index)} alt="" loading="lazy" className="absolute inset-0 size-full object-cover object-center" />
@@ -42,7 +44,7 @@ export default function EventCard({ event, index = 0 }) {
         </div>
         <div className="celebration-listing-details">
           <p className="celebration-listing-category">{event.category || kind}</p>
-          <h3>{event.title}</h3>
+          <h3><Link className="hover:underline" to={`/expos/${event._id}`}>{event.title}</Link></h3>
           <p className="celebration-listing-description">{event.description || 'More details will be shared by the organizer.'}</p>
           <dl className="celebration-listing-meta">
             {metadata.map(({ label, Icon, value }) => (
@@ -54,9 +56,9 @@ export default function EventCard({ event, index = 0 }) {
           </dl>
         </div>
         <div className="celebration-listing-stub">
-          <span className="celebration-listing-action">{action} <span aria-hidden="true"><ArrowUpRight size={17} /></span></span>
+          {closed ? <Link to={`/expos/${event._id}`} className="celebration-listing-action">View details <span aria-hidden="true"><ArrowUpRight size={17} /></span></Link> : <BookLink eventId={event._id} className="celebration-listing-action" aria-label={`Book now: ${event.title}`}>Book Now <span aria-hidden="true"><ArrowUpRight size={17} /></span></BookLink>}
         </div>
       </article>
-    </Link>
+    </div>
   );
 }

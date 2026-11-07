@@ -1,8 +1,11 @@
+import AnimatedIcon from "@/components/AnimatedIcon";
+import { useSidebar } from "@/hooks/use-sidebar";
 import { NavLink, useLocation } from "react-router-dom";
 import { SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 export function NavMain({
   items
 }) {
+  const { isMobile, setOpenMobile } = useSidebar();
   const {
     pathname
   } = useLocation();
@@ -21,16 +24,17 @@ export function NavMain({
             <SidebarMenu className="gap-1">
               {groupItems.map(item => {
             const active = pathname === item.url || item.url !== "/dashboard" && pathname.startsWith(`${item.url}/`);
-            return <SidebarMenuItem key={item.url}>
+            const renderLink = (icon, triggerProps = {}) => <SidebarMenuItem key={item.url}>
                     <SidebarMenuButton asChild isActive={active} tooltip={{
                 children: item.title
-              }} className="h-10 rounded-lg px-3 text-[13px] transition-colors data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:font-semibold">
-                      <NavLink to={item.url} end={item.url === "/dashboard"}>
-                        {item.icon}
-                        <span>{item.title}</span>
+              }} className="h-10 rounded-lg px-3 text-sm transition-colors data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:font-semibold">
+                      <NavLink {...triggerProps} onClick={() => { if (isMobile) setOpenMobile(false); }} to={item.url} end={item.url === "/dashboard"}>
+                        {icon}
+                        <span className="truncate">{item.title}</span>
                       </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>;
+            return item.animatedIcon ? <AnimatedIcon key={item.url} icon={item.animatedIcon}>{renderLink}</AnimatedIcon> : renderLink(item.icon);
           })}
             </SidebarMenu>
           </SidebarGroupContent>

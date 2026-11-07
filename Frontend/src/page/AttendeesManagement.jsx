@@ -1,3 +1,4 @@
+import EllipseLoader from "@/components/EllipseLoader";
 
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -153,7 +154,7 @@ export default function AttendeesManagement() {
                 </div>
 
                 <Button type="submit" disabled={!eventId || events.length === 0}>
-                  {saving ? "Registering..." : "Register"}
+                  {saving && <EllipseLoader inline label="Registering" />} Register
                 </Button>
 
                 {!loading && events.length === 0 && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
@@ -164,15 +165,24 @@ export default function AttendeesManagement() {
           </CardContent>
         </Card></FormPanel>}
 
-      {loading ? <p role="status">Loading registrations...</p> : loadError ? <div className="space-y-3">
+      {loading ? <EllipseLoader label="Loading registrations" /> : loadError ? <div className="space-y-3">
           <p role="alert">{loadError}</p>
 
           <Button variant="outline" onClick={refreshData}>
             Try Again
           </Button>
-        </div> : attendees.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
+        </div> : !isOrganizer && attendees.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
           No registrations found.
-        </p> : <RecordBrowser records={attendees} label="registrations">{visible => <div className="overflow-hidden rounded-xl border bg-card"><Table><TableHeader><TableRow><TableHead>Attendee / Event</TableHead><TableHead>Contact</TableHead><TableHead>Ticket</TableHead><TableHead>Event date</TableHead><TableHead>Location</TableHead><TableHead>Status</TableHead>{isOrganizer && <TableHead>Actions</TableHead>}</TableRow></TableHeader><TableBody>{visible.map(registration => <TableRow key={registration._id}><TableCell className="whitespace-normal"><p className="font-medium">{isOrganizer ? registration.user?.name || "Unavailable" : registration.event?.title || "Event unavailable"}</p>{isOrganizer && <p className="mt-1 text-xs text-muted-foreground">{registration.event?.title || "Event unavailable"}</p>}</TableCell><TableCell>{isOrganizer ? registration.user?.email || "Unavailable" : "Your registration"}</TableCell><TableCell><Badge variant="secondary">{registration.ticketType}</Badge></TableCell><TableCell>{registration.event?.date ? new Date(registration.event.date).toLocaleDateString("en-GB", {
+        </p> : <RecordBrowser records={attendees} label="registrations" statusOptions={isOrganizer ? ["Pending", "Confirmed", "Rejected", "Cancelled"] : undefined} statusValue={item => item.status || "Confirmed"} allStatusesLabel="All Registrations" emptyText="No registrations found.">{visible => <div className="overflow-hidden rounded-xl border bg-card"><Table><TableHeader><TableRow><TableHead>Attendee / Event</TableHead><TableHead>Contact</TableHead><TableHead>Ticket</TableHead><TableHead>Event date</TableHead><TableHead>Location</TableHead><TableHead>Status</TableHead>{isOrganizer && <TableHead>Actions</TableHead>}</TableRow></TableHeader><TableBody>{visible.map(registration => <TableRow key={registration._id}><TableCell className="whitespace-normal"><p className="font-medium">{isOrganizer ? registration.user?.name || "Unavailable" : registration.event?.title || "Event unavailable"}</p>{isOrganizer && <p className="mt-1 text-xs text-muted-foreground">{registration.event?.title || "Event unavailable"}</p>}</TableCell><TableCell>{isOrganizer ? registration.user?.email || "Unavailable" : "Your registration"}
+                      {(registration.phone || registration.guestCount || registration.details) && <details className="mt-1 max-w-64 whitespace-normal">
+                        <summary className="cursor-pointer text-sm font-medium text-primary">Booking details</summary>
+                        <div className="mt-2 space-y-1 [overflow-wrap:anywhere]">
+                          {registration.phone && <p>Phone: {registration.phone}</p>}
+                          {registration.guestCount && <p>Guests: {registration.guestCount}</p>}
+                          {registration.details && <p className="whitespace-pre-wrap">{registration.details}</p>}
+                        </div>
+                      </details>}
+                    </TableCell><TableCell><Badge variant="secondary">{registration.ticketType}</Badge></TableCell><TableCell>{registration.event?.date ? new Date(registration.event.date).toLocaleDateString("en-GB", {
                   timeZone: "UTC"
                 }) : "Unavailable"}</TableCell><TableCell className="max-w-60 whitespace-normal">{registration.event?.location || "Unavailable"}</TableCell>
                     <TableCell><Badge variant="secondary">{registration.status || "Confirmed"}</Badge></TableCell>

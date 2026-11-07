@@ -11,6 +11,11 @@ import {
 import { ArrowUpRight, LoaderCircle } from 'lucide-react';
 import AuthLayout from '@/components/auth/AuthLayout';
 import PasswordField from '@/components/auth/PasswordField';
+function accountDestination(account, returnTo) {
+  const booking = returnTo && /^\/book\/?(?:[?#]|$)/i.test(returnTo);
+  return (booking && account.role !== "attendee" ? null : returnTo) || (account.role === "attendee" ? "/" : "/dashboard");
+}
+
 export default function Login({ signup = false }) {
   const [params] = useSearchParams();
   const [error, setError] = useState('');
@@ -22,7 +27,7 @@ export default function Login({ signup = false }) {
   const from = location.state?.from;
   const returnTo =
     typeof from === 'string' && from.startsWith('/') && !from.startsWith('//') && !from.includes('\\') && !/login|signup|register/i.test(from) ? from : null;
-  if (user) return <Navigate to={returnTo || (user.role === 'attendee' ? '/' : '/dashboard')} replace />;
+  if (user) return <Navigate to={accountDestination(user, returnTo)} replace />;
   async function submit(event) {
     event.preventDefault();
     if (loading) return;
@@ -45,7 +50,7 @@ export default function Login({ signup = false }) {
       const { data } = await API.post(signup ? '/auth/register' : '/auth/login', values);
       const account = signup ? data.data : data.existingUser;
       saveAuth(data.token, account);
-      navigate(returnTo || (account.role === 'attendee' ? '/' : '/dashboard'), { replace: true });
+      navigate(accountDestination(account, returnTo), { replace: true });
     } catch (failure) {
       setError(failure.response?.data?.msg || failure.message || 'Unable to connect to the server');
     } finally {

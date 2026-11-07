@@ -1,3 +1,5 @@
+import { isExpo } from "@/hooks/useExpos";
+import EllipseLoader from "@/components/EllipseLoader";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableHeader, TableHead, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -7,20 +9,20 @@ import { PageHeading } from "@/components/workspace";
 import { FormPanel } from "@/components/workspace";
 import WorkspaceSelect from "@/components/workspace-select";
 import useLiveRefresh from '@/hooks/useLiveRefresh';
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import API from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
-export default function BoothSelection() {
+export default function BoothSelection({ expo, onBusyChange, onReservationChanged }) {
   const confirm = useConfirmation();
   const [createOpen, setCreateOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
-  const [boothView, setBoothView] = useState("grid");
+  const [boothView, setBoothView] = useState(expo ? "table" : "grid");
   const [events, setEvents] = useState([]);
-  const [eventId, setEventId] = useState("");
+  const [eventId, setEventId] = useState(expo?._id || "");
   const [booths, setBooths] = useState([]);
   const [applications, setApplications] = useState([]);
   const [boothNumber, setBoothNumber] = useState("");
@@ -28,7 +30,7 @@ export default function BoothSelection() {
   const [assignmentExhibitorId, setAssignmentExhibitorId] = useState("");
   const [loadedEventId, setLoadedEventId] = useState("");
   const [loadingEvents, setLoadingEvents] = useState(true);
-  const [loadingBooths, setLoadingBooths] = useState(false);
+  const [loadingBooths, setLoadingBooths] = useState(Boolean(expo));
   const [saving, setSaving] = useState(false);
   const [action, setAction] = useState(null);
   const [eventError, setEventError] = useState("");
@@ -36,7 +38,7 @@ export default function BoothSelection() {
   const role = localStorage.getItem("userRole");
   const userId = localStorage.getItem("userId");
   const busy = saving || loadingBooths || Boolean(action);
-  const selectedEvent = events.find(event => event._id === eventId);
+  const selectedEvent = expo ?? events.find(event => event._id === eventId);
   const organizerId = selectedEvent?.organizer?._id || selectedEvent?.organizer;
   const canManage = Boolean(selectedEvent) && (role === "admin" || role === "organizer" && organizerId === userId);
   const loaded = Boolean(eventId) && loadedEventId === eventId;
@@ -60,14 +62,15 @@ export default function BoothSelection() {
     setEventError("");
     try {
       const response = await API.get("/events/all");
-      setEvents(response.data.events);
+      setEvents(response.data.events.filter(isExpo));
     } catch {
-      setEventError("Unable to load events.");
+      setEventError("Unable to load expos.");
     } finally {
       setLoadingEvents(false);
     }
   }
   useEffect(() => {
+    if (expo) return;
     const controller = new AbortController();
     async function loadInitialEvents() {
       try {
@@ -75,11 +78,11 @@ export default function BoothSelection() {
           signal: controller.signal
         });
         if (!controller.signal.aborted) {
-          setEvents(response.data.events);
+          setEvents(response.data.events.filter(isExpo));
         }
       } catch {
         if (!controller.signal.aborted) {
-          setEventError("Unable to load events.");
+          setEventError("Unable to load expos.");
         }
       } finally {
         if (!controller.signal.aborted) setLoadingEvents(false);
@@ -87,19 +90,19 @@ export default function BoothSelection() {
     }
     loadInitialEvents();
     return () => controller.abort();
-  }, []);
-  async function fetchBooths() {
-    if (!eventId) return;
+  }, [expo]);
+  const fetchBooths = useCallback(async (id = eventId) => {
+    if (!id) return;
     setLoadingBooths(true);
     setBoothError("");
     setLoadedEventId("");
     try {
-      const [boothResponse, applicationResponse] = await Promise.all([API.get(`/booths/event/${eventId}`), ["exhibitor", "organizer", "admin"].includes(role) ? API.get("/exhibitors/all") : Promise.resolve(null)]);
+      const [boothResponse, applicationResponse] = await Promise.all([API.get(`/booths/event/${id}`), ["exhibitor", "organizer", "admin"].includes(role) ? API.get("/exhibitors/all") : Promise.resolve(null)]);
       setBooths(boothResponse.data.booths);
       setApplications(applicationResponse?.data?.exhibitors || []);
       setAssignmentBoothId("");
       setAssignmentExhibitorId("");
-      setLoadedEventId(eventId);
+      setLoadedEventId(id);
     } catch (error) {
       setBooths([]);
       setApplications([]);
@@ -107,12 +110,19 @@ export default function BoothSelection() {
     } finally {
       setLoadingBooths(false);
     }
-  }
+  }, [eventId, role]);
+  useEffect(() => {
+    if (!expo) return;
+    const timer = window.setTimeout(fetchBooths, 0);
+    return () => window.clearTimeout(timer);
+  }, [expo, fetchBooths]);
   useLiveRefresh(() => {
     if (!busy && loaded) void fetchBooths();
   });
   function changeEvent(event) {
-    setEventId(event.target.value);
+    const id = event.target.value;
+    if (id === eventId || busy) return;
+    setEventId(id);
     setBooths([]);
     setApplications([]);
     setLoadedEventId("");
@@ -120,6 +130,7 @@ export default function BoothSelection() {
     setAssignmentBoothId("");
     setAssignmentExhibitorId("");
     setBoothError("");
+    if (id) void fetchBooths(id);
   }
   async function handleCreate(event) {
     event.preventDefault();
@@ -182,7 +193,11 @@ export default function BoothSelection() {
       return;
     }
     const question = cancelling ? `Cancel your reservation for booth ${booth.boothNumber}?` : `Reserve booth ${booth.boothNumber}?`;
-    if (!(await confirm(question))) return;
+    onBusyChange?.(true);
+    if (!(await confirm(question))) {
+      onBusyChange?.(false);
+      return;
+    }
     setAction({
       id: booth._id,
       type
@@ -193,6 +208,7 @@ export default function BoothSelection() {
       });
       toast.success(response.data.msg);
       await fetchBooths();
+      onReservationChanged?.();
     } catch (error) {
       toast.error(error.response?.data?.msg || "Unable to update reservation.");
       if ([403, 404, 409].includes(error.response?.status)) {
@@ -200,14 +216,15 @@ export default function BoothSelection() {
       }
     } finally {
       setAction(null);
+      onBusyChange?.(false);
     }
   }
   return <div className="w-full space-y-6">
-      <PageHeading title="Booth workspace" description="Coordinate availability, reservations, and exhibitor assignments." />
+      {!expo && <><PageHeading title="Booth workspace" description="Coordinate availability, reservations, and exhibitor assignments." />
 
       <Card className="workspace-event-scope">
         <CardHeader>
-          <CardTitle>Select an Event</CardTitle>
+          <CardTitle>Select an Expo</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -217,24 +234,25 @@ export default function BoothSelection() {
                 Try Again
               </Button>
             </div> : <>
-              <Label htmlFor="booth-event">Event</Label>
+              <Label htmlFor="booth-event">Expo</Label>
 
               <WorkspaceSelect id="booth-event" value={eventId} onChange={changeEvent} disabled={loadingEvents || busy} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
                 <option value="">
-                  {loadingEvents ? "Loading events..." : "Select an event"}
+                  Select an Expo
                 </option>
 
                 {events.map(event => <option key={event._id} value={event._id}>
                     {event.title}
                   </option>)}
               </WorkspaceSelect>
+              {loadingEvents && <EllipseLoader inline label="Loading expos" />}
 
-              <Button onClick={fetchBooths} disabled={!eventId || busy || loadingEvents}>
-                {loadingBooths ? "Loading..." : "Load / Refresh Booths"}
+              <Button onClick={() => fetchBooths()} disabled={!eventId || busy || loadingEvents}>
+                {loadingBooths ? <EllipseLoader inline label="Loading booths" /> : "Load / Refresh Booths"}
               </Button>
 
               {!loadingEvents && events.length === 0 && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
-                  No events are available yet.
+                  No expos are available yet.
                 </p>}
             </>}
         </CardContent>
@@ -261,7 +279,8 @@ export default function BoothSelection() {
           </CardContent>
         </Card></FormPanel>}
 
-      {loadingBooths ? <p role="status">Loading booths...</p> : boothError ? <p role="alert">{boothError}</p> : loaded ? <>
+      </>}
+      {loadingBooths ? <EllipseLoader label="Loading booths" /> : boothError ? <div className="space-y-2"><p role="alert">{boothError}</p>{expo && <Button variant="outline" onClick={() => fetchBooths()}>Try again</Button>}</div> : loaded ? <>
           {canManage && <FormPanel open={assignOpen} onOpenChange={value => {
         if (!busy) setAssignOpen(value);
       }} title="Assign Booth" trigger="Assign a booth"><Card>
@@ -314,10 +333,10 @@ export default function BoothSelection() {
             </Card></FormPanel>}
 
           {role === "exhibitor" && <p className="text-sm text-muted-foreground">
-              {hasReservation ? "Your reserved booth is marked below. Cancel it before selecting another booth." : approved ? "Select an available booth. You can reserve one booth per event." : "An approved application is required to reserve a booth."}
+              {hasReservation ? "Your reserved booth is marked below. Cancel it before selecting another booth." : approved ? "Select an available booth. You can reserve one booth per expo." : "An approved application is required to reserve a booth."}
             </p>}
 
-          <div className="grid gap-4 sm:grid-cols-3">
+          {!expo && <div className="grid gap-4 sm:grid-cols-3">
             {[{
           title: "Total Booths",
           value: booths.length
@@ -335,11 +354,11 @@ export default function BoothSelection() {
                   <p className="text-2xl font-semibold">{item.value}</p>
                 </CardContent>
               </Card>)}
-          </div>
+          </div>}
 
           <Card>
             <CardHeader>
-              <div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Booth availability</CardTitle><Tabs value={boothView} onValueChange={setBoothView}><TabsList><TabsTrigger value="grid">Grid</TabsTrigger><TabsTrigger value="table">Table</TabsTrigger></TabsList></Tabs></div>
+              <div className="flex flex-wrap items-center justify-between gap-3"><CardTitle>Booth availability</CardTitle>{!expo && <Tabs value={boothView} onValueChange={setBoothView}><TabsList><TabsTrigger value="grid">Grid</TabsTrigger><TabsTrigger value="table">Table</TabsTrigger></TabsList></Tabs>}</div>
               <p className="text-sm text-muted-foreground">
                 {selectedEvent?.title} - sorted by booth number
               </p>
@@ -347,7 +366,7 @@ export default function BoothSelection() {
 
             <CardContent>
               {booths.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
-                  No booths have been created for this event.
+                  No booths have been created for this expo.
                 </p> : <RecordBrowser records={sortedBooths} label="booths" statusKey="status">{visible => boothView === "table" ? <Table><TableHeader><TableRow><TableHead>Booth</TableHead><TableHead>Exhibitor</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader><TableBody>{visible.map(booth => <TableRow key={booth._id}><TableCell className="font-semibold">{booth.boothNumber}</TableCell><TableCell>{booth.reservedBy?.companyName || "Unassigned"}</TableCell><TableCell><Badge variant={booth.status === "Available" ? "secondary" : "default"}>{booth.status}</Badge></TableCell><TableCell>{role === "exhibitor" && booth.status === "Available" && <Button size="sm" disabled={busy || !approved || hasReservation} onClick={() => handleReservation(booth, "reserve")}>Reserve Booth</Button>}{isMyBooth(booth) && booth.status !== "Available" && <Button size="sm" variant="destructive" disabled={busy} onClick={() => handleReservation(booth, "cancel")}>Cancel Reservation</Button>}</TableCell></TableRow>)}</TableBody></Table> : <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {visible.map(booth => {
                 const available = booth.status === "Available";
@@ -383,7 +402,7 @@ export default function BoothSelection() {
             </CardContent>
           </Card>
         </> : <p className="text-muted-foreground">
-          Select an event and click Load / Refresh Booths.
+          Select an Expo to view booth availability.
         </p>}
     </div>;
 }

@@ -17,6 +17,9 @@ const attendeeSchema = new mongoose.Schema(
       enum: ["Standard", "VIP", "Regular"],
       default: "Standard",
     },
+    phone: { type: String, trim: true, maxlength: 32 },
+    guestCount: { type: Number, min: 1, validate: Number.isSafeInteger },
+    details: { type: String, trim: true, maxlength: 2000 },
     status: {
       type: String,
       enum: ["Pending", "Confirmed", "Rejected", "Cancelled"],

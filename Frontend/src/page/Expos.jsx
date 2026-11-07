@@ -1,3 +1,5 @@
+import BookLink from "@/components/landing/BookLink";
+import EllipseLoader from "@/components/EllipseLoader";
 import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from 'lucide-react';
@@ -81,13 +83,12 @@ function ListingDetailCard({ event, eventIndex, user, featured = false }) {
           </p>
         </div>
         <div className="mt-auto flex flex-wrap gap-3 pt-7">
-          {isPastEvent(event.date) ? <p className="self-center text-sm font-medium text-[#756a64]">Bookings closed · Event has passed</p> : (!user || user.role === 'attendee') && <Link
-            to={user ? `/profile?event=${event._id}` : '/login'}
-            state={user ? undefined : { from: `/profile?event=${event._id}` }}
+          {isPastEvent(event.date) ? <p className="self-center text-sm font-medium text-[#756a64]">Bookings closed · Event has passed</p> : (!user || user.role === 'attendee') && <BookLink
+            eventId={event._id}
             className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#c6952d] px-6 text-sm font-semibold text-white transition hover:bg-[#a97818]"
           >
             {user ? 'Book this event' : 'Log in to book'} <ArrowUpRight size={16} />
-          </Link>}
+          </BookLink>}
           <Link
             to={featured ? catalogPath : `/expos/${event._id}`}
             className="inline-flex min-h-11 items-center rounded-full border border-[#d9c7ad] px-6 text-sm font-semibold text-[#4a292a] transition hover:bg-[#fbf4ee]"
@@ -129,9 +130,7 @@ export function ExpoDetailPage() {
             <ArrowLeft size={16} /> {backToEvents ? 'Back to events' : 'Back to expos'}
           </Link>
           {data.loading ? (
-            <p role="status" className="rounded-2xl bg-white p-10 text-center text-[#756a64]">
-              Loading event details…
-            </p>
+            <EllipseLoader label="Loading event details" />
           ) : data.error ? (
             <div role="alert" className="rounded-2xl border border-[#eadfd5] bg-white p-8 text-center">
               <p className="text-sm text-[#756a64]">{data.error}</p>
