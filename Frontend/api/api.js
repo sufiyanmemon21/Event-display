@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://e-project-qckw.vercel.app/",
+  baseURL: "https://event-display-backend.vercel.app/",
   timeout: 15000,
   headers: {
     "Content-Type": "application/json",
