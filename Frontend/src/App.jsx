@@ -1,5 +1,5 @@
-import { lazy, Suspense } from "react";
-import { Navigate, Route, Routes } from "react-router-dom";
+import { lazy, Suspense, useLayoutEffect } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import DashboardLayout from "./layout/DashboardLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import EventSphereHome from "./page/EventSphereHome";
@@ -15,6 +15,7 @@ const EventListing = lazy(() => import("./page/Expos").then(module => ({
   default: module.EventsPage
 })));
 const Gallery = lazy(() => import("./page/Gallery"));
+const PublicFeedback = lazy(() => import("./page/PublicFeedback"));
 const Services = lazy(() => import("./page/Services"));
 const Login = lazy(() => import("./page/login"));
 const Signup = lazy(() => import("./page/signup"));
@@ -40,6 +41,12 @@ const EventApprovals = lazy(() => import("./page/EventApprovals"));
 const FloorPlan = lazy(() => import("./page/FloorPlan"));
 const allRoles = ["admin", "organizer", "exhibitor", "attendee"];
 function App() {
+  const { key, hash } = useLocation();
+
+  useLayoutEffect(() => {
+    if (!hash) window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [key, hash]);
+
   return <Suspense fallback={null}>
       <Routes>
         <Route path="/" element={<EventSphereHome />} />
@@ -48,6 +55,7 @@ function App() {
         <Route path="/expos/:expoId" element={<ExpoDetail />} />
         <Route path="/event-listing" element={<EventListing />} />
         <Route path="/gallery" element={<Gallery />} />
+        <Route path="/share-feedback" element={<PublicFeedback />} />
         <Route path="/event-gallery" element={<Gallery />} />
         <Route path="/service" element={<Services />} />
         <Route path="/services" element={<Services />} />

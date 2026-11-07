@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ArrowUpRight, Building2, Cake, Flower2, Heart, Images, Music2, Trees } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { ArrowUpRight, Building2, Cake, Flower2, Heart, Images, Music2, Trees } from 'lucide-react';
 import HeroSection from '@/components/landing/HeroSection';
 import PublicPageShell from '@/components/landing/PublicPageShell';
 import ExpoCollection from '@/components/landing/ExpoCollection';
@@ -10,6 +10,7 @@ import weddingImage from '@/assets/wedding.avif';
 import gardenImage from '@/assets/last.avif';
 import receptionImage from '@/assets/Main.jpg';
 import concertImage from '@/assets/live concerts.avif';
+import LandingExtras from '@/components/landing/LandingExtras';
 import './celebration.css';
 
 const occasions = [
@@ -21,11 +22,8 @@ const occasions = [
   { name: 'Outdoor gatherings', icon: Trees, photo: gardenImage, alt: 'Rows of gold chairs along a garden aisle' },
 ];
 
-const packages = [
-  { name: 'Classic', title: 'The essentials', description: 'A focused setup for smaller gatherings and intimate celebrations.' },
-  { name: 'Signature', title: 'Room to celebrate', description: 'A coordinated look for birthdays, showers, and milestone events.', featured: true },
-  { name: 'Bespoke', title: 'Made for your occasion', description: 'A custom plan for larger events with more moving parts.' },
-];
+const packages = ['Classic', 'Signature', 'Bespoke'];
+const galleryPreview = occasions.filter(({ name }) => ['Birthdays', 'Weddings', 'Live events'].includes(name));
 
 function openInquiry(event) {
   event.preventDefault();
@@ -38,9 +36,7 @@ function openInquiry(event) {
 export default function EventSphereHome() {
   const { hash, key } = useLocation();
   const [occasion, setOccasion] = useState('');
-  const [selectedPackage, setSelectedPackage] = useState('');
   const catalog = useExpos();
-  const upcoming = catalog.items.find((item) => isExpo(item) && Date.parse(item.date) >= catalog.fetchedAt);
   const latest = [...catalog.items].sort((left, right) =>
     (Date.parse(right.createdAt) || 0) - (Date.parse(left.createdAt) || 0),
   );
@@ -89,49 +85,20 @@ export default function EventSphereHome() {
           </div>
         </section>
 
-        <section id="about" className="celebration-wrap celebration-intro">
+        <section id="about" className="celebration-wrap celebration-intro" aria-labelledby="about-title">
           <div>
-            <p className="celebration-kicker">The EventSphere approach</p>
-            <h2>We bring it together.<br /><em>You celebrate.</em></h2>
-            <p>Start with the kind of gathering you have in mind. Browse real expos, find ideas for your own celebration, or get in touch to discuss the details.</p>
-            <Link className="celebration-button" to="/gallery">Visit the gallery <ArrowRight size={16} /></Link>
+            <p className="celebration-kicker">Events and celebrations</p>
+            <h2 id="about-title">About <em>EventSphere</em></h2>
+            <p>EventSphere brings attendees, organizers, and exhibitors together. Discover local events and expos, check what’s happening, and book a place when you’re ready.</p>
+            <p>Planning a gathering of your own? Explore ideas for birthdays, weddings, and corporate events, then share your plans with us through the inquiry form.</p>
           </div>
-          <aside className="celebration-note">
-            <p className="celebration-kicker">From the live event catalog</p>
-            <h3>{upcoming?.title || 'Find your next event'}</h3>
-            <p>{upcoming ? upcoming.location : 'See what organizers are planning and find a gathering worth making time for.'}</p>
-            <Link className="celebration-text-link" to={upcoming ? `/expos/${upcoming._id}` : '/expos'}>
-              {upcoming ? 'View expo details' : 'Browse expos'} <ArrowUpRight size={15} />
-            </Link>
-          </aside>
+          <img src={receptionImage} alt="Tables set with flowers for a formal reception" loading="lazy" />
         </section>
 
         <ExpoCollection data={{ ...catalog, items: eventItems }} kind="events" limit={3} />
         <ExpoCollection data={{ ...catalog, items: expoItems }} kind="expos" limit={3} />
 
-        <section id="packages" className="celebration-packages" aria-labelledby="packages-title">
-          <div className="celebration-wrap">
-            <p className="celebration-kicker">Start with what you need</p>
-            <h2 id="packages-title">Celebration packages</h2>
-            <div className="celebration-package-grid">
-              {packages.map(({ name, title, description, featured }) => (
-                <article key={name} className="celebration-package">
-                  {featured && <p className="celebration-package-label">Featured package</p>}
-                  <h3>{name}</h3>
-                  <p className="celebration-package-title">{title}</p>
-                  <p>{description}</p>
-                  <Link className="celebration-button" to="/#inquire" onClick={() => setSelectedPackage(name)}>Request a quote <ArrowUpRight size={14} /></Link>
-                </article>
-              ))}
-            </div>
-            <div className="celebration-package-footer">
-              <Link className="celebration-text-link celebration-services-link" to="/services">Explore our services <ArrowRight size={16} /></Link>
-              <Link to="/gallery" className="celebration-filmstrip" aria-label="Explore the event gallery">
-                {occasions.slice(0, 4).map(({ name, photo }) => <img key={name} src={photo} alt="" loading="lazy" />)}
-              </Link>
-            </div>
-          </div>
-        </section>
+        <LandingExtras photos={galleryPreview} />
 
         <section id="inquire" className="celebration-wrap celebration-inquiry" aria-labelledby="inquiry-title">
           <div>
@@ -144,9 +111,9 @@ export default function EventSphereHome() {
             <h3>Send an inquiry</h3>
             <label>Your name<input name="name" autoComplete="name" required /></label>
             <label>Email address<input type="email" name="email" autoComplete="email" required /></label>
-            <label>Package<select name="package" value={selectedPackage} onChange={(event) => setSelectedPackage(event.target.value)}>
+            <label>Package<select name="package">
               <option value="">Help me decide</option>
-              {packages.map(({ name }) => <option key={name}>{name}</option>)}
+              {packages.map((name) => <option key={name}>{name}</option>)}
             </select></label>
             <label>Tell us about your event<textarea name="message" rows={3} required /></label>
             <button className="celebration-button" type="submit">Open email draft <ArrowUpRight size={16} /></button>

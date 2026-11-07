@@ -61,6 +61,14 @@ function readEvent(body = {}) {
   }
 
   data.date = date;
+  for (const field of ["time", "endTime"]) {
+    const value = body[field];
+    if (value === undefined) continue;
+    if (typeof value !== "string" || !/^(?:|(?:[01]\d|2[0-3]):[0-5]\d)$/.test(value)) {
+      return { error: "Please enter a valid event time" };
+    }
+    data[field] = value;
+  }
 
   if (Object.hasOwn(body, "listingType")) {
     if (!["event", "expo"].includes(body.listingType)) {

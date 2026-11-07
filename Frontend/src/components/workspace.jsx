@@ -20,6 +20,7 @@ export function FormPanel({
   onOpenChange,
   trigger = "Add new",
   showCancel = true,
+  closeButtonOnly = false,
   compact = false
 }) {
   const [localOpen, setLocalOpen] = useState(false);
@@ -31,7 +32,11 @@ export function FormPanel({
         <Plus className="size-4" />{trigger}
       </Button>
       <Dialog open={visible} onOpenChange={change}>
-        <DialogContent className={compact ? "workspace-form-panel workspace-form-compact" : "workspace-form-panel"}>
+        <DialogContent
+          className={compact ? "workspace-form-panel workspace-form-compact" : "workspace-form-panel"}
+          onInteractOutside={closeButtonOnly ? (event) => event.preventDefault() : undefined}
+          onEscapeKeyDown={closeButtonOnly ? (event) => event.preventDefault() : undefined}
+        >
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description}</DialogDescription>

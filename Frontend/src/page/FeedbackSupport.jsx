@@ -162,7 +162,9 @@ export default function FeedbackSupport() {
                 <WorkspaceSelect id="feedback-type" value={type} onChange={event => setType(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
                   <option value="suggestion">Suggestion</option>
                   <option value="issue">Report an Issue</option>
+                  <option value="review">Public review</option>
                 </WorkspaceSelect>
+                {type === "review" && <p className="text-sm text-muted-foreground">Your first name and review will appear on the public landing page.</p>}
               </div>
 
               <div className="space-y-2">
@@ -210,6 +212,8 @@ export default function FeedbackSupport() {
                 </div>
 
                 <p className="whitespace-pre-wrap break-words text-sm">
+                  {feedback.subject && <strong className="mb-1 block">{feedback.subject}</strong>}
+                  {feedback.rating && <span className="mb-1 block">{feedback.rating} out of 5 stars</span>}
                   {feedback.message}
                 </p>
 

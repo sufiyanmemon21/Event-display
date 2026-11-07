@@ -15,14 +15,14 @@ import {
 
 const eventRouter = express.Router();
 const coverUpload = multer({
-  limits: { fileSize: 3 * 1024 * 1024, files: 1, fields: 6, fieldSize: 20_000 }
+  limits: { fileSize: 3 * 1024 * 1024, files: 1, fields: 8, fieldSize: 20_000 }
 }).single("image");
 
 function uploadCover(req, res, next) {
   coverUpload(req, res, (error) => {
     if (error instanceof multer.MulterError) {
       return res.status(error.code === "LIMIT_FILE_SIZE" ? 413 : 400)
-        .json({ msg: "Upload one cover image no larger than 3 MB" });
+        .json({ msg: error.code === "LIMIT_FILE_SIZE" ? "The prepared cover image is too large to upload." : "The cover upload could not be processed." });
     }
     return next(error);
   });

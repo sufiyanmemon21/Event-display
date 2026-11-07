@@ -71,20 +71,53 @@
 .celebration-listing-details { flex: 1; padding: 13px 15px 10px; text-align: left; overflow-wrap: anywhere; }
 .celebration-listing-details .celebration-listing-category { margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ticket-accent); font-size: .73rem; font-weight: 650; text-transform: uppercase; letter-spacing: .1em; }
 .celebration-listing .celebration-listing-details h3, .celebration-listing-description { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-.celebration-listing .celebration-listing-details h3 { height: 2.22em; font: clamp(1.4rem, 2vw, 1.75rem)/1.11 Georgia, serif; letter-spacing: -.025em; color: #452d24; }
-.celebration-listing-meta { display: grid; margin-top: 4px; font-size: .84rem; line-height: 1.45; }
-.celebration-listing-details .celebration-listing-meta p { min-height: 1.45em; line-height: 1.45; }
-.celebration-listing-meta p:first-child, .celebration-listing-meta span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.celebration-listing-meta p:last-child { display: flex; align-items: center; gap: 6px; }
-.celebration-listing-meta svg { flex: none; color: var(--ticket-accent); }
-.celebration-listing-details .celebration-listing-description { height: 2.8em; margin-top: 5px; color: #69534b; font-size: .86rem; line-height: 1.4; }
+.celebration-listing .celebration-listing-details h3 { font: clamp(1.4rem, 2vw, 1.75rem)/1.11 Georgia, serif; letter-spacing: -.025em; color: #452d24; }
+.celebration-listing-meta { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 12px 10px; margin-top: 15px; font-size: .875rem; line-height: 1.4; }
+.celebration-listing-meta > div { position: relative; padding-inline-start: 25px; }
+.celebration-listing-meta dt { color: #69534b; font-size: .75rem; }
+.celebration-listing-meta svg { position: absolute; inset-inline-start: 0; top: .35rem; color: #a57514; }
+.celebration-listing-details .celebration-listing-description { margin-top: 8px; color: #69534b; font-size: .94rem; line-height: 1.45; }
 .celebration-listing-stub { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 10px; margin-inline: 15px; padding: 8px 0 10px; border-top: 1px solid var(--ticket-line); font-size: .8rem; color: #634a40; }
-.celebration-listing-action { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 11px 0 13px; border: 1px solid var(--ticket-accent); border-radius: 0; background: var(--ticket-accent); color: #fffaf6; font-size: .84rem; font-weight: 650; white-space: nowrap; transition: background-color .2s ease; }
-.celebration-listing-action > span { display: grid; place-items: center; min-height: 22px; padding-inline-start: 9px; border-inline-start: 1px solid #f1d5bd70; color: #f1d5bd; }
-.celebration-listing:hover .celebration-listing-action, .celebration-listing:focus-visible .celebration-listing-action { background: #4e342b; }
+.celebration-listing-action {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 6px 8px 6px 18px;
+  border: 1px solid #8d583b;
+  border-radius: 999px;
+  background: linear-gradient(115deg, #8b5235, #57342b 70%);
+  background-size: 160% 100%;
+  box-shadow: inset 0 1px #fff2d54d, 0 4px 10px #57342b29;
+  color: #fffaf6;
+  font-size: .9rem;
+  font-weight: 650;
+  transition: background-position .25s ease, box-shadow .25s ease;
+}
+.celebration-listing-action > span {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f5dbaf;
+  color: #57342b;
+}
+.celebration-listing-action svg { transition: translate .25s ease; }
+.celebration-listing:hover .celebration-listing-action,
+.celebration-listing:focus-visible .celebration-listing-action {
+  background-position: 100% 0;
+  box-shadow: inset 0 1px #fff2d54d, 0 6px 14px #57342b40;
+}
+.celebration-listing:hover .celebration-listing-action svg,
+.celebration-listing:focus-visible .celebration-listing-action svg { translate: 2px -2px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .celebration-listing, .celebration-listing-action, .celebration-listing-photo img { transition: none; }
+  .celebration-listing, .celebration-listing-action, .celebration-listing-action svg, .celebration-listing-photo img { transition: none; }
+  .celebration-listing:hover .celebration-listing-action svg,
+  .celebration-listing:focus-visible .celebration-listing-action svg { translate: none; }
   .celebration-listing:hover { translate: none; }
   .celebration-listing:hover .celebration-listing-photo img { scale: none; }
 }

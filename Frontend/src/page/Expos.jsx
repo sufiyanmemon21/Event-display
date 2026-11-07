@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from 'lucide-react';
 import ExpoCollection from '@/components/landing/ExpoCollection';
-import EventCard from '@/components/landing/EventCard';
+
 import { getEventImage } from '@/components/landing/eventImages';
 import PublicPageShell from '@/components/landing/PublicPageShell';
 import useExpos, { isExpo } from '@/hooks/useExpos';
@@ -44,6 +44,62 @@ export function EventsPage() {
   return <Catalog events />;
 }
 
+
+function ListingDetailCard({ event, eventIndex, user, featured = false }) {
+  const backToEvents = !isExpo(event);
+  const catalogPath = backToEvents ? '/event-listing' : '/expos';
+  const Heading = featured ? 'h1' : 'h3';
+  return (
+    <article className="mx-auto flex h-full w-full max-w-sm flex-col overflow-hidden rounded-xl border border-[#eadfd5] bg-white shadow-[0_14px_38px_rgba(54,27,25,0.09)]">
+      <img
+        src={getEventImage(event, eventIndex)}
+        alt=""
+        className="h-44 w-full shrink-0 object-cover"
+      />
+      <div className="flex flex-1 flex-col break-words p-5 text-left">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.23em] text-[#a97d28]">
+          {event.category || (backToEvents ? 'Event' : 'Expo')}
+        </p>
+        <Heading className="mt-2 font-serif text-3xl font-semibold leading-tight text-[#321b1f] sm:text-4xl">
+          {event.title}
+        </Heading>
+        <p className="mt-4 max-w-3xl text-sm leading-7 text-[#756a64]">
+          {event.description || 'More details will be shared by the organizer.'}
+        </p>
+        <div className="mt-6 grid gap-4 rounded-2xl bg-[#fbf4ee] p-5 text-sm text-[#594842] sm:grid-cols-2">
+          <p className="flex items-center gap-3">
+            <CalendarDays size={18} className="shrink-0 text-[#bd8b2e]" />
+            {event.date
+              ? new Date(event.date).toLocaleDateString(undefined, {
+                  dateStyle: 'long',
+                })
+              : 'Date to be announced'}
+          </p>
+          <p className="flex items-center gap-3">
+            <MapPin size={18} className="shrink-0 text-[#bd8b2e]" />
+            {event.location || 'Location to be announced'}
+          </p>
+        </div>
+        <div className="mt-auto flex flex-wrap gap-3 pt-7">
+          {isPastEvent(event.date) ? <p className="self-center text-sm font-medium text-[#756a64]">Bookings closed · Event has passed</p> : (!user || user.role === 'attendee') && <Link
+            to={user ? `/profile?event=${event._id}` : '/login'}
+            state={user ? undefined : { from: `/profile?event=${event._id}` }}
+            className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#c6952d] px-6 text-sm font-semibold text-white transition hover:bg-[#a97818]"
+          >
+            {user ? 'Book this event' : 'Log in to book'} <ArrowUpRight size={16} />
+          </Link>}
+          <Link
+            to={featured ? catalogPath : `/expos/${event._id}`}
+            className="inline-flex min-h-11 items-center rounded-full border border-[#d9c7ad] px-6 text-sm font-semibold text-[#4a292a] transition hover:bg-[#fbf4ee]"
+          >
+            {featured ? (backToEvents ? 'Browse events' : 'Browse expos') : 'View details'}
+          </Link>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export function ExpoDetailPage() {
   const user = useAuth();
   const { expoId } = useParams();
@@ -51,6 +107,10 @@ export function ExpoDetailPage() {
   const eventIndex = data.items.findIndex((item) => item._id === expoId);
   const event = eventIndex >= 0 ? data.items[eventIndex] : undefined;
   const backToEvents = event && !isExpo(event);
+  const catalogPath = backToEvents ? '/event-listing' : '/expos';
+  const related = event
+    ? data.items.filter((item) => item._id !== expoId && isExpo(item) === isExpo(event))
+    : [];
 
   useEffect(() => {
     document.title = event
@@ -63,7 +123,7 @@ export function ExpoDetailPage() {
       <main className="min-h-[65vh] px-4 py-10 sm:px-7 sm:py-14">
         <div className="mx-auto max-w-5xl">
           <Link
-            to={backToEvents ? '/event-listing' : '/expos'}
+            to={catalogPath}
             className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[#765b4e] hover:text-[#a97818]"
           >
             <ArrowLeft size={16} /> {backToEvents ? 'Back to events' : 'Back to expos'}
@@ -99,66 +159,19 @@ export function ExpoDetailPage() {
               </Link>
             </div>
           ) : (
-            <article className="overflow-hidden rounded-[1.75rem] border border-[#eadfd5] bg-white shadow-[0_14px_38px_rgba(54,27,25,0.09)]">
-              <img
-                src={getEventImage(event, eventIndex)}
-                alt=""
-                className="max-h-[460px] min-h-64 w-full object-cover"
-              />
-              <div className="p-6 sm:p-10">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.23em] text-[#a97d28]">
-                  {event.category || 'Event'}
-                </p>
-                <h1 className="mt-2 font-serif text-3xl font-semibold leading-tight text-[#321b1f] sm:text-4xl">
-                  {event.title}
-                </h1>
-                <p className="mt-4 max-w-3xl text-sm leading-7 text-[#756a64]">
-                  {event.description || 'More details will be shared by the organizer.'}
-                </p>
-                <div className="mt-6 grid gap-4 rounded-2xl bg-[#fbf4ee] p-5 text-sm text-[#594842] sm:grid-cols-2">
-                  <p className="flex items-center gap-3">
-                    <CalendarDays size={18} className="shrink-0 text-[#bd8b2e]" />
-                    {event.date
-                      ? new Date(event.date).toLocaleDateString(undefined, {
-                          dateStyle: 'long',
-                        })
-                      : 'Date to be announced'}
-                  </p>
-                  <p className="flex items-center gap-3">
-                    <MapPin size={18} className="shrink-0 text-[#bd8b2e]" />
-                    {event.location || 'Location to be announced'}
-                  </p>
-                </div>
-                <div className="mt-7 flex flex-wrap gap-3">
-                  {isPastEvent(event.date) ? <p className="self-center text-sm font-medium text-[#756a64]">Bookings closed · Event has passed</p> : (!user || user.role === 'attendee') && <Link
-                    to={user ? `/profile?event=${event._id}` : '/login'}
-                    state={user ? undefined : { from: `/profile?event=${event._id}` }}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#c6952d] px-6 text-sm font-semibold text-white transition hover:bg-[#a97818]"
-                  >
-                    {user ? 'Book this event' : 'Log in to book'} <ArrowUpRight size={16} />
-                  </Link>}
-                  <Link
-                    to="/event-listing"
-                    className="inline-flex min-h-11 items-center rounded-full border border-[#d9c7ad] px-6 text-sm font-semibold text-[#4a292a] transition hover:bg-[#fbf4ee]"
-                  >
-                    More events
-                  </Link>
-                </div>
-              </div>
-            </article>
+            <ListingDetailCard event={event} eventIndex={eventIndex} user={user} featured />
           )}
-          {!data.loading && !data.error && data.items.length > 1 && (
-            <section className="mt-14">
+          {!data.loading && !data.error && related.length > 0 && (
+            <section className="mt-14 text-center">
               <h2 className="mb-5 font-serif text-2xl font-semibold text-[#321b1f]">
                 You may also like
               </h2>
-              <div className="grid gap-5 md:grid-cols-2">
-                {data.items
-                  .filter((item) => item._id !== expoId)
-                  .slice(0, 2)
-                  .map((item, index) => (
-                    <EventCard key={item._id} event={item} index={index} />
-                  ))}
+              <div className="mx-auto flex max-w-[49.25rem] flex-wrap justify-center gap-5">
+                {related.map((item, index) => (
+                  <div key={item._id} className="w-full max-w-sm sm:w-[calc(50%-0.625rem)]">
+                    <ListingDetailCard event={item} eventIndex={index} user={user} />
+                  </div>
+                ))}
               </div>
             </section>
           )}

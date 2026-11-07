@@ -18,6 +18,14 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  time: {
+    type: String,
+    match: /^(?:|(?:[01]\d|2[0-3]):[0-5]\d)$/
+  },
+  endTime: {
+    type: String,
+    match: /^(?:|(?:[01]\d|2[0-3]):[0-5]\d)$/
+  },
   category: {
     type: String,
     required: true

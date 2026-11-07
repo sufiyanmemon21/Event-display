@@ -4,7 +4,13 @@ import Event from "../models/eventmodel.js";
 
 async function submitFeedback(req, res) {
   try {
-    const { message, type, event } = req.body || {};
+    const { message, type, event, subject, rating } = req.body || {};
+    if (subject !== undefined && (typeof subject !== "string" || subject.trim().length > 120)) {
+      return res.status(400).json({ msg: "Subject must be at most 120 characters" });
+    }
+    if (rating !== undefined && (!Number.isInteger(rating) || rating < 1 || rating > 5)) {
+      return res.status(400).json({ msg: "Choose a rating from 1 to 5" });
+    }
 
     if (
       typeof message !== "string" ||
@@ -16,7 +22,7 @@ async function submitFeedback(req, res) {
       });
     }
 
-    if (!["suggestion", "issue"].includes(type)) {
+    if (!["suggestion", "issue", "review"].includes(type)) {
       return res.status(400).json({
         msg: "Select a valid feedback type",
       });
@@ -44,6 +50,8 @@ async function submitFeedback(req, res) {
       email: req.user.email,
       event: eventId,
       message: message.trim(),
+      subject,
+      rating,
       type,
     });
 
@@ -55,6 +63,25 @@ async function submitFeedback(req, res) {
     return res.status(500).json({
       msg: "Unable to submit feedback",
     });
+  }
+}
+
+async function getPublicReviews(_req, res) {
+  try {
+    const records = await Feedback.find({ type: "review" })
+      .sort({ createdAt: -1 })
+      .limit(6)
+      .select("name message rating")
+      .lean();
+    const reviews = records.map(({ _id, name, message, rating }) => ({
+      _id,
+      name: name.trim().split(/\s+/)[0],
+      message,
+      rating,
+    }));
+    return res.json({ reviews });
+  } catch {
+    return res.status(500).json({ msg: "Unable to load reviews" });
   }
 }
 
@@ -147,4 +174,4 @@ async function updateFeedback(req, res) {
   }
 }
 
-export { submitFeedback, getFeedbacks, updateFeedback };
+export { submitFeedback, getFeedbacks, updateFeedback, getPublicReviews };

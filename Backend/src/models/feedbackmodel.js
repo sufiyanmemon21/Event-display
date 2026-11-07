@@ -26,9 +26,11 @@ const feedbackSchema = new mongoose.Schema(
       trim: true,
       maxlength: 3000,
     },
+    subject: { type: String, trim: true, maxlength: 120 },
+    rating: { type: Number, min: 1, max: 5 },
     type: {
       type: String,
-      enum: ["suggestion", "issue"],
+      enum: ["suggestion", "issue", "review"],
       default: "suggestion",
     },
     status: {
@@ -45,5 +47,7 @@ const feedbackSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+feedbackSchema.index({ type: 1, createdAt: -1 });
 
 export default mongoose.model("Feedback", feedbackSchema);

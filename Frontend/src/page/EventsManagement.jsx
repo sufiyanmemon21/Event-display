@@ -18,6 +18,28 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
+
+async function prepareCoverImage(file) {
+  if (file.size < 3 * 1024 * 1024) return file;
+
+  const url = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.src = url;
+    await image.decode();
+    const scale = Math.min(1, 1600 / image.naturalWidth, 1200 / image.naturalHeight);
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+    const cover = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", 0.88));
+    if (!cover || cover.size >= 3 * 1024 * 1024) throw new Error("Cover encoding failed");
+    return cover;
+  } finally {
+    URL.revokeObjectURL(url);
+  }
+}
+
 export default function EventsManagement({ listingType = "expo" }) {
   const listingName = listingType === "expo" ? "Expo" : "Event";
   const collectionName = `${listingName}s`;
@@ -31,6 +53,8 @@ export default function EventsManagement({ listingType = "expo" }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
   const [selectedType, setSelectedType] = useState(listingType);
@@ -85,6 +109,8 @@ export default function EventsManagement({ listingType = "expo" }) {
     setTitle("");
     setDescription("");
     setDate("");
+    setTime("");
+    setEndTime("");
     setLocation("");
     setCategory("");
     setSelectedType(listingType);
@@ -100,6 +126,8 @@ export default function EventsManagement({ listingType = "expo" }) {
     setTitle(event.title);
     setDescription(event.description);
     setDate(event.date.slice(0, 10));
+    setTime(event.time || "");
+    setEndTime(event.endTime || "");
     setLocation(event.location);
     setCategory(event.category);
     setSelectedType(isExpo(event) ? "expo" : "event");
@@ -121,19 +149,21 @@ export default function EventsManagement({ listingType = "expo" }) {
       toast.error("Please fill all fields.");
       return;
     }
-    if (imageFile && imageFile.size > 3 * 1024 * 1024) {
-      setSaveError("Choose a cover image no larger than 3 MB.");
-      return;
-    }
-    const payload = imageFile ? new FormData() : data;
-    if (imageFile) {
-      Object.entries(data).forEach(([key, value]) => payload.append(key, value));
-      payload.append("image", imageFile);
-    }
-    const options = imageFile ? { headers: { "Content-Type": "multipart/form-data" } } : undefined;
+    const eventData = { ...data, time, endTime };
     setSaveError("");
     setSaving(true);
     try {
+      const payload = imageFile ? new FormData() : eventData;
+      if (imageFile) {
+        const cover = await prepareCoverImage(imageFile).catch(() => null);
+        if (!cover) {
+          setSaveError("Could not prepare this cover image. Choose a valid JPEG, PNG, WebP, or AVIF image.");
+          return;
+        }
+        Object.entries(eventData).forEach(([key, value]) => payload.append(key, value));
+        payload.append("image", cover, cover === imageFile ? imageFile.name : "cover.webp");
+      }
+      const options = imageFile ? { headers: { "Content-Type": "multipart/form-data" } } : undefined;
       if (editingId) {
         await API.put(`/events/update/${editingId}`, payload, options);
         toast.success("Event updated successfully!");
@@ -171,7 +201,7 @@ export default function EventsManagement({ listingType = "expo" }) {
   }
   return <div className="w-full space-y-6">
       <PageHeading title={collectionName} description={`Manage your ${collectionName.toLowerCase()} and their public listings.`}>
-      {isOrganizer && <FormPanel showCancel={false} title={editingId ? `Edit ${listingLabel}` : `Create ${listingLabel}`} trigger={`Create ${listingName}`} open={formOpen} onOpenChange={value => {
+      {isOrganizer && <FormPanel showCancel={false} closeButtonOnly title={editingId ? `Edit ${listingLabel}` : `Create ${listingLabel}`} trigger={`Create ${listingName}`} open={formOpen} onOpenChange={value => {
         if (!saving) {
           setFormOpen(value);
           if (!value) {
@@ -204,6 +234,14 @@ export default function EventsManagement({ listingType = "expo" }) {
                   <Label htmlFor="event-date">Date</Label>
                   <Input id="event-date" type="date" value={date} onChange={event => setDate(event.target.value)} required />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="event-time">Start time (optional)</Label>
+                  <Input id="event-time" type="time" value={time} onChange={event => setTime(event.target.value)} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="event-end-time">End time (optional)</Label>
+                  <Input id="event-end-time" type="time" value={endTime} onChange={event => setEndTime(event.target.value)} />
+                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="event-location">Location</Label>
@@ -226,16 +264,11 @@ export default function EventsManagement({ listingType = "expo" }) {
                 <div className="col-span-full space-y-2">
                   <Label htmlFor="event-image">Cover image (optional)</Label>
                   <Input id="event-image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" aria-describedby="event-image-help" onChange={event => setImageFile(event.target.files?.[0] || null)} />
-                  <p id="event-image-help" className="text-xs text-muted-foreground">JPEG, PNG, WebP, or AVIF up to 3 MB. This photo appears on the public listing.</p>
+                  <p id="event-image-help" className="text-xs text-muted-foreground">JPEG, PNG, WebP, or AVIF. Large photos are optimized automatically for the public listing.</p>
                 </div>
 
                 {saveError && <p role="alert" className="col-span-full text-sm text-destructive">{saveError}</p>}
                 <div className="workspace-form-actions">
-                  <Button type="button" variant="outline" onClick={() => {
-                    clearForm();
-                    setSaveError("");
-                    setFormOpen(false);
-                  }}>Cancel</Button>
                   <Button type="submit">{saving ? "Saving…" : editingId ? "Save Changes" : `Create ${selectedType === "expo" ? "Expo" : "Event"}`}</Button>
                 </div>
               </fieldset>

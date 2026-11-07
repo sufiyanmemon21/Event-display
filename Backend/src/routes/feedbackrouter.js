@@ -3,6 +3,7 @@ import { rateLimit } from "express-rate-limit";
 import {
   submitFeedback,
   getFeedbacks,
+  getPublicReviews,
   updateFeedback,
 } from "../controllers/feedbackcontroller.js";
 import {
@@ -22,6 +23,7 @@ const feedbackLimiter = rateLimit({
   },
 });
 
+feedbackRouter.get("/reviews", getPublicReviews);
 feedbackRouter.use(authenticate);
 
 feedbackRouter.post("/submit", feedbackLimiter, submitFeedback);
