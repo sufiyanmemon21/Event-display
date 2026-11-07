@@ -13,7 +13,7 @@ import feedbackRouter from "./routes/feedbackrouter.js";
 import boothRouter from "./routes/boothrouter.js";
 import exhibitorFileRouter from "./routes/exhibitorfilerouter.js";
 import messageRouter from "./routes/messagerouter.js";
-import mongoose from "mongoose";
+import database from "./configs/dbconfig.js";
 import { announceChanges, streamUpdates } from "./services/liveupdates.js";
 const app = express();
 app.disable('x-powered-by');
@@ -32,12 +32,16 @@ app.use(cors());
 //   });
 //   next();
 // });
-app.get('/health', (req, res) => {
-  const ready = mongoose.connection.readyState === 1;
-  res.status(ready ? 200 : 503).json({
-    status: ready ? 'ready' : 'database-unavailable'
-  });
+app.use(async (req, res, next) => {
+  try {
+    await database();
+    next();
+  } catch (error) {
+    console.error("Database connection failed:", error.name, error.code ?? error.cause?.code ?? (process.env.MONGODB_URL?.trim() ? "connection-error" : "missing-MONGODB_URL"));
+    res.status(503).json({ status: "database-unavailable" });
+  }
 });
+app.get('/health', (req, res) => res.json({ status: 'ready' }));
 app.get('/updates', streamUpdates);
 app.use(announceChanges);
 app.use(express.json({
