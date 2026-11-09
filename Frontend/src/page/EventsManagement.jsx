@@ -1,4 +1,5 @@
 import BoothSelection from "@/page/BoothSelection";
+import CoverImageField from "@/components/CoverImageField";
 import ExhibitorApplicationForm from "@/components/ExhibitorApplicationForm";
 import { useRef } from "react";
 import EllipsisLoader from "@/components/EllipsisLoader";
@@ -10,10 +11,10 @@ import WorkspaceSelect from "@/components/workspace-select";
 import { isExpo } from "@/hooks/useExpos";
 import { getEventImage } from "@/components/landing/eventImages";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, Pencil, Trash2, Eye } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Eye, CalendarDays, Clock, MapPin, UserRound } from "lucide-react";
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import useLiveRefresh from '@/hooks/useLiveRefresh';
 import { useEffect, useState } from "react";
 import API from "@/api/api";
@@ -63,6 +64,7 @@ export default function EventsManagement({ listingType = "expo" }) {
   const [category, setCategory] = useState("");
   const [selectedType, setSelectedType] = useState(listingType);
   const [imageFile, setImageFile] = useState(null);
+  const [existingImage, setExistingImage] = useState("");
   const [editingId, setEditingId] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -152,6 +154,7 @@ export default function EventsManagement({ listingType = "expo" }) {
     setCategory("");
     setSelectedType(listingType);
     setImageFile(null);
+    setExistingImage("");
     setEditingId("");
   }
   function canManage(event) {
@@ -169,6 +172,7 @@ export default function EventsManagement({ listingType = "expo" }) {
     setCategory(event.category);
     setSelectedType(isExpo(event) ? "expo" : "event");
     setImageFile(null);
+    setExistingImage(event.hasImage ? getEventImage(event) : "");
     setFormOpen(true);
   }
   async function handleSaveEvent(event) {
@@ -299,11 +303,7 @@ export default function EventsManagement({ listingType = "expo" }) {
                   </WorkspaceSelect>
                 </div>}
 
-                <div className="col-span-full space-y-2">
-                  <Label htmlFor="event-image">Cover image (optional)</Label>
-                  <Input id="event-image" type="file" accept="image/jpeg,image/png,image/webp,image/avif" aria-describedby="event-image-help" onChange={event => setImageFile(event.target.files?.[0] || null)} />
-                  <p id="event-image-help" className="text-xs text-muted-foreground">JPEG, PNG, WebP, or AVIF. Large photos are optimized automatically for the public listing.</p>
-                </div>
+                <CoverImageField existingImage={existingImage} file={imageFile} onChange={setImageFile} />
 
                 {saveError && <p role="alert" className="col-span-full text-sm text-destructive">{saveError}</p>}
                 <div className="workspace-form-actions">
@@ -357,13 +357,44 @@ export default function EventsManagement({ listingType = "expo" }) {
           }}>{applicationFor(event._id)?.boothNumber ? `Booth ${applicationFor(event._id).boothNumber}` : applicationFor(event._id)?.status === "Approved" ? "Select Booth" : applicationFor(event._id)?.status || "Register Booth"}</Button>}
           <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" size="icon" aria-label={`Actions for ${event.title}`} disabled={busy}><MoreHorizontal className="size-4" /></Button></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem onSelect={() => setDetails(event)}><Eye className="size-4" />View details</DropdownMenuItem>{canManage(event) && <><DropdownMenuItem onSelect={() => handleEdit(event)}><Pencil className="size-4" />Edit {listingLabel}</DropdownMenuItem><DropdownMenuItem variant="destructive" onSelect={() => handleDelete(event)}><Trash2 className="size-4" />{deletingId === event._id ? "Deleting…" : `Delete ${listingLabel}`}</DropdownMenuItem></>}</DropdownMenuContent></DropdownMenu></div></TableCell></TableRow>)}</TableBody></Table></div>}</RecordBrowser>}
       </div>
-      <Sheet open={Boolean(details)} onOpenChange={open => {
-      if (!open) setDetails(null);
-    }}><SheetContent className="overflow-y-auto"><SheetHeader><SheetTitle>{details?.title}</SheetTitle><SheetDescription>{listingName} details</SheetDescription></SheetHeader>{details && <div className="space-y-6 p-6"><Badge variant="secondary">{details.category}</Badge><p className="whitespace-pre-wrap text-sm leading-relaxed">{details.description}</p><dl className="grid gap-4 text-sm"><div><dt className="text-muted-foreground">Date</dt><dd>{new Date(details.date).toLocaleDateString("en-GB", {
-                  timeZone: "UTC"
-                })}</dd></div><div><dt className="text-muted-foreground">Location</dt><dd>{details.location}</dd></div><div><dt className="text-muted-foreground">Organizer</dt><dd>{details.organizer?.name || "Unavailable"}</dd></div></dl>{canManage(details) && <Button onClick={() => {
-            handleEdit(details);
-            setDetails(null);
-          }}>Edit {listingLabel}</Button>}</div>}</SheetContent></Sheet>
+      <Dialog open={Boolean(details)} onOpenChange={open => {
+        if (!open) setDetails(null);
+      }}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader className="min-w-0 pr-8 text-left">
+            <div className="mb-3 flex flex-wrap gap-2">
+              <Badge variant="outline">{listingName}</Badge>
+              {details?.category && <Badge variant="secondary">{details.category}</Badge>}
+            </div>
+            <DialogTitle className="break-words font-serif text-2xl leading-tight sm:text-3xl">{details?.title}</DialogTitle>
+            <DialogDescription>Schedule, venue and organizer information.</DialogDescription>
+          </DialogHeader>
+          {details && <div className="min-w-0 space-y-5">
+            <img src={getEventImage(details)} alt="" className="h-40 w-full rounded-xl border object-cover sm:h-52" />
+            <dl className="grid gap-3 sm:grid-cols-2">
+              {[
+                { label: "Date", icon: CalendarDays, value: details.date ? new Date(details.date).toLocaleDateString("en-GB", { timeZone: "UTC", dateStyle: "long" }) : "To be announced" },
+                { label: "Time", icon: Clock, value: [details.time, details.endTime].filter(Boolean).join(" – ") || "To be announced" },
+                { label: "Location", icon: MapPin, value: details.location || "To be announced" },
+                { label: "Organizer", icon: UserRound, value: details.organizer?.name || "Unavailable" }
+              ].map(({ label, icon: Icon, value }) => <div key={label} className="flex min-w-0 items-start gap-3 rounded-xl border bg-muted/30 p-4">
+                <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary"><Icon className="size-4" aria-hidden="true" /></span>
+                <div className="min-w-0"><dt className="text-xs font-medium text-muted-foreground">{label}</dt><dd className="mt-1 text-sm font-medium [overflow-wrap:anywhere]">{value}</dd></div>
+              </div>)}
+            </dl>
+            <section className="rounded-xl border p-4 sm:p-5">
+              <h3 className="mb-2 font-serif text-lg">About this {listingLabel}</h3>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed [overflow-wrap:anywhere]">{details.description || "No description provided."}</p>
+            </section>
+          </div>}
+          <DialogFooter className="gap-2 border-t pt-4">
+            <Button variant="outline" onClick={() => setDetails(null)}>Close</Button>
+            {details && canManage(details) && <Button onClick={() => {
+              handleEdit(details);
+              setDetails(null);
+            }}><Pencil className="size-4" />Edit {listingLabel}</Button>}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>;
 }

@@ -4,6 +4,7 @@ import cors from "cors";
 import authRouter from "./routes/authrouter.js";
 import forgetRouter from "./routes/forgetrouter.js";
 import eventRouter from "./routes/eventrouter.js";
+import websiteBrandingRouter from "./routes/websitebrandingrouter.js";
 import exhibitorRouter from "./routes/exhibitorrouter.js";
 import attendeeRouter from "./routes/attendeerouter.js";
 import notificationRouter from "./routes/notificationrouter.js";
@@ -50,6 +51,7 @@ app.use(express.json({
 app.use("/auth", authRouter);
 app.use("/forget", forgetRouter);
 app.use("/events", eventRouter);
+app.use("/website-settings", websiteBrandingRouter);
 app.use("/exhibitors", exhibitorRouter);
 app.use("/attendees", attendeeRouter);
 app.use("/notifications", notificationRouter);

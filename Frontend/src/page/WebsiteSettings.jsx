@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useConfirmation } from "@/hooks/useConfirmation";
+import { useEffect, useRef, useState } from "react";
 import { PageHeading } from "@/components/workspace";
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -6,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import useWebsiteLogo, { saveWebsiteLogo } from "@/hooks/useWebsiteLogo";
+import { useWebsiteLogoState, refreshWebsiteLogo, saveWebsiteLogo } from "@/hooks/useWebsiteLogo";
 import useWebsiteBanner, { readWebsiteBanner, saveWebsiteBanner } from "@/hooks/useWebsiteBanner";
 const sections = [{
   id: "general",
@@ -87,57 +88,57 @@ function AssetField({
   </div>;
 }
 function WebsiteLogoField() {
-  const logo = useWebsiteLogo();
-  const [preview, setPreview] = useState("");
+  const logo = useWebsiteLogoState();
+  const confirm = useConfirmation();
+  const input = useRef(null);
+  const [selection, setSelection] = useState(null);
   const [notice, setNotice] = useState("");
-  const [loading, setLoading] = useState(false);
-
+  const [saving, setSaving] = useState(false);
+  useEffect(() => () => {
+    if (selection) URL.revokeObjectURL(selection.url);
+  }, [selection]);
+  useEffect(() => { void refreshWebsiteLogo(); }, []);
   function choose(event) {
-    const file = event.currentTarget.files?.[0];
-    event.currentTarget.value = "";
+    const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
-    setPreview("");
     if (!/^image\/(png|jpeg|webp|avif)$/.test(file.type) || file.size > 1024 * 1024) {
       setNotice("Choose a PNG, JPEG, WebP, or AVIF image up to 1 MB.");
       return;
     }
-
-    setLoading(true);
+    setSelection({ file, url: URL.createObjectURL(file) });
     setNotice("");
-    const reader = new FileReader();
-    reader.onload = () => {
-      setPreview(String(reader.result));
-      setLoading(false);
-    };
-    reader.onerror = () => {
-      setNotice("The image could not be read.");
-      setLoading(false);
-    };
-    reader.readAsDataURL(file);
   }
-
-  function save(value) {
+  async function save(remove = false) {
+    if (saving) return;
+    if (remove && !(await confirm("Delete the saved website logo and restore default branding?"))) return;
+    setSaving(true);
+    setNotice("");
     try {
-      saveWebsiteLogo(value);
-      setPreview("");
-      setNotice(value ? "Logo saved. It now appears on the public site in this browser." : "Default website logo restored.");
-    } catch {
-      setNotice("The browser could not save the logo. Check your storage settings.");
+      await saveWebsiteLogo(remove ? null : selection.file);
+      setSelection(null);
+      setNotice(remove ? "Default branding restored." : "Logo saved for all visitors.");
+    } catch (error) {
+      setNotice(error.response?.data?.msg || "Unable to save the logo. Please try again.");
+    } finally {
+      setSaving(false);
     }
   }
-
   return <div className="col-span-full space-y-3">
-    <Label htmlFor="website-logo">Public website logo</Label>
-    <p className="text-sm text-muted-foreground" id="website-logo-help">Choose a symbol and click Save logo to update the navbar and footer in this browser. PNG, JPEG, WebP, or AVIF up to 1 MB.</p>
-    <Input id="website-logo" type="file" accept="image/png,image/jpeg,image/webp,image/avif" aria-describedby="website-logo-help" disabled={loading} onChange={choose} />
-    {(preview || logo) && <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
-      <p className="text-xs text-muted-foreground">{preview ? "New logo preview" : "Current logo"}</p>
-      <img src={preview || logo} alt={preview ? "New logo preview" : "Current website logo"} className="max-h-24 max-w-full rounded border object-contain" />
-    </div>}
-    <div className="flex flex-wrap gap-2">
-      <Button type="button" disabled={!preview || loading} onClick={() => save(preview)}>Save logo</Button>
-      {logo && <Button type="button" variant="outline" disabled={loading} onClick={() => save("")}>Restore default logo</Button>}
+    <Label htmlFor="website-logo-change">Website logo</Label>
+    <p className="text-sm text-muted-foreground" id="website-logo-help">PNG, JPEG, WebP, or AVIF up to 1 MB. Saved logos appear across the website and dashboard.</p>
+    <input ref={input} id="website-logo" className="hidden" type="file" accept="image/png,image/jpeg,image/webp,image/avif" disabled={saving} onChange={choose} />
+    <div className="space-y-2 rounded-lg border bg-muted/40 p-3">
+      <p className="text-xs text-muted-foreground">{selection ? "New logo preview — not saved" : logo.loading ? "Loading saved logo…" : logo.url ? "Current saved logo" : "Default EventSphere branding"}</p>
+      {(selection || logo.url) ? <img src={selection?.url || logo.url} alt="Website logo preview" className="max-h-24 max-w-full object-contain" /> : <span className="font-serif text-2xl text-primary">EventSphere</span>}
+      <p className="break-all text-xs text-muted-foreground">{selection?.file.name || logo.filename}</p>
     </div>
+    <div className="flex flex-wrap gap-2">
+      <Button id="website-logo-change" type="button" variant="outline" disabled={saving || logo.loading} aria-describedby="website-logo-help" onClick={() => input.current?.click()}>Change Logo</Button>
+      {selection && <><Button type="button" disabled={saving} onClick={() => save()}>{saving ? "Saving…" : "Save Logo"}</Button><Button type="button" variant="ghost" disabled={saving} onClick={() => setSelection(null)}>Cancel change</Button></>}
+      {logo.url && <Button type="button" variant="outline" disabled={saving} onClick={() => save(true)}>Delete Logo</Button>}
+    </div>
+    {logo.error && <div role="alert" className="text-sm text-destructive">{logo.error} <Button type="button" variant="link" onClick={refreshWebsiteLogo}>Retry</Button></div>}
     {notice && <p role="status" className="text-sm">{notice}</p>}
   </div>;
 }
@@ -187,7 +188,7 @@ export default function WebsiteSettings() {
 
   return (
     <div className="mx-auto w-full max-w-5xl space-y-5">
-      <PageHeading title="Website settings" description="Save your logo and main banner in this browser. Other fields are available to preview." />
+      <PageHeading title="Website settings" description="Save your website logo for all visitors. Banner settings remain browser-specific; other fields are available to preview." />
 
       <form onSubmit={event => event.preventDefault()} className="space-y-5">
         {sections.map(section => (

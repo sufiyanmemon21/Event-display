@@ -1,21 +1,10 @@
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import QRCode from "qrcode";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
+import { renderBookingPass } from "../presentation/bookingpass.js";
 import Attendee from "../models/attendeemodel.js";
 
 const passOptions = { issuer: "eventsphere-booking", audience: "eventsphere-entry" };
-
-function printable(font, text) {
-  return Array.from(String(text), (char) => {
-    try {
-      font.encodeText(char);
-      return char;
-    } catch {
-      return "?";
-    }
-  }).join("");
-}
 
 export async function issueBookingPass(req, res) {
   const { id } = req.params;
@@ -32,26 +21,7 @@ export async function issueBookingPass(req, res) {
   res.set("Cache-Control", "no-store");
   if (req.query.format === "qr") return res.type("png").send(qr);
 
-  const document = await PDFDocument.create();
-  const page = document.addPage([460, 580]);
-  const font = await document.embedFont(StandardFonts.Helvetica);
-  const heading = await document.embedFont(StandardFonts.HelveticaBold);
-  const image = await document.embedPng(qr);
-  const ink = rgb(0.26, 0.16, 0.13);
-  page.drawRectangle({ x: 0, y: 0, width: 460, height: 580, color: rgb(1, 0.97, 0.93) });
-  const draw = (value, y, size = 12, face = font) => page.drawText(printable(face, value), {
-    x: 34, y, size, font: face, color: ink, maxWidth: 392, lineHeight: size + 4,
-  });
-
-  draw("EVENTSPHERE  /  CONFIRMED ENTRY PASS", 533, 12, heading);
-  draw(booking.event.title, 492, 21, heading);
-  draw(`Attendee: ${req.user.name}`, 400);
-  draw(`Ticket: ${booking.ticketType}`, 375);
-  draw(new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeZone: "UTC" }).format(booking.event.date), 352);
-  draw(booking.event.location, 329);
-  page.drawImage(image, { x: 122, y: 73, width: 216, height: 216 });
-  draw(`Booking reference: ${id}`, 44);
-  const pdf = Buffer.from(await document.save());
+  const pdf = Buffer.from(await renderBookingPass({ booking, attendeeName: req.user.name, qr }));
   return res.type("pdf").attachment(`eventsphere-pass-${id}.pdf`).send(pdf);
 }
 

@@ -1,7 +1,8 @@
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowUpRight, CalendarDays, Download, QrCode } from 'lucide-react';
+import { ArrowUpRight, CalendarDays, Download, Eye, QrCode } from 'lucide-react';
 import PublicPageShell from '@/components/landing/PublicPageShell';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long', timeZon
 
 function BookingCard({ booking }) {
   const [qr, setQr] = useState('');
+  const [preview, setPreview] = useState('');
   const [working, setWorking] = useState('');
   const [error, setError] = useState('');
   const status = booking.status || 'Confirmed';
@@ -25,17 +27,24 @@ function BookingCard({ booking }) {
     if (qr) URL.revokeObjectURL(qr);
   }, [qr]);
 
+  useEffect(() => () => {
+    if (preview) URL.revokeObjectURL(preview);
+  }, [preview]);
+
   async function getPass(format) {
+    if (working) return;
     setWorking(format);
     setError('');
     try {
       const response = await API.get(`/attendees/${booking._id}/pass`, {
-        params: { format },
+        params: { format: format === "preview" ? "pdf" : format },
         responseType: 'blob',
       });
       const url = URL.createObjectURL(response.data);
       if (format === 'qr') {
         setQr(url);
+      } else if (format === 'preview') {
+        setPreview(url);
       } else {
         const link = document.createElement('a');
         link.href = url;
@@ -72,6 +81,7 @@ function BookingCard({ booking }) {
       {status === 'Confirmed' && event && (
         <div className="grid gap-3 border-t border-[#e2c9bd] pt-4">
           <div className="flex flex-wrap gap-2">
+            <Button variant="outline" disabled={Boolean(working)} onClick={() => getPass("preview")}><Eye size={16} />{working === "preview" ? "Preparing…" : "Preview pass"}</Button>
             <Button variant="outline" disabled={Boolean(working)} onClick={() => getPass('qr')}><QrCode size={16} /> {working === 'qr' ? 'Generating…' : 'Show QR code'}</Button>
             <Button className="bg-[#87584d] text-white hover:bg-[#694239]" disabled={Boolean(working)} onClick={() => getPass('pdf')}><Download size={16} /> {working === 'pdf' ? 'Preparing…' : 'Download pass'}</Button>
           </div>
@@ -81,6 +91,21 @@ function BookingCard({ booking }) {
           </div>}
         </div>
       )}
+      <Dialog open={Boolean(preview)} onOpenChange={open => { if (!open) setPreview(''); }}>
+        <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-5xl">
+          <DialogHeader className="pr-8 text-left">
+            <DialogTitle className="font-serif text-2xl">Your event pass</DialogTitle>
+            <DialogDescription>Preview your downloadable pass for {event?.title}.</DialogDescription>
+          </DialogHeader>
+          {preview && <>
+            <iframe title={`Event pass for ${event?.title}`} src={`${preview}#toolbar=0&navpanes=0&view=Fit`} className="h-[55dvh] min-h-64 w-full rounded-xl border bg-[#faf5ef]" />
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <a className="text-sm font-medium underline" href={preview} target="_blank" rel="noreferrer">Open PDF in a new tab</a>
+              <Button asChild className="bg-[#87584d] text-white hover:bg-[#694239]"><a href={preview} download={`eventsphere-pass-${booking._id}.pdf`}><Download size={16} />Download pass</a></Button>
+            </div>
+          </>}
+        </DialogContent>
+      </Dialog>
       {error && <p role="alert" className="text-sm text-red-800">{error}</p>}
     </article>
   );
