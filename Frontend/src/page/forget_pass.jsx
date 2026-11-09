@@ -1,5 +1,5 @@
 import EllipsisLoader from "@/components/EllipsisLoader";
-import AuthLayout from '@/components/auth/AuthLayout';
+import AuthLayout from "@/components/auth/AuthLayout";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import API from "@/api/api";
@@ -31,7 +31,7 @@ export default function Forget() {
     } catch (error) {
       setError(
         error.response?.data?.msg ||
-          "Unable to request a reset link. Please try again."
+          "Unable to request a reset link. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -39,7 +39,10 @@ export default function Forget() {
   }
 
   return (
-    <AuthLayout title="Account recovery" description="Securely recover your EventSphere account.">
+    <AuthLayout
+      title="Account recovery"
+      description="Securely recover your EventSphere account."
+    >
       <form onSubmit={handleSubmit} className="grid gap-3">
         <div className="grid gap-1">
           <Label htmlFor="reset-email">Email address</Label>
@@ -58,23 +61,31 @@ export default function Forget() {
         <Button
           type="submit"
           disabled={loading}
-          className="celebration-auth-submit w-full text-sm font-semibold"
+          className="celebration-auth-submit w-full text-sm font-semibold min-h-[46px] rounded-[7px] [background:var(--account-accent)] text-[#fffaf6] hover:[background:var(--account-accent-hover)]"
         >
-          {loading ? <EllipsisLoader scope="inline" label="Sending reset link" /> : "Send reset link"}
+          {loading ? (
+            <EllipsisLoader scope="inline" label="Sending reset link" />
+          ) : (
+            "Send reset link"
+          )}
         </Button>
       </form>
 
       {message && (
         <div className="mt-4 space-y-1 text-sm text-[#364f5b]" role="status">
           <p>{message}</p>
-          <p className="text-xs leading-5 text-[#556c74]">
-            The link expires in 15 minutes. Wait at least one minute before requesting another.
+          <p className="text-xs leading-5 text-[#556c74] [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
+            The link expires in 15 minutes. Wait at least one minute before
+            requesting another.
           </p>
         </div>
       )}
 
       {error && (
-        <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">
+        <p
+          className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+          role="alert"
+        >
           {error}
         </p>
       )}

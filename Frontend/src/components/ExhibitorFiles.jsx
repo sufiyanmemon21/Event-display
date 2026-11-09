@@ -16,10 +16,7 @@ async function getErrorMessage(error, fallback) {
   }
   return data?.msg || data?.error || fallback;
 }
-export function LogoPreview({
-  exhibitorId,
-  fallback
-}) {
+export function LogoPreview({ exhibitorId, fallback }) {
   const [url, setUrl] = useState("");
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -27,10 +24,13 @@ export function LogoPreview({
     const logo = { url: "" };
     async function loadLogo() {
       try {
-        const response = await API.get(`/exhibitor-files/${exhibitorId}/private-logo`, {
-          responseType: "blob",
-          signal: controller.signal
-        });
+        const response = await API.get(
+          `/exhibitor-files/${exhibitorId}/private-logo`,
+          {
+            responseType: "blob",
+            signal: controller.signal,
+          },
+        );
         if (controller.signal.aborted) return;
         logo.url = URL.createObjectURL(response.data);
         setUrl(logo.url);
@@ -48,19 +48,24 @@ export function LogoPreview({
   }, [exhibitorId]);
   if (failed) {
     if (fallback) return fallback;
-    return <p className="text-sm text-muted-foreground">
+    return (
+      <p className="text-sm text-muted-foreground">
         Logo preview unavailable. Try Refresh Files.
-      </p>;
+      </p>
+    );
   }
   if (!url) {
     return <EllipsisLoader scope="inline" label="Loading logo" />;
   }
-  return <img src={url} alt="Company logo" className="h-24 w-24 rounded-md border object-contain p-2" />;
+  return (
+    <img
+      src={url}
+      alt="Company logo"
+      className="h-24 w-24 rounded-md border object-contain p-2"
+    />
+  );
 }
-function CompanyFiles({
-  exhibitorId,
-  canUpload
-}) {
+function CompanyFiles({ exhibitorId, canUpload }) {
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState("");
@@ -71,14 +76,17 @@ function CompanyFiles({
     async function loadFiles() {
       try {
         const response = await API.get(`/exhibitor-files/${exhibitorId}`, {
-          signal: controller.signal
+          signal: controller.signal,
         });
         if (controller.signal.aborted) return;
         setFiles(response.data.files || []);
         setError("");
       } catch (err) {
         if (controller.signal.aborted) return;
-        const message = await getErrorMessage(err, "Unable to load company files.");
+        const message = await getErrorMessage(
+          err,
+          "Unable to load company files.",
+        );
         if (!controller.signal.aborted) {
           setError(message);
         }
@@ -92,7 +100,7 @@ function CompanyFiles({
   function refreshFiles() {
     setLoading(true);
     setError("");
-    setRefresh(previous => previous + 1);
+    setRefresh((previous) => previous + 1);
   }
   async function handleUpload(event, kind) {
     const input = event.target;
@@ -100,9 +108,14 @@ function CompanyFiles({
     input.value = "";
     if (!file || busy || loading || error || !canUpload) return;
     const limit = kind === "logo" ? 2 : 5;
-    const allowedTypes = kind === "logo" ? ["image/jpeg", "image/png"] : ["application/pdf"];
+    const allowedTypes =
+      kind === "logo" ? ["image/jpeg", "image/png"] : ["application/pdf"];
     if (!allowedTypes.includes(file.type)) {
-      toast.error(kind === "logo" ? "Please select a JPG or PNG image." : "Please select a PDF document.");
+      toast.error(
+        kind === "logo"
+          ? "Please select a JPG or PNG image."
+          : "Please select a PDF document.",
+      );
       return;
     }
     if (file.size > limit * 1024 * 1024) {
@@ -115,11 +128,13 @@ function CompanyFiles({
     try {
       await API.post(`/exhibitor-files/${exhibitorId}/${kind}`, formData, {
         headers: {
-          "Content-Type": undefined
+          "Content-Type": undefined,
         },
-        timeout: 60000
+        timeout: 60000,
       });
-      toast.success(kind === "logo" ? "Company logo uploaded." : "Document uploaded.");
+      toast.success(
+        kind === "logo" ? "Company logo uploaded." : "Document uploaded.",
+      );
       refreshFiles();
     } catch (err) {
       toast.error(await getErrorMessage(err, "Unable to upload file."));
@@ -131,10 +146,13 @@ function CompanyFiles({
     if (busy || loading || error) return;
     setBusy("download");
     try {
-      const response = await API.get(`/exhibitor-files/${exhibitorId}/document`, {
-        responseType: "blob",
-        timeout: 60000
-      });
+      const response = await API.get(
+        `/exhibitor-files/${exhibitorId}/document`,
+        {
+          responseType: "blob",
+          timeout: 60000,
+        },
+      );
       const url = URL.createObjectURL(response.data);
       const link = document.createElement("a");
       link.href = url;
@@ -149,64 +167,118 @@ function CompanyFiles({
       setBusy("");
     }
   }
-  const hasLogo = files.some(file => file.kind === "logo");
-  const hasDocument = files.some(file => file.kind === "document");
-  return <div className="space-y-4 rounded-md border p-4">
+  const hasLogo = files.some((file) => file.kind === "logo");
+  const hasDocument = files.some((file) => file.kind === "document");
+  return (
+    <div className="space-y-4 rounded-md border p-4">
       <div className="flex items-center justify-between gap-3">
         <h3 className="font-medium">Company Files</h3>
 
-        <Button type="button" variant="outline" onClick={refreshFiles} disabled={loading || Boolean(busy)}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={refreshFiles}
+          disabled={loading || Boolean(busy)}
+        >
           Refresh Files
         </Button>
       </div>
 
-      {loading ? <EllipsisLoader label="Loading files" /> : error ? <p className="text-sm text-destructive" role="alert">
+      {loading ? (
+        <EllipsisLoader label="Loading files" />
+      ) : error ? (
+        <p className="text-sm text-destructive" role="alert">
           {error}
-        </p> : <>
-          {hasLogo ? <LogoPreview exhibitorId={exhibitorId} /> : <p className="text-sm text-muted-foreground">
+        </p>
+      ) : (
+        <>
+          {hasLogo ? (
+            <LogoPreview exhibitorId={exhibitorId} />
+          ) : (
+            <p className="text-sm text-muted-foreground">
               No company logo uploaded.
-            </p>}
+            </p>
+          )}
 
-          {hasDocument ? <Button type="button" variant="outline" onClick={handleDownload} disabled={Boolean(busy)}>
+          {hasDocument ? (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleDownload}
+              disabled={Boolean(busy)}
+            >
               {busy === "download" ? "Downloading..." : "Download PDF"}
-            </Button> : <p className="text-sm text-muted-foreground">
+            </Button>
+          ) : (
+            <p className="text-sm text-muted-foreground">
               No PDF document uploaded.
-            </p>}
-        </>}
+            </p>
+          )}
+        </>
+      )}
 
-      {canUpload && <fieldset disabled={loading || Boolean(busy) || Boolean(error)} className="space-y-4">
+      {canUpload && (
+        <fieldset
+          disabled={loading || Boolean(busy) || Boolean(error)}
+          className="space-y-4"
+        >
           <div className="space-y-2">
-            <Label htmlFor={`logo-${exhibitorId}`} className="block text-sm font-medium">
+            <Label
+              htmlFor={`logo-${exhibitorId}`}
+              className="block text-sm font-medium"
+            >
               Company Logo — JPG or PNG, maximum 2 MB
             </Label>
 
-            <Input id={`logo-${exhibitorId}`} type="file" accept="image/jpeg,image/png" onChange={event => handleUpload(event, "logo")} className="block w-full text-sm" />
+            <Input
+              id={`logo-${exhibitorId}`}
+              type="file"
+              accept="image/jpeg,image/png"
+              onChange={(event) => handleUpload(event, "logo")}
+              className="block w-full text-sm"
+            />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor={`document-${exhibitorId}`} className="block text-sm font-medium">
+            <Label
+              htmlFor={`document-${exhibitorId}`}
+              className="block text-sm font-medium"
+            >
               Application Document — PDF, maximum 5 MB
             </Label>
 
-            <Input id={`document-${exhibitorId}`} type="file" accept="application/pdf" onChange={event => handleUpload(event, "document")} className="block w-full text-sm" />
+            <Input
+              id={`document-${exhibitorId}`}
+              type="file"
+              accept="application/pdf"
+              onChange={(event) => handleUpload(event, "document")}
+              className="block w-full text-sm"
+            />
           </div>
 
           <p className="text-sm text-muted-foreground">
-            Selecting a file uploads it immediately and replaces the
-            previous file of the same type. Approved company logos
-            can appear publicly. Documents are available to you and
-            authorized organizers or administrators.
+            Selecting a file uploads it immediately and replaces the previous
+            file of the same type. Approved company logos can appear publicly.
+            Documents are available to you and authorized organizers or
+            administrators.
           </p>
-        </fieldset>}
+        </fieldset>
+      )}
 
-      {(busy === "logo" || busy === "document") && <p className="text-sm" role="status">
+      {(busy === "logo" || busy === "document") && (
+        <p className="text-sm" role="status">
           Uploading file...
-        </p>}
-    </div>;
+        </p>
+      )}
+    </div>
+  );
 }
-export default function ExhibitorFiles({
-  exhibitorId,
-  canUpload = false
-}) {
-  return <CompanyFiles key={exhibitorId} exhibitorId={exhibitorId} canUpload={canUpload} />;
+export default function ExhibitorFiles({ exhibitorId, canUpload = false }) {
+  return (
+    <CompanyFiles
+      key={exhibitorId}
+      exhibitorId={exhibitorId}
+      canUpload={canUpload}
+    />
+  );
 }

@@ -14,7 +14,7 @@ export default class ErrorBoundary extends Component {
         <main className="flex min-h-screen items-center justify-center bg-background p-6 text-foreground">
           <div
             role="alert"
-            className="w-full max-w-md space-y-4 rounded-xl border bg-card p-6 text-center text-card-foreground"
+            className="w-full max-w-md space-y-4 rounded-xl border bg-card p-6 text-center text-card-foreground [.workspace-form-body_fieldset_>_p&]:py-[14px]"
           >
             <h1 className="text-2xl font-semibold">
               Unable to display this page

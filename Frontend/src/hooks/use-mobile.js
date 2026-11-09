@@ -21,9 +21,5 @@ function getServerSnapshot() {
 }
 
 export function useIsMobile() {
-  return useSyncExternalStore(
-    subscribe,
-    getSnapshot,
-    getServerSnapshot
-  );
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }

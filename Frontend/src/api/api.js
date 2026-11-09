@@ -9,14 +9,7 @@ const api = axios.create({
 });
 
 export function clearAuth() {
-  const keys = [
-    "token",
-    "user",
-    "userId",
-    "userName",
-    "userEmail",
-    "userRole",
-  ];
+  const keys = ["token", "user", "userId", "userName", "userEmail", "userRole"];
 
   keys.forEach((key) => localStorage.removeItem(key));
 
@@ -65,7 +58,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

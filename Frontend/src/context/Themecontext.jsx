@@ -7,9 +7,7 @@ export function ThemeProvider({ children }) {
   });
 
   function toggleTheme() {
-    setTheme((currentTheme) =>
-      currentTheme === "dark" ? "light" : "dark"
-    );
+    setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
   }
 
   useEffect(() => {

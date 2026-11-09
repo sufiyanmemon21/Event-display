@@ -1,11 +1,6 @@
 import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import {
-  Link,
-  Navigate,
-  Outlet,
-  useLocation,
-} from "react-router-dom";
+import { Link, Navigate, Outlet, useLocation } from "react-router-dom";
 import API, { saveAuth } from "@/api/api";
 import { Button } from "@/components/ui/button";
 
@@ -23,7 +18,10 @@ function subscribeToAuth(callback) {
   };
 }
 
-export default function ProtectedRoute({ allowedRoles, loadingScope = "viewport" }) {
+export default function ProtectedRoute({
+  allowedRoles,
+  loadingScope = "viewport",
+}) {
   const location = useLocation();
   const token = useSyncExternalStore(subscribeToAuth, readToken);
   const [retry, setRetry] = useState(0);
@@ -66,10 +64,7 @@ export default function ProtectedRoute({ allowedRoles, loadingScope = "viewport"
         setCheck({
           token,
           attempt: retry,
-          status:
-            error.response?.status === 401
-              ? "unauthorized"
-              : "error",
+          status: error.response?.status === 401 ? "unauthorized" : "error",
           role: "",
         });
       }
@@ -80,13 +75,9 @@ export default function ProtectedRoute({ allowedRoles, loadingScope = "viewport"
     return () => controller.abort();
   }, [token, retry]);
 
-  const currentCheck =
-    check.token === token && check.attempt === retry;
+  const currentCheck = check.token === token && check.attempt === retry;
 
-  if (
-    !token ||
-    (currentCheck && check.status === "unauthorized")
-  ) {
+  if (!token || (currentCheck && check.status === "unauthorized")) {
     return (
       <Navigate
         to="/dashboard/login"
@@ -107,9 +98,7 @@ export default function ProtectedRoute({ allowedRoles, loadingScope = "viewport"
   if (check.status === "error") {
     return (
       <div className="space-y-4 p-6 text-center">
-        <p role="alert">
-          Unable to verify your account. Please try again.
-        </p>
+        <p role="alert">Unable to verify your account. Please try again.</p>
 
         <Button
           variant="outline"

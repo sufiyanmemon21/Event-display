@@ -1,52 +1,73 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import EllipsisLoader from "@/components/EllipsisLoader";
-import { useEffect, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowUpRight, CalendarDays, Download, Eye, QrCode } from 'lucide-react';
-import PublicPageShell from '@/components/landing/PublicPageShell';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import API, { clearAuth } from '@/api/api';
-import useAuth from '@/hooks/useAuth';
-import useLiveRefresh from '@/hooks/useLiveRefresh';
-import { isPastEvent } from '@/lib/eventDates';
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  ArrowUpRight,
+  CalendarDays,
+  Download,
+  Eye,
+  QrCode,
+} from "lucide-react";
+import PublicPageShell from "@/components/landing/PublicPageShell";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import API, { clearAuth } from "@/api/api";
+import useAuth from "@/hooks/useAuth";
+import useLiveRefresh from "@/hooks/useLiveRefresh";
+import { isPastEvent } from "@/lib/eventDates";
 
-const statuses = ['Pending', 'Confirmed', 'Rejected', 'Cancelled'];
-const tickets = ['Standard', 'VIP', 'Regular'];
-const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long', timeZone: 'UTC' });
+const statuses = ["Pending", "Confirmed", "Rejected", "Cancelled"];
+const tickets = ["Standard", "VIP", "Regular"];
+const dateFormat = new Intl.DateTimeFormat("en-GB", {
+  dateStyle: "long",
+  timeZone: "UTC",
+});
 
 function BookingCard({ booking }) {
-  const [qr, setQr] = useState('');
-  const [preview, setPreview] = useState('');
-  const [working, setWorking] = useState('');
-  const [error, setError] = useState('');
-  const status = booking.status || 'Confirmed';
+  const [qr, setQr] = useState("");
+  const [preview, setPreview] = useState("");
+  const [working, setWorking] = useState("");
+  const [error, setError] = useState("");
+  const status = booking.status || "Confirmed";
   const event = booking.event;
 
-  useEffect(() => () => {
-    if (qr) URL.revokeObjectURL(qr);
-  }, [qr]);
+  useEffect(
+    () => () => {
+      if (qr) URL.revokeObjectURL(qr);
+    },
+    [qr],
+  );
 
-  useEffect(() => () => {
-    if (preview) URL.revokeObjectURL(preview);
-  }, [preview]);
+  useEffect(
+    () => () => {
+      if (preview) URL.revokeObjectURL(preview);
+    },
+    [preview],
+  );
 
   async function getPass(format) {
     if (working) return;
     setWorking(format);
-    setError('');
+    setError("");
     try {
       const response = await API.get(`/attendees/${booking._id}/pass`, {
         params: { format: format === "preview" ? "pdf" : format },
-        responseType: 'blob',
+        responseType: "blob",
       });
       const url = URL.createObjectURL(response.data);
-      if (format === 'qr') {
+      if (format === "qr") {
         setQr(url);
-      } else if (format === 'preview') {
+      } else if (format === "preview") {
         setPreview(url);
       } else {
-        const link = document.createElement('a');
+        const link = document.createElement("a");
         link.href = url;
         link.download = `eventsphere-pass-${booking._id}.pdf`;
         document.body.append(link);
@@ -55,58 +76,147 @@ function BookingCard({ booking }) {
         window.setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
     } catch {
-      setError('The pass could not be issued. Refresh the booking status and try again.');
+      setError(
+        "The pass could not be issued. Refresh the booking status and try again.",
+      );
     } finally {
-      setWorking('');
+      setWorking("");
     }
   }
 
   return (
-    <article className="grid min-w-0 content-start gap-4 rounded-xl border border-[#e2c9bd] bg-[#fffaf6] p-5 shadow-sm">
+    <article className="grid min-w-0 content-start gap-4 rounded-xl border border-[#e2c9bd] bg-[var(--public-paper)] p-5 shadow-sm [.workspace-form-body_fieldset_>_p&]:py-[14px]">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-widest text-[#87584d]">{booking.ticketType} ticket</p>
-          <h3 className="mt-1 break-words font-serif text-2xl">{event?.title || 'Event unavailable'}</h3>
+          <p className="text-xs font-semibold uppercase tracking-widest text-[#87584d] [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
+            {booking.ticketType} ticket
+          </p>
+          <h3 className="mt-1 break-words font-serif text-2xl">
+            {event?.title || "Event unavailable"}
+          </h3>
         </div>
-        <Badge variant={status === 'Confirmed' ? 'default' : 'outline'}>{status}</Badge>
+        <Badge variant={status === "Confirmed" ? "default" : "outline"}>
+          {status}
+        </Badge>
       </div>
       {event && (
-        <div className="grid gap-1 text-sm text-[#756a64]">
-          {event.date && <p className="flex items-center gap-2"><CalendarDays size={16} /> {dateFormat.format(new Date(event.date))}</p>}
+        <div className="grid gap-1 text-sm text-[var(--public-copy)]">
+          {event.date && (
+            <p className="flex items-center gap-2">
+              <CalendarDays size={16} />{" "}
+              {dateFormat.format(new Date(event.date))}
+            </p>
+          )}
           <p>{event.location}</p>
         </div>
       )}
-      <p className="break-all text-xs text-[#756a64]">Reference {booking._id}</p>
-      {status === 'Pending' && <p className="text-sm text-[#756a64]">Waiting for the organizer to confirm your booking.</p>}
-      {status === 'Confirmed' && event && (
+      <p className="break-all text-xs text-[var(--public-copy)] [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
+        Reference {booking._id}
+      </p>
+      {status === "Pending" && (
+        <p className="text-sm text-[var(--public-copy)]">
+          Waiting for the organizer to confirm your booking.
+        </p>
+      )}
+      {status === "Confirmed" && event && (
         <div className="grid gap-3 border-t border-[#e2c9bd] pt-4">
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" disabled={Boolean(working)} onClick={() => getPass("preview")}><Eye size={16} />{working === "preview" ? "Preparing…" : "Preview pass"}</Button>
-            <Button variant="outline" disabled={Boolean(working)} onClick={() => getPass('qr')}><QrCode size={16} /> {working === 'qr' ? 'Generating…' : 'Show QR code'}</Button>
-            <Button className="bg-[#87584d] text-white hover:bg-[#694239]" disabled={Boolean(working)} onClick={() => getPass('pdf')}><Download size={16} /> {working === 'pdf' ? 'Preparing…' : 'Download pass'}</Button>
+            <Button
+              variant="outline"
+              disabled={Boolean(working)}
+              onClick={() => getPass("preview")}
+            >
+              <Eye size={16} />
+              {working === "preview" ? "Preparing…" : "Preview pass"}
+            </Button>
+            <Button
+              variant="outline"
+              disabled={Boolean(working)}
+              onClick={() => getPass("qr")}
+            >
+              <QrCode size={16} />{" "}
+              {working === "qr" ? "Generating…" : "Show QR code"}
+            </Button>
+            <Button
+              className="bg-[#87584d] text-white hover:bg-[#694239]"
+              disabled={Boolean(working)}
+              onClick={() => getPass("pdf")}
+            >
+              <Download size={16} />{" "}
+              {working === "pdf" ? "Preparing…" : "Download pass"}
+            </Button>
           </div>
-          {qr && <div className="flex flex-wrap items-end gap-3">
-            <img className="size-36 rounded-md border bg-white" src={qr} alt={`Entry QR code for ${event.title}`} />
-            <a className="text-sm font-semibold underline" href={qr} download={`eventsphere-qr-${booking._id}.png`}>Download QR code</a>
-          </div>}
+          {qr && (
+            <div className="flex flex-wrap items-end gap-3">
+              <img
+                className="size-36 rounded-md border bg-white"
+                src={qr}
+                alt={`Entry QR code for ${event.title}`}
+              />
+              <a
+                className="text-sm font-semibold underline"
+                href={qr}
+                download={`eventsphere-qr-${booking._id}.png`}
+              >
+                Download QR code
+              </a>
+            </div>
+          )}
         </div>
       )}
-      <Dialog open={Boolean(preview)} onOpenChange={open => { if (!open) setPreview(''); }}>
+      <Dialog
+        open={Boolean(preview)}
+        onOpenChange={(open) => {
+          if (!open) setPreview("");
+        }}
+      >
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-5xl">
           <DialogHeader className="pr-8 text-left">
-            <DialogTitle className="font-serif text-2xl">Your event pass</DialogTitle>
-            <DialogDescription>Preview your downloadable pass for {event?.title}.</DialogDescription>
+            <DialogTitle className="font-serif text-2xl">
+              Your event pass
+            </DialogTitle>
+            <DialogDescription>
+              Preview your downloadable pass for {event?.title}.
+            </DialogDescription>
           </DialogHeader>
-          {preview && <>
-            <iframe title={`Event pass for ${event?.title}`} src={`${preview}#toolbar=0&navpanes=0&view=Fit`} className="h-[55dvh] min-h-64 w-full rounded-xl border bg-[#faf5ef]" />
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <a className="text-sm font-medium underline" href={preview} target="_blank" rel="noreferrer">Open PDF in a new tab</a>
-              <Button asChild className="bg-[#87584d] text-white hover:bg-[#694239]"><a href={preview} download={`eventsphere-pass-${booking._id}.pdf`}><Download size={16} />Download pass</a></Button>
-            </div>
-          </>}
+          {preview && (
+            <>
+              <iframe
+                title={`Event pass for ${event?.title}`}
+                src={`${preview}#toolbar=0&navpanes=0&view=Fit`}
+                className="h-[55dvh] min-h-64 w-full rounded-xl border bg-[#faf5ef] [.workspace-form-body_fieldset_>_p&]:py-[14px]"
+              />
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <a
+                  className="text-sm font-medium underline"
+                  href={preview}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Open PDF in a new tab
+                </a>
+                <Button
+                  asChild
+                  className="bg-[#87584d] text-white hover:bg-[#694239]"
+                >
+                  <a
+                    href={preview}
+                    download={`eventsphere-pass-${booking._id}.pdf`}
+                  >
+                    <Download size={16} />
+                    Download pass
+                  </a>
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
-      {error && <p role="alert" className="text-sm text-red-800">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-red-800">
+          {error}
+        </p>
+      )}
     </article>
   );
 }
@@ -115,33 +225,38 @@ export default function AttendeeProfile() {
   const user = useAuth();
   const navigate = useNavigate();
   const [params, setParams] = useSearchParams();
-  const eventId = params.get('event');
+  const eventId = params.get("event");
   const [bookings, setBookings] = useState([]);
   const [event, setEvent] = useState(null);
-  const [status, setStatus] = useState('All');
-  const [ticket, setTicket] = useState('Standard');
+  const [status, setStatus] = useState("All");
+  const [ticket, setTicket] = useState("Standard");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [eventError, setEventError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [error, setError] = useState("");
+  const [eventError, setEventError] = useState("");
+  const [notice, setNotice] = useState("");
   const [refresh, setRefresh] = useState(0);
 
-  useLiveRefresh(() => setRefresh(value => value + 1));
+  useLiveRefresh(() => setRefresh((value) => value + 1));
   useEffect(() => {
-    document.title = 'My profile — EventSphere';
+    document.title = "My profile — EventSphere";
   }, []);
 
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
       try {
-        const { data } = await API.get('/attendees/all', { signal: controller.signal });
+        const { data } = await API.get("/attendees/all", {
+          signal: controller.signal,
+        });
         if (controller.signal.aborted) return;
         setBookings(data.attendees);
-        setError('');
+        setError("");
       } catch (failure) {
-        if (!controller.signal.aborted) setError(failure.response?.data?.msg || 'Unable to load your bookings.');
+        if (!controller.signal.aborted)
+          setError(
+            failure.response?.data?.msg || "Unable to load your bookings.",
+          );
       } finally {
         if (!controller.signal.aborted) setLoading(false);
       }
@@ -153,14 +268,17 @@ export default function AttendeeProfile() {
   useEffect(() => {
     if (!eventId) return;
     const controller = new AbortController();
-    API.get(`/events/${encodeURIComponent(eventId)}`, { signal: controller.signal })
+    API.get(`/events/${encodeURIComponent(eventId)}`, {
+      signal: controller.signal,
+    })
       .then(({ data }) => {
         if (controller.signal.aborted) return;
         setEvent(data.event);
-        setEventError('');
+        setEventError("");
       })
       .catch(() => {
-        if (!controller.signal.aborted) setEventError('This event could not be loaded.');
+        if (!controller.signal.aborted)
+          setEventError("This event could not be loaded.");
       });
     return () => controller.abort();
   }, [eventId]);
@@ -169,57 +287,111 @@ export default function AttendeeProfile() {
     e.preventDefault();
     if (saving || !eventId) return;
     if (isPastEvent(event?.date)) {
-      setEventError('Bookings are closed for past events.');
+      setEventError("Bookings are closed for past events.");
       return;
     }
     setSaving(true);
-    setEventError('');
+    setEventError("");
     try {
-      const { data } = await API.post('/attendees/register', { event: eventId, ticketType: ticket });
+      const { data } = await API.post("/attendees/register", {
+        event: eventId,
+        ticketType: ticket,
+      });
       setNotice(data.msg);
-      setStatus('All');
+      setStatus("All");
       setParams({}, { replace: true });
-      setRefresh(value => value + 1);
+      setRefresh((value) => value + 1);
     } catch (failure) {
-      setEventError(failure.response?.data?.msg || 'Unable to request a booking.');
+      setEventError(
+        failure.response?.data?.msg || "Unable to request a booking.",
+      );
     } finally {
       setSaving(false);
     }
   }
 
-  const alreadyBooked = bookings.find(item => item.event?._id === eventId);
-  const visible = status === 'All' ? bookings : bookings.filter(item => (item.status || 'Confirmed') === status);
+  const alreadyBooked = bookings.find((item) => item.event?._id === eventId);
+  const visible =
+    status === "All"
+      ? bookings
+      : bookings.filter((item) => (item.status || "Confirmed") === status);
 
   return (
     <PublicPageShell>
       <main className="mx-auto min-h-[65vh] max-w-6xl space-y-7 px-4 pb-14 sm:px-8">
         <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[#e2c9bd] pb-5">
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[.2em] text-[#87584d]">Attendee profile</p>
-            <h1 className="break-words font-serif text-4xl sm:text-5xl">{user?.name || 'My profile'}</h1>
-            <p className="mt-2 break-all text-sm text-[#756a64]">{user?.email}</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[.2em] text-[#87584d] [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
+              Attendee profile
+            </p>
+            <h1 className="break-words font-serif text-4xl sm:text-5xl">
+              {user?.name || "My profile"}
+            </h1>
+            <p className="mt-2 break-all text-sm text-[var(--public-copy)]">
+              {user?.email}
+            </p>
           </div>
-          <Button variant="outline" onClick={() => { clearAuth(); navigate('/', { replace: true }); }}>Sign out</Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              clearAuth();
+              navigate("/", { replace: true });
+            }}
+          >
+            Sign out
+          </Button>
         </header>
 
-        {notice && <p role="status" className="rounded-lg border border-[#e2c9bd] bg-[#fffaf6] p-4">{notice}</p>}
+        {notice && (
+          <p
+            role="status"
+            className="rounded-lg border border-[#e2c9bd] bg-[var(--public-paper)] p-4"
+          >
+            {notice}
+          </p>
+        )}
         {eventId && (
-          <section className="max-w-2xl space-y-4 rounded-xl border border-[#e2c9bd] bg-[#fffaf6] p-5">
+          <section className="max-w-2xl space-y-4 rounded-xl border border-[#e2c9bd] bg-[var(--public-paper)] p-5 [.workspace-form-body_fieldset_>_p&]:py-[14px]">
             <h2 className="font-serif text-2xl">Request a booking</h2>
-            {eventError && <p role="alert" className="text-sm text-red-800">{eventError}</p>}
+            {eventError && (
+              <p role="alert" className="text-sm text-red-800">
+                {eventError}
+              </p>
+            )}
             {event?._id === eventId && (
               <>
                 <p className="font-medium">{event.title}</p>
-                {alreadyBooked ? <p className="text-sm text-[#756a64]">You already have a booking for this event.</p> : isPastEvent(event.date) ? (
-                  <p className="text-sm text-[#756a64]">Bookings are closed for past events.</p>
+                {alreadyBooked ? (
+                  <p className="text-sm text-[var(--public-copy)]">
+                    You already have a booking for this event.
+                  </p>
+                ) : isPastEvent(event.date) ? (
+                  <p className="text-sm text-[var(--public-copy)]">
+                    Bookings are closed for past events.
+                  </p>
                 ) : (
-                  <form onSubmit={requestBooking} className="flex flex-wrap items-end gap-3">
-                    <label className="grid gap-1 text-sm font-medium">Ticket type
-                      <select value={ticket} onChange={e => setTicket(e.target.value)} className="min-h-10 rounded-md border border-[#e2c9bd] bg-white px-3">
-                        {tickets.map(type => <option key={type}>{type}</option>)}
+                  <form
+                    onSubmit={requestBooking}
+                    className="flex flex-wrap items-end gap-3"
+                  >
+                    <label className="grid gap-1 text-sm font-medium">
+                      Ticket type
+                      <select
+                        value={ticket}
+                        onChange={(e) => setTicket(e.target.value)}
+                        className="min-h-10 rounded-md border border-[#e2c9bd] bg-white px-3"
+                      >
+                        {tickets.map((type) => (
+                          <option key={type}>{type}</option>
+                        ))}
                       </select>
                     </label>
-                    <Button className="bg-[#87584d] text-white hover:bg-[#694239]" disabled={saving || loading}>{saving ? 'Requesting…' : 'Request booking'}</Button>
+                    <Button
+                      className="bg-[#87584d] text-white hover:bg-[#694239]"
+                      disabled={saving || loading}
+                    >
+                      {saving ? "Requesting…" : "Request booking"}
+                    </Button>
                   </form>
                 )}
               </>
@@ -229,23 +401,60 @@ export default function AttendeeProfile() {
 
         <section aria-labelledby="my-bookings">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <h2 id="my-bookings" className="font-serif text-3xl">My bookings</h2>
+            <h2 id="my-bookings" className="font-serif text-3xl">
+              My bookings
+            </h2>
             <div className="flex flex-wrap items-center gap-2">
-              <label className="flex items-center gap-2 text-sm">Status
-                <select value={status} onChange={e => setStatus(e.target.value)} className="min-h-10 rounded-md border border-[#e2c9bd] bg-[#fffaf6] px-3">
-                  {['All', ...statuses].map(value => <option key={value}>{value}</option>)}
+              <label className="flex items-center gap-2 text-sm">
+                Status
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="min-h-10 rounded-md border border-[#e2c9bd] bg-[var(--public-paper)] px-3"
+                >
+                  {["All", ...statuses].map((value) => (
+                    <option key={value}>{value}</option>
+                  ))}
                 </select>
               </label>
-              <Button variant="outline" onClick={() => setRefresh(value => value + 1)}>Refresh</Button>
+              <Button
+                variant="outline"
+                onClick={() => setRefresh((value) => value + 1)}
+              >
+                Refresh
+              </Button>
             </div>
           </div>
-          {error && <p role="alert" className="mb-3 text-sm text-red-800">{error}</p>}
-          {loading ? <EllipsisLoader label="Loading your bookings" /> : visible.length ? (
-            <div className="grid gap-4 md:grid-cols-2">{visible.map(item => <BookingCard key={item._id} booking={item} />)}</div>
-          ) : !error && <div className="rounded-xl border border-[#e2c9bd] bg-[#fffaf6] p-6">
-            <p>{status === 'All' ? 'You don’t have any bookings yet.' : `No ${status.toLowerCase()} bookings.`}</p>
-            <Link to="/#catalog-events" className="mt-3 inline-flex items-center gap-2 text-sm font-semibold underline">Explore events <ArrowUpRight size={15} /></Link>
-          </div>}
+          {error && (
+            <p role="alert" className="mb-3 text-sm text-red-800">
+              {error}
+            </p>
+          )}
+          {loading ? (
+            <EllipsisLoader label="Loading your bookings" />
+          ) : visible.length ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {visible.map((item) => (
+                <BookingCard key={item._id} booking={item} />
+              ))}
+            </div>
+          ) : (
+            !error && (
+              <div className="rounded-xl border border-[#e2c9bd] bg-[var(--public-paper)] p-6 [.workspace-form-body_fieldset_>_p&]:py-[14px]">
+                <p>
+                  {status === "All"
+                    ? "You don’t have any bookings yet."
+                    : `No ${status.toLowerCase()} bookings.`}
+                </p>
+                <Link
+                  to="/#catalog-events"
+                  className="mt-3 inline-flex items-center gap-2 text-sm font-semibold underline"
+                >
+                  Explore events <ArrowUpRight size={15} />
+                </Link>
+              </div>
+            )
+          )}
         </section>
       </main>
     </PublicPageShell>

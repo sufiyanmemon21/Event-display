@@ -1,5 +1,3 @@
-"use client";
-
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -17,7 +15,13 @@ function DialogPortal(props) {
 }
 
 function DialogClose(props) {
-  return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
+  return (
+    <DialogPrimitive.Close
+      className="workspace:text-muted-foreground"
+      data-slot="dialog-close"
+      {...props}
+    />
+  );
 }
 
 function DialogOverlay({ className, ...props }) {
@@ -26,7 +30,7 @@ function DialogOverlay({ className, ...props }) {
       data-slot="dialog-overlay"
       className={cn(
         "fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-sm data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
-        className
+        className,
       )}
       {...props}
     />
@@ -45,8 +49,14 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 grid max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 text-slate-950 shadow-2xl outline-none dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95",
-          className
+          `fixed left-1/2 top-1/2 z-50 grid max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2
+          gap-4 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-6 text-slate-950 shadow-2xl outline-none
+          dark:border-slate-800 dark:bg-slate-950 dark:text-slate-50 data-open:animate-in data-open:fade-in-0
+          data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95
+          workspace:max-h-[calc(100dvh_-_2rem)] workspace:overflow-y-auto workspace:border workspace:border-border
+          workspace:shadow-[var(--workspace-shadow)] workspace:[background:var(--card)]
+          workspace:text-[var(--foreground)]`,
+          className,
         )}
         {...props}
       >
@@ -54,7 +64,9 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="absolute right-4 top-4 grid size-8 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring dark:hover:bg-slate-800 dark:hover:text-slate-100"
+            className="absolute right-4 top-4 grid size-8 place-items-center rounded-lg text-slate-500 transition hover:bg-slate-100
+          hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+          dark:hover:bg-slate-800 dark:hover:text-slate-100 workspace:text-muted-foreground"
           >
             <X className="size-4" />
             <span className="sr-only">Close</span>
@@ -69,7 +81,13 @@ function DialogHeader({ className, ...props }) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-1.5", className)}
+      className={cn(
+        `flex flex-col gap-1.5
+          [body:has(.eventsphere-workspace)_.workspace-form-panel_&]:[border-bottom:1px_solid_var(--border)]
+          [body:has(.eventsphere-workspace)_.workspace-form-panel_&]:pb-[15px] [.workspace-form-panel_&]:pe-7
+          [.workspace-form-panel_&]:text-left`,
+        className,
+      )}
       {...props}
     />
   );
@@ -80,8 +98,8 @@ function DialogFooter({ className, ...props }) {
     <div
       data-slot="dialog-footer"
       className={cn(
-        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
-        className
+        "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end [.workspace-form-panel_&]:[border-top:1px_solid_var(--border)] [.workspace-form-panel_&]:pt-[13px]",
+        className,
       )}
       {...props}
     />
@@ -92,7 +110,10 @@ function DialogTitle({ className, ...props }) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg font-semibold tracking-tight", className)}
+      className={cn(
+        "text-lg font-semibold tracking-tight workspace:[font:1.65rem/1.12_Georgia,_serif]",
+        className,
+      )}
       {...props}
     />
   );
@@ -102,7 +123,10 @@ function DialogDescription({ className, ...props }) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-sm text-muted-foreground", className)}
+      className={cn(
+        "text-sm text-muted-foreground workspace:text-muted-foreground",
+        className,
+      )}
       {...props}
     />
   );

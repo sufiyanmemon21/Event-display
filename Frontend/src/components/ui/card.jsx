@@ -6,8 +6,19 @@ function Card({ className, size = "default", ...props }) {
       data-slot="card"
       data-size={size}
       className={cn(
-        "group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card py-(--card-spacing) text-sm text-card-foreground ring-1 ring-foreground/10 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)] data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl",
-        className
+        `group/card flex flex-col gap-(--card-spacing) overflow-hidden rounded-xl bg-card py-(--card-spacing) text-sm
+        text-card-foreground ring-1 ring-foreground/10 [--card-spacing:--spacing(4)] has-data-[slot=card-footer]:pb-0
+        has-[>img:first-child]:pt-0 data-[size=sm]:[--card-spacing:--spacing(3)]
+        data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl
+        *:[img:last-child]:rounded-b-xl [.workspace-form-body_fieldset_>_p&]:py-[14px] workspace:border-border
+        workspace:shadow-[var(--workspace-shadow)]
+        [body:has(.eventsphere-workspace)_.workspace-form-panel_&]:shadow-none
+        [body:has(.eventsphere-workspace)_.workspace-form-body_&]:p-0
+        [body:has(.eventsphere-workspace)_.workspace-form-body_&]:border-0
+        [body:has(.eventsphere-workspace)_.workspace-form-body_&]:bg-transparent
+        [body:has(.eventsphere-workspace)_.workspace-form-body_&]:shadow-none
+        [body:has(.eventsphere-workspace)_.workspace-form-body_&]:overflow-visible`,
+        className,
       )}
       {...props}
     />
@@ -19,8 +30,10 @@ function CardHeader({ className, ...props }) {
     <div
       data-slot="card-header"
       className={cn(
-        "group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-(--card-spacing) has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto] [.border-b]:pb-(--card-spacing)",
-        className
+        `group/card-header @container/card-header grid auto-rows-min items-start gap-1 rounded-t-xl px-(--card-spacing)
+        has-data-[slot=card-action]:grid-cols-[1fr_auto] has-data-[slot=card-description]:grid-rows-[auto_auto]
+        [.border-b]:pb-(--card-spacing) [.workspace-form-body_&]:hidden`,
+        className,
       )}
       {...props}
     />
@@ -32,8 +45,8 @@ function CardTitle({ className, ...props }) {
     <div
       data-slot="card-title"
       className={cn(
-        "font-heading text-base leading-snug font-medium group-data-[size=sm]/card:text-sm",
-        className
+        "font-heading text-base leading-snug font-medium group-data-[size=sm]/card:text-sm workspace:font-serif workspace:font-medium workspace:tracking-[-.015em] workspace:leading-[1.3]",
+        className,
       )}
       {...props}
     />
@@ -56,7 +69,7 @@ function CardAction({ className, ...props }) {
       data-slot="card-action"
       className={cn(
         "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className
+        className,
       )}
       {...props}
     />
@@ -67,7 +80,18 @@ function CardContent({ className, ...props }) {
   return (
     <div
       data-slot="card-content"
-      className={cn("px-(--card-spacing)", className)}
+      className={cn(
+        `px-(--card-spacing) [.workspace-event-scope_&:has(>_[data-slot='select-trigger'])]:grid
+          [.workspace-event-scope_&:has(>_[data-slot='select-trigger'])]:[grid-template-columns:minmax(0,_30rem)]
+          [.workspace-event-scope_&:has(>_[data-slot='select-trigger'])]:items-end
+          [.workspace-event-scope_&:has(>_[data-slot='select-trigger'])]:gap-[8px_12px]
+          [.workspace-event-scope_&_>_label]:col-span-full [.workspace-event-scope_&_>_p]:col-span-full
+          [.workspace-event-scope_&:has(>_[data-slot='select-trigger'])_>_*]:m-0 [.workspace-event-scope_&_>_p]:py-[14px]
+          [.workspace-form-body_&]:p-0
+          min-[640px]:[.workspace-event-scope_&:has(>_[data-slot='select-trigger'])]:[grid-template-columns:minmax(0,_30rem)_auto]
+          min-[640px]:[.workspace-event-scope_&:has(>_[data-slot='select-trigger'])]:justify-start`,
+        className,
+      )}
       {...props}
     />
   );
@@ -79,7 +103,7 @@ function CardFooter({ className, ...props }) {
       data-slot="card-footer"
       className={cn(
         "flex items-center rounded-b-xl border-t bg-muted/50 p-(--card-spacing)",
-        className
+        className,
       )}
       {...props}
     />

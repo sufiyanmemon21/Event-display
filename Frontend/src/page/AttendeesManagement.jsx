@@ -1,6 +1,13 @@
 import EllipsisLoader from "@/components/EllipsisLoader";
 
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { PageHeading } from "@/components/workspace";
 import { RecordBrowser } from "@/components/workspace";
@@ -15,14 +22,19 @@ import { toast } from "react-toastify";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { isPastEvent } from "@/lib/eventDates";
 async function fetchRegistrationData(isAttendee, signal) {
-  const [registrationResponse, eventResponse] = await Promise.all([API.get("/attendees/all", {
-    signal
-  }), isAttendee ? API.get("/events/all", {
-    signal
-  }) : Promise.resolve(null)]);
+  const [registrationResponse, eventResponse] = await Promise.all([
+    API.get("/attendees/all", {
+      signal,
+    }),
+    isAttendee
+      ? API.get("/events/all", {
+          signal,
+        })
+      : Promise.resolve(null),
+  ]);
   return {
     attendees: registrationResponse.data.attendees,
-    events: eventResponse?.data?.events || []
+    events: eventResponse?.data?.events || [],
   };
 }
 export default function AttendeesManagement() {
@@ -51,7 +63,9 @@ export default function AttendeesManagement() {
         setEvents(data.events);
       } catch (error) {
         if (!controller.signal.aborted) {
-          setLoadError(error.response?.data?.msg || "Unable to load registrations.");
+          setLoadError(
+            error.response?.data?.msg || "Unable to load registrations.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) setLoading(false);
@@ -68,7 +82,9 @@ export default function AttendeesManagement() {
       setAttendees(data.attendees);
       setEvents(data.events);
     } catch (error) {
-      setLoadError(error.response?.data?.msg || "Unable to load registrations.");
+      setLoadError(
+        error.response?.data?.msg || "Unable to load registrations.",
+      );
     } finally {
       setLoading(false);
     }
@@ -76,7 +92,7 @@ export default function AttendeesManagement() {
   async function handleRegister(event) {
     event.preventDefault();
     if (saving || !eventId) return;
-    if (isPastEvent(events.find(item => item._id === eventId)?.date)) {
+    if (isPastEvent(events.find((item) => item._id === eventId)?.date)) {
       toast.error("Bookings are closed for past events.");
       return;
     }
@@ -84,7 +100,7 @@ export default function AttendeesManagement() {
     try {
       const response = await API.post("/attendees/register", {
         event: eventId,
-        ticketType
+        ticketType,
       });
       toast.success(response.data.msg);
       setEventId("");
@@ -99,101 +115,294 @@ export default function AttendeesManagement() {
   }
   async function reviewBooking(booking, status) {
     if (reviewing) return;
-    if (status !== "Confirmed" && !(await confirm(`${status === "Rejected" ? "Reject" : "Cancel"} this booking?`))) return;
+    if (
+      status !== "Confirmed" &&
+      !(await confirm(
+        `${status === "Rejected" ? "Reject" : "Cancel"} this booking?`,
+      ))
+    )
+      return;
     setReviewing(booking._id);
     try {
-      const { data } = await API.patch(`/attendees/${booking._id}/status`, { status });
-      setAttendees(previous => previous.map(item => item._id === booking._id ? { ...item, status: data.status } : item));
+      const { data } = await API.patch(`/attendees/${booking._id}/status`, {
+        status,
+      });
+      setAttendees((previous) =>
+        previous.map((item) =>
+          item._id === booking._id ? { ...item, status: data.status } : item,
+        ),
+      );
       toast.success(`Booking ${data.status.toLowerCase()}.`);
     } catch (error) {
-      toast.error(error.response?.data?.msg || "Unable to update booking status.");
+      toast.error(
+        error.response?.data?.msg || "Unable to update booking status.",
+      );
     } finally {
       setReviewing("");
     }
   }
   if (!canView) {
-    return <p className="p-6">
-        Event registration requires an attendee account.
-        Exhibitors can apply through the Exhibitors page.
-      </p>;
+    return (
+      <p className="p-6">
+        Event registration requires an attendee account. Exhibitors can apply
+        through the Exhibitors page.
+      </p>
+    );
   }
-  return <div className="w-full space-y-6">
-      <PageHeading title={isAttendee ? "My registrations" : "Attendee registrations"} description={isOrganizer ? "Review booking requests and manage attendee registrations." : "Track your bookings and download confirmed passes from your profile."} />
+  return (
+    <div className="w-full space-y-6">
+      <PageHeading
+        title={isAttendee ? "My registrations" : "Attendee registrations"}
+        description={
+          isOrganizer
+            ? "Review booking requests and manage attendee registrations."
+            : "Track your bookings and download confirmed passes from your profile."
+        }
+      />
 
-      {isAttendee && <FormPanel open={formOpen} onOpenChange={value => {
-      if (!saving) setFormOpen(value);
-    }} title="Register for an Event" compact trigger="Register for an expo"><Card>
-          <CardHeader>
-            <CardTitle>Register for an Event</CardTitle>
-          </CardHeader>
+      {isAttendee && (
+        <FormPanel
+          open={formOpen}
+          onOpenChange={(value) => {
+            if (!saving) setFormOpen(value);
+          }}
+          title="Register for an Event"
+          compact
+          trigger="Register for an expo"
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>Register for an Event</CardTitle>
+            </CardHeader>
 
-          <CardContent>
-            <form onSubmit={handleRegister}>
-              <fieldset disabled={saving || loading || Boolean(loadError)} className="workspace-field-grid workspace-registration-fields">
-                <div className="space-y-2">
-                  <Label htmlFor="attendee-event">Event</Label>
-                  <WorkspaceSelect id="attendee-event" value={eventId} onChange={event => setEventId(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" required>
-                    <option value="">Select an event</option>
+            <CardContent>
+              <form onSubmit={handleRegister}>
+                <fieldset
+                  disabled={saving || loading || Boolean(loadError)}
+                  className="workspace-field-grid workspace-registration-fields min-[640px]:[.workspace-form-body_fieldset&]:[grid-template-columns:minmax(0,_1.65fr)_minmax(0,_1fr)]"
+                >
+                  <div className="space-y-2">
+                    <Label htmlFor="attendee-event">Event</Label>
+                    <WorkspaceSelect
+                      id="attendee-event"
+                      value={eventId}
+                      onChange={(event) => setEventId(event.target.value)}
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      required
+                    >
+                      <option value="">Select an event</option>
 
-                    {events.map(event => {
-                      const closed = isPastEvent(event.date);
-                      return <option key={event._id} value={event._id} disabled={closed}>
-                        {closed ? `${event.title} (booking closed)` : event.title}
-                      </option>;
-                    })}
-                  </WorkspaceSelect>
-                </div>
+                      {events.map((event) => {
+                        const closed = isPastEvent(event.date);
+                        return (
+                          <option
+                            key={event._id}
+                            value={event._id}
+                            disabled={closed}
+                          >
+                            {closed
+                              ? `${event.title} (booking closed)`
+                              : event.title}
+                          </option>
+                        );
+                      })}
+                    </WorkspaceSelect>
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="ticket-type">Ticket Type</Label>
-                  <WorkspaceSelect id="ticket-type" value={ticketType} onChange={event => setTicketType(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" required>
-                    <option value="Standard">Standard</option>
-                    <option value="VIP">VIP</option>
-                    <option value="Regular">Regular</option>
-                  </WorkspaceSelect>
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="ticket-type">Ticket Type</Label>
+                    <WorkspaceSelect
+                      id="ticket-type"
+                      value={ticketType}
+                      onChange={(event) => setTicketType(event.target.value)}
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      required
+                    >
+                      <option value="Standard">Standard</option>
+                      <option value="VIP">VIP</option>
+                      <option value="Regular">Regular</option>
+                    </WorkspaceSelect>
+                  </div>
 
-                <Button type="submit" disabled={!eventId || events.length === 0}>
-                  {saving && <EllipsisLoader scope="inline" label="Registering" />} Register
-                </Button>
+                  <Button
+                    type="submit"
+                    disabled={!eventId || events.length === 0}
+                  >
+                    {saving && (
+                      <EllipsisLoader scope="inline" label="Registering" />
+                    )}{" "}
+                    Register
+                  </Button>
 
-                {!loading && events.length === 0 && <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
-                    No events are available yet.
-                  </p>}
-              </fieldset>
-            </form>
-          </CardContent>
-        </Card></FormPanel>}
+                  {!loading && events.length === 0 && (
+                    <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground [.workspace-form-body_fieldset_>_p&]:py-[14px]">
+                      No events are available yet.
+                    </p>
+                  )}
+                </fieldset>
+              </form>
+            </CardContent>
+          </Card>
+        </FormPanel>
+      )}
 
-      {loading ? <EllipsisLoader scope="page" label="Loading registrations" /> : loadError ? <div className="space-y-3">
+      {loading ? (
+        <EllipsisLoader scope="page" label="Loading registrations" />
+      ) : loadError ? (
+        <div className="space-y-3">
           <p role="alert">{loadError}</p>
 
           <Button variant="outline" onClick={refreshData}>
             Try Again
           </Button>
-        </div> : !isOrganizer && attendees.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">
+        </div>
+      ) : !isOrganizer && attendees.length === 0 ? (
+        <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground [.workspace-form-body_fieldset_>_p&]:py-[14px]">
           No registrations found.
-        </p> : <RecordBrowser records={attendees} label="registrations" statusOptions={isOrganizer ? ["Pending", "Confirmed", "Rejected", "Cancelled"] : undefined} statusValue={item => item.status || "Confirmed"} allStatusesLabel="All Registrations" emptyText="No registrations found.">{visible => <div className="overflow-hidden rounded-xl border bg-card"><Table><TableHeader><TableRow><TableHead>Attendee / Event</TableHead><TableHead>Contact</TableHead><TableHead>Ticket</TableHead><TableHead>Event date</TableHead><TableHead>Location</TableHead><TableHead>Status</TableHead>{isOrganizer && <TableHead>Actions</TableHead>}</TableRow></TableHeader><TableBody>{visible.map(registration => <TableRow key={registration._id}><TableCell className="whitespace-normal"><p className="font-medium">{isOrganizer ? registration.user?.name || "Unavailable" : registration.event?.title || "Event unavailable"}</p>{isOrganizer && <p className="mt-1 text-xs text-muted-foreground">{registration.event?.title || "Event unavailable"}</p>}</TableCell><TableCell>{isOrganizer ? registration.user?.email || "Unavailable" : "Your registration"}
-                      {(registration.phone || registration.guestCount || registration.details) && <details className="mt-1 max-w-64 whitespace-normal">
-                        <summary className="cursor-pointer text-sm font-medium text-primary">Booking details</summary>
-                        <div className="mt-2 space-y-1 [overflow-wrap:anywhere]">
-                          {registration.phone && <p>Phone: {registration.phone}</p>}
-                          {registration.guestCount && <p>Guests: {registration.guestCount}</p>}
-                          {registration.details && <p className="whitespace-pre-wrap">{registration.details}</p>}
-                        </div>
-                      </details>}
-                    </TableCell><TableCell><Badge variant="secondary">{registration.ticketType}</Badge></TableCell><TableCell>{registration.event?.date ? new Date(registration.event.date).toLocaleDateString("en-GB", {
-                  timeZone: "UTC"
-                }) : "Unavailable"}</TableCell><TableCell className="max-w-60 whitespace-normal">{registration.event?.location || "Unavailable"}</TableCell>
-                    <TableCell><Badge variant="secondary">{registration.status || "Confirmed"}</Badge></TableCell>
-                    {isOrganizer && <TableCell><div className="flex flex-wrap gap-2">
-                      {registration.status === "Pending" && <>
-                        <Button size="sm" disabled={Boolean(reviewing)} onClick={() => reviewBooking(registration, "Confirmed")}>Confirm</Button>
-                        <Button size="sm" variant="outline" disabled={Boolean(reviewing)} onClick={() => reviewBooking(registration, "Rejected")}>Reject</Button>
-                      </>}
-                      {(!registration.status || ["Pending", "Confirmed"].includes(registration.status)) &&
-                        <Button size="sm" variant="outline" disabled={Boolean(reviewing)} onClick={() => reviewBooking(registration, "Cancelled")}>Cancel booking</Button>}
-                    </div></TableCell>}
-                  </TableRow>)}</TableBody></Table></div>}</RecordBrowser>}
-    </div>;
+        </p>
+      ) : (
+        <RecordBrowser
+          records={attendees}
+          label="registrations"
+          statusOptions={
+            isOrganizer
+              ? ["Pending", "Confirmed", "Rejected", "Cancelled"]
+              : undefined
+          }
+          statusValue={(item) => item.status || "Confirmed"}
+          allStatusesLabel="All Registrations"
+          emptyText="No registrations found."
+        >
+          {(visible) => (
+            <div className="overflow-hidden rounded-xl border bg-card [.workspace-form-body_fieldset_>_p&]:py-[14px]">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Attendee / Event</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Ticket</TableHead>
+                    <TableHead>Event date</TableHead>
+                    <TableHead>Location</TableHead>
+                    <TableHead>Status</TableHead>
+                    {isOrganizer && <TableHead>Actions</TableHead>}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {visible.map((registration) => (
+                    <TableRow key={registration._id}>
+                      <TableCell className="whitespace-normal">
+                        <p className="font-medium">
+                          {isOrganizer
+                            ? registration.user?.name || "Unavailable"
+                            : registration.event?.title || "Event unavailable"}
+                        </p>
+                        {isOrganizer && (
+                          <p className="mt-1 text-xs text-muted-foreground [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
+                            {registration.event?.title || "Event unavailable"}
+                          </p>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {isOrganizer
+                          ? registration.user?.email || "Unavailable"
+                          : "Your registration"}
+                        {(registration.phone ||
+                          registration.guestCount ||
+                          registration.details) && (
+                          <details className="mt-1 max-w-64 whitespace-normal">
+                            <summary className="cursor-pointer text-sm font-medium text-primary">
+                              Booking details
+                            </summary>
+                            <div className="mt-2 space-y-1 [overflow-wrap:anywhere]">
+                              {registration.phone && (
+                                <p>Phone: {registration.phone}</p>
+                              )}
+                              {registration.guestCount && (
+                                <p>Guests: {registration.guestCount}</p>
+                              )}
+                              {registration.details && (
+                                <p className="whitespace-pre-wrap">
+                                  {registration.details}
+                                </p>
+                              )}
+                            </div>
+                          </details>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {registration.ticketType}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {registration.event?.date
+                          ? new Date(
+                              registration.event.date,
+                            ).toLocaleDateString("en-GB", {
+                              timeZone: "UTC",
+                            })
+                          : "Unavailable"}
+                      </TableCell>
+                      <TableCell className="max-w-60 whitespace-normal">
+                        {registration.event?.location || "Unavailable"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {registration.status || "Confirmed"}
+                        </Badge>
+                      </TableCell>
+                      {isOrganizer && (
+                        <TableCell>
+                          <div className="flex flex-wrap gap-2">
+                            {registration.status === "Pending" && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  disabled={Boolean(reviewing)}
+                                  onClick={() =>
+                                    reviewBooking(registration, "Confirmed")
+                                  }
+                                >
+                                  Confirm
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  disabled={Boolean(reviewing)}
+                                  onClick={() =>
+                                    reviewBooking(registration, "Rejected")
+                                  }
+                                >
+                                  Reject
+                                </Button>
+                              </>
+                            )}
+                            {(!registration.status ||
+                              ["Pending", "Confirmed"].includes(
+                                registration.status,
+                              )) && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                disabled={Boolean(reviewing)}
+                                onClick={() =>
+                                  reviewBooking(registration, "Cancelled")
+                                }
+                              >
+                                Cancel booking
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      )}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </RecordBrowser>
+      )}
+    </div>
+  );
 }

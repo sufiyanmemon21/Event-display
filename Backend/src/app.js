@@ -19,20 +19,6 @@ import { announceChanges, streamUpdates } from "./services/liveupdates.js";
 const app = express();
 app.disable('x-powered-by');
 app.use(cors());
-// app.use((req, res, next) => {
-//   res.set('X-Content-Type-Options', 'nosniff');
-//   res.set('Referrer-Policy', 'no-referrer');
-//   const started = performance.now();
-//   res.once('finish', () => {
-//     if (process.env.NODE_ENV !== 'test') console.info(JSON.stringify({
-//       method: req.method,
-//       route: req.route?.path || 'unmatched',
-//       status: res.statusCode,
-//       durationMs: Math.round(performance.now() - started)
-//     }));
-//   });
-//   next();
-// });
 app.use(async (req, res, next) => {
   try {
     await database();

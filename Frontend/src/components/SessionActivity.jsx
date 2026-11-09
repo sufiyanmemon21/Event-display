@@ -38,10 +38,9 @@ function SessionActivityPanel({ session }) {
 
     async function loadActivity() {
       try {
-        const response = await API.get(
-          `/sessions/${session._id}/activity`,
-          { signal: controller.signal }
-        );
+        const response = await API.get(`/sessions/${session._id}/activity`, {
+          signal: controller.signal,
+        });
 
         if (!controller.signal.aborted) {
           setActivity(response.data.activity);
@@ -51,7 +50,7 @@ function SessionActivityPanel({ session }) {
         if (!controller.signal.aborted) {
           setError(
             err.response?.data?.msg ||
-              "Unable to load your session registration."
+              "Unable to load your session registration.",
           );
         }
       } finally {
@@ -70,33 +69,27 @@ function SessionActivityPanel({ session }) {
     if (saving || loading || error) return;
 
     const enabled =
-      action === "register"
-        ? !activity.registered
-        : !activity.bookmarked;
+      action === "register" ? !activity.registered : !activity.bookmarked;
 
     setSaving(true);
 
     try {
-      const response = await API.put(
-        `/sessions/${session._id}/activity`,
-        { action, enabled }
-      );
+      const response = await API.put(`/sessions/${session._id}/activity`, {
+        action,
+        enabled,
+      });
 
       setActivity(response.data.activity);
       toast.success(response.data.msg);
     } catch (err) {
-      toast.error(
-        err.response?.data?.msg || "Unable to update session."
-      );
+      toast.error(err.response?.data?.msg || "Unable to update session.");
     } finally {
       setSaving(false);
     }
   }
 
   if (loading) {
-    return (
-      <EllipsisLoader label="Loading your session details" />
-    );
+    return <EllipsisLoader label="Loading your session details" />;
   }
 
   if (error) {
@@ -149,19 +142,12 @@ function SessionActivityPanel({ session }) {
           ? "Saving..."
           : `Registration: ${
               activity.registered ? "Registered" : "Not registered"
-            } | Bookmark: ${
-              activity.bookmarked ? "Saved" : "Not saved"
-            }`}
+            } | Bookmark: ${activity.bookmarked ? "Saved" : "Not saved"}`}
       </p>
     </div>
   );
 }
 
 export default function SessionActivity({ session }) {
-  return (
-    <SessionActivityPanel
-      key={session._id}
-      session={session}
-    />
-  );
+  return <SessionActivityPanel key={session._id} session={session} />;
 }

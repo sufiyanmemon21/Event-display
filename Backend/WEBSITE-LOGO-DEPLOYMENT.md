@@ -4,7 +4,7 @@ The logo is stored as a bounded WebP buffer in the existing MongoDB database's w
 
 Deploy the backend and frontend changes together when ready. No deployment is performed by this change.
 
-Set VITE_API_URL in the frontend deployment environment to the public HTTPS backend base URL (without an /events suffix). Rebuild the frontend after changing this variable; Vite embeds it at build time. The active API client is Frontend/src/api/api.js, not Frontend/api/api.js. Without VITE_API_URL the existing client defaults to localhost:3000.
+Set VITE_API_URL in the frontend deployment environment to the public HTTPS backend base URL (without an /events suffix). Rebuild the frontend after changing this variable; Vite embeds it at build time. The API client is Frontend/src/api/api.js. Without VITE_API_URL the existing client defaults to localhost:3000.
 
 Keep the existing backend MONGODB_URL and JWT_SECRET configuration. To share a logo between local and deployed sites, their configured APIs must use the same intended database. Do not change database configuration solely to copy a logo.
 

@@ -4,11 +4,14 @@ function Table({ className, ...props }) {
   return (
     <div
       data-slot="table-container"
-      className="relative w-full overflow-x-auto"
+      className="relative w-full overflow-x-auto workspace:[scrollbar-color:var(--input)_transparent] workspace:[background:var(--card)] workspace:[overscroll-behavior-x:contain]"
     >
       <table
         data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
+        className={cn(
+          "w-full caption-bottom text-sm workspace:text-[.9375rem]",
+          className,
+        )}
         {...props}
       />
     </div>
@@ -41,7 +44,7 @@ function TableFooter({ className, ...props }) {
       data-slot="table-footer"
       className={cn(
         "border-t bg-muted/50 font-medium [&>tr]:last:border-b-0",
-        className
+        className,
       )}
       {...props}
     />
@@ -53,8 +56,9 @@ function TableRow({ className, ...props }) {
     <tr
       data-slot="table-row"
       className={cn(
-        "border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted",
-        className
+        `border-b transition-colors hover:bg-muted/50 has-aria-expanded:bg-muted/50 data-[state=selected]:bg-muted
+        [.eventsphere-workspace_[data-slot='table-body']_&:hover]:[background:color-mix(in_srgb,_var(--accent)_44%,_transparent)]`,
+        className,
       )}
       {...props}
     />
@@ -66,8 +70,10 @@ function TableHead({ className, ...props }) {
     <th
       data-slot="table-head"
       className={cn(
-        "h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0",
-        className
+        `h-10 px-2 text-left align-middle font-medium whitespace-nowrap text-foreground [&:has([role=checkbox])]:pr-0
+        workspace:h-[46px] workspace:[background:var(--muted)] workspace:text-muted-foreground
+        workspace:text-[.8125rem] workspace:font-[650] workspace:tracking-[.075em] workspace:uppercase`,
+        className,
       )}
       {...props}
     />
@@ -79,8 +85,8 @@ function TableCell({ className, ...props }) {
     <td
       data-slot="table-cell"
       className={cn(
-        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0",
-        className
+        "p-2 align-middle whitespace-nowrap [&:has([role=checkbox])]:pr-0 workspace:py-[.9rem]",
+        className,
       )}
       {...props}
     />

@@ -1,5 +1,13 @@
 import EllipsisLoader from "@/components/EllipsisLoader";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 import { PageHeading } from "@/components/workspace";
 import WorkspaceSelect from "@/components/workspace-select";
 import { useEffect, useState } from "react";
@@ -7,103 +15,141 @@ import API from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-const metrics = [{
-  key: "totalEvents",
-  label: "Events"
-}, {
-  key: "attendeeRegistrations",
-  label: "Attendee Registrations"
-}, {
-  key: "exhibitorApplications",
-  label: "Exhibitor Applications"
-}, {
-  key: "approvedApplications",
-  label: "Approved Applications"
-}, {
-  key: "pendingApplications",
-  label: "Pending Applications"
-}, {
-  key: "rejectedApplications",
-  label: "Rejected Applications"
-}, {
-  key: "totalBooths",
-  label: "Total Booths"
-}, {
-  key: "reservedBooths",
-  label: "Reserved Booths"
-}, {
-  key: "availableBooths",
-  label: "Available Booths"
-}, {
-  key: "totalSessions",
-  label: "Sessions"
-}, {
-  key: "sessionRegistrations",
-  label: "Session Registrations"
-}, {
-  key: "sessionBookmarks",
-  label: "Session Bookmarks"
-}, {
-  key: "recordedBoothVisits",
-  label: "Recorded Booth Visits"
-}, {
-  key: "uniqueVisitingAttendees",
-  label: "Unique Visiting Attendees"
-}];
-const sessionColumns = [{
-  key: "title",
-  label: "Session"
-}, {
-  key: "eventTitle",
-  label: "Event"
-}, {
-  key: "registrations",
-  label: "Registrations"
-}, {
-  key: "bookmarks",
-  label: "Bookmarks"
-}];
-const exhibitorColumns = [{
-  key: "companyName",
-  label: "Company"
-}, {
-  key: "eventTitle",
-  label: "Event"
-}, {
-  key: "boothNumber",
-  label: "Current Booth"
-}, {
-  key: "visits",
-  label: "Recorded Visits"
-}];
-function ReportTable({
-  rows,
-  columns,
-  emptyText
-}) {
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+const metrics = [
+  {
+    key: "totalEvents",
+    label: "Events",
+  },
+  {
+    key: "attendeeRegistrations",
+    label: "Attendee Registrations",
+  },
+  {
+    key: "exhibitorApplications",
+    label: "Exhibitor Applications",
+  },
+  {
+    key: "approvedApplications",
+    label: "Approved Applications",
+  },
+  {
+    key: "pendingApplications",
+    label: "Pending Applications",
+  },
+  {
+    key: "rejectedApplications",
+    label: "Rejected Applications",
+  },
+  {
+    key: "totalBooths",
+    label: "Total Booths",
+  },
+  {
+    key: "reservedBooths",
+    label: "Reserved Booths",
+  },
+  {
+    key: "availableBooths",
+    label: "Available Booths",
+  },
+  {
+    key: "totalSessions",
+    label: "Sessions",
+  },
+  {
+    key: "sessionRegistrations",
+    label: "Session Registrations",
+  },
+  {
+    key: "sessionBookmarks",
+    label: "Session Bookmarks",
+  },
+  {
+    key: "recordedBoothVisits",
+    label: "Recorded Booth Visits",
+  },
+  {
+    key: "uniqueVisitingAttendees",
+    label: "Unique Visiting Attendees",
+  },
+];
+const sessionColumns = [
+  {
+    key: "title",
+    label: "Session",
+  },
+  {
+    key: "eventTitle",
+    label: "Event",
+  },
+  {
+    key: "registrations",
+    label: "Registrations",
+  },
+  {
+    key: "bookmarks",
+    label: "Bookmarks",
+  },
+];
+const exhibitorColumns = [
+  {
+    key: "companyName",
+    label: "Company",
+  },
+  {
+    key: "eventTitle",
+    label: "Event",
+  },
+  {
+    key: "boothNumber",
+    label: "Current Booth",
+  },
+  {
+    key: "visits",
+    label: "Recorded Visits",
+  },
+];
+function ReportTable({ rows, columns, emptyText }) {
   if (rows.length === 0) {
     return <p className="text-muted-foreground">{emptyText}</p>;
   }
-  return <div className="overflow-x-auto">
+  return (
+    <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            {columns.map(column => <TableHead key={column.key}>
-                {column.label}
-              </TableHead>)}
+            {columns.map((column) => (
+              <TableHead key={column.key}>{column.label}</TableHead>
+            ))}
           </TableRow>
         </TableHeader>
 
         <TableBody>
-          {rows.map(row => <TableRow key={row.id}>
-              {columns.map(column => <TableCell key={column.key}>
-                  {row[column.key] === "" || row[column.key] === null || row[column.key] === undefined ? "Not assigned" : row[column.key]}
-                </TableCell>)}
-            </TableRow>)}
+          {rows.map((row) => (
+            <TableRow key={row.id}>
+              {columns.map((column) => (
+                <TableCell key={column.key}>
+                  {row[column.key] === "" ||
+                  row[column.key] === null ||
+                  row[column.key] === undefined
+                    ? "Not assigned"
+                    : row[column.key]}
+                </TableCell>
+              ))}
+            </TableRow>
+          ))}
         </TableBody>
       </Table>
-    </div>;
+    </div>
+  );
 }
 function csvCell(value) {
   let text = String(value ?? "");
@@ -131,9 +177,9 @@ export default function AnalyticsDashboard() {
       try {
         const response = await API.get("/analytics/summary", {
           params: {
-            eventId
+            eventId,
           },
-          signal: controller.signal
+          signal: controller.signal,
         });
         if (!controller.signal.aborted) {
           setReport(response.data);
@@ -157,11 +203,43 @@ export default function AnalyticsDashboard() {
   }, [allowed, eventId, refresh]);
   function downloadReport() {
     if (!report || report.selectedEventId !== eventId) return;
-    const eventTitle = eventId ? report.events.find(event => event._id === eventId)?.title : role === "admin" ? "All Events" : "All My Events";
-    const rows = [["EventSphere Analytics Report"], ["Event", eventTitle], ["Generated At", report.generatedAt], ["Visit Counting", "Attendee-confirmed; one recorded visit per attendee and exhibitor application"], [], ["Metric", "Value"], ...metrics.map(metric => [metric.label, report.analytics[metric.key]]), ["Booth Reservation Rate", `${report.analytics.boothReservationRate}%`], [], ["Session", "Event", "Registrations", "Bookmarks"], ...report.sessionStats.map(session => [session.title, session.eventTitle, session.registrations, session.bookmarks]), [], ["Company", "Event", "Current Booth", "Recorded Visits"], ...report.exhibitorStats.map(item => [item.companyName, item.eventTitle, item.boothNumber || "Not assigned", item.visits])];
-    const csv = rows.map(row => row.map(csvCell).join(",")).join("\r\n");
+    const eventTitle = eventId
+      ? report.events.find((event) => event._id === eventId)?.title
+      : role === "admin"
+        ? "All Events"
+        : "All My Events";
+    const rows = [
+      ["EventSphere Analytics Report"],
+      ["Event", eventTitle],
+      ["Generated At", report.generatedAt],
+      [
+        "Visit Counting",
+        "Attendee-confirmed; one recorded visit per attendee and exhibitor application",
+      ],
+      [],
+      ["Metric", "Value"],
+      ...metrics.map((metric) => [metric.label, report.analytics[metric.key]]),
+      ["Booth Reservation Rate", `${report.analytics.boothReservationRate}%`],
+      [],
+      ["Session", "Event", "Registrations", "Bookmarks"],
+      ...report.sessionStats.map((session) => [
+        session.title,
+        session.eventTitle,
+        session.registrations,
+        session.bookmarks,
+      ]),
+      [],
+      ["Company", "Event", "Current Booth", "Recorded Visits"],
+      ...report.exhibitorStats.map((item) => [
+        item.companyName,
+        item.eventTitle,
+        item.boothNumber || "Not assigned",
+        item.visits,
+      ]),
+    ];
+    const csv = rows.map((row) => row.map(csvCell).join(",")).join("\r\n");
     const blob = new Blob(["\uFEFF", csv], {
-      type: "text/csv;charset=utf-8;"
+      type: "text/csv;charset=utf-8;",
     });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -173,21 +251,34 @@ export default function AnalyticsDashboard() {
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   if (!allowed) {
-    return <p className="p-6">
+    return (
+      <p className="p-6">
         Analytics are available to organizers and administrators.
-      </p>;
+      </p>
+    );
   }
   const currentReport = report && report.selectedEventId === eventId;
-  return <div className="w-full space-y-6">
+  return (
+    <div className="w-full space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <PageHeading title="Analytics" description="Understand participation, booth performance, and session engagement." />
+        <PageHeading
+          title="Analytics"
+          description="Understand participation, booth performance, and session engagement."
+        />
 
         <div className="flex gap-3">
-          <Button variant="outline" onClick={() => setRefresh(value => value + 1)} disabled={loading}>
+          <Button
+            variant="outline"
+            onClick={() => setRefresh((value) => value + 1)}
+            disabled={loading}
+          >
             Refresh
           </Button>
 
-          <Button onClick={downloadReport} disabled={loading || Boolean(error) || !currentReport}>
+          <Button
+            onClick={downloadReport}
+            disabled={loading || Boolean(error) || !currentReport}
+          >
             Download CSV
           </Button>
         </div>
@@ -195,42 +286,100 @@ export default function AnalyticsDashboard() {
 
       <div className="max-w-md space-y-2">
         <Label htmlFor="analytics-event">Event</Label>
-        <WorkspaceSelect id="analytics-event" value={eventId} onChange={event => setEventId(event.target.value)} disabled={loading} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+        <WorkspaceSelect
+          id="analytics-event"
+          value={eventId}
+          onChange={(event) => setEventId(event.target.value)}
+          disabled={loading}
+          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+        >
           <option value="">
             {role === "admin" ? "All Events" : "All My Events"}
           </option>
 
-          {report?.events.map(event => <option key={event._id} value={event._id}>
+          {report?.events.map((event) => (
+            <option key={event._id} value={event._id}>
               {event.title}
-            </option>)}
+            </option>
+          ))}
         </WorkspaceSelect>
       </div>
 
-      {error && <p role="alert" className="text-destructive">
+      {error && (
+        <p role="alert" className="text-destructive">
           {error}
-        </p>}
+        </p>
+      )}
 
-      {loading ? <EllipsisLoader scope="page" label="Loading analytics" /> : currentReport ? <>
+      {loading ? (
+        <EllipsisLoader scope="page" label="Loading analytics" />
+      ) : currentReport ? (
+        <>
           <p className="text-sm text-muted-foreground">
             Updated: {new Date(report.generatedAt).toLocaleString("en-GB")}.
             Refreshes every 30 seconds.
           </p>
 
-          <Card><CardHeader><CardTitle>Application pipeline</CardTitle><p className="text-sm text-muted-foreground">Current exhibitor application outcomes</p></CardHeader><CardContent><div className="h-60 w-full" role="img" aria-label={`Approved: ${report.analytics.approvedApplications}, Pending: ${report.analytics.pendingApplications}, Rejected: ${report.analytics.rejectedApplications}`}><ResponsiveContainer width="100%" height="100%" initialDimension={{
-              width: 600,
-              height: 240
-            }}><BarChart data={[{
-                name: "Approved",
-                count: report.analytics.approvedApplications || 0
-              }, {
-                name: "Pending",
-                count: report.analytics.pendingApplications || 0
-              }, {
-                name: "Rejected",
-                count: report.analytics.rejectedApplications || 0
-              }]}><CartesianGrid vertical={false} stroke="var(--border)" /><XAxis dataKey="name" axisLine={false} tickLine={false} /><YAxis allowDecimals={false} axisLine={false} tickLine={false} /><Tooltip /><Bar dataKey="count" name="Applications" fill="var(--primary)" radius={[6, 6, 0, 0]} maxBarSize={90} /></BarChart></ResponsiveContainer></div></CardContent></Card>
+          <Card>
+            <CardHeader>
+              <CardTitle>Application pipeline</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Current exhibitor application outcomes
+              </p>
+            </CardHeader>
+            <CardContent>
+              <div
+                className="h-60 w-full"
+                role="img"
+                aria-label={`Approved: ${report.analytics.approvedApplications}, Pending: ${report.analytics.pendingApplications}, Rejected: ${report.analytics.rejectedApplications}`}
+              >
+                <ResponsiveContainer
+                  width="100%"
+                  height="100%"
+                  initialDimension={{
+                    width: 600,
+                    height: 240,
+                  }}
+                >
+                  <BarChart
+                    data={[
+                      {
+                        name: "Approved",
+                        count: report.analytics.approvedApplications || 0,
+                      },
+                      {
+                        name: "Pending",
+                        count: report.analytics.pendingApplications || 0,
+                      },
+                      {
+                        name: "Rejected",
+                        count: report.analytics.rejectedApplications || 0,
+                      },
+                    ]}
+                  >
+                    <CartesianGrid vertical={false} stroke="var(--border)" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                    <YAxis
+                      allowDecimals={false}
+                      axisLine={false}
+                      tickLine={false}
+                    />
+                    <Tooltip />
+                    <Bar
+                      dataKey="count"
+                      name="Applications"
+                      fill="var(--primary)"
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={90}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {metrics.map(metric => <Card key={metric.key}>
+            {metrics.map((metric) => (
+              <Card key={metric.key}>
                 <CardHeader>
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {metric.label}
@@ -242,7 +391,8 @@ export default function AnalyticsDashboard() {
                     {report.analytics[metric.key]}
                   </p>
                 </CardContent>
-              </Card>)}
+              </Card>
+            ))}
           </div>
 
           <Card>
@@ -253,11 +403,16 @@ export default function AnalyticsDashboard() {
             <CardContent className="space-y-3">
               <p>
                 {report.analytics.reservedBooths} of{" "}
-                {report.analytics.totalBooths} booths reserved
-                {" "}({report.analytics.boothReservationRate}%)
+                {report.analytics.totalBooths} booths reserved (
+                {report.analytics.boothReservationRate}%)
               </p>
 
-              <progress value={report.analytics.reservedBooths} max={report.analytics.totalBooths || 1} aria-label="Reserved booths" className="h-3 w-full accent-primary" />
+              <progress
+                value={report.analytics.reservedBooths}
+                max={report.analytics.totalBooths || 1}
+                aria-label="Reserved booths"
+                className="h-3 w-full accent-primary"
+              />
             </CardContent>
           </Card>
 
@@ -268,12 +423,16 @@ export default function AnalyticsDashboard() {
 
             <CardContent className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Visits are confirmed by attendees. Each attendee counts
-                once per exhibitor application. Current booth numbers
-                may differ from the booth used at the time of a visit.
+                Visits are confirmed by attendees. Each attendee counts once per
+                exhibitor application. Current booth numbers may differ from the
+                booth used at the time of a visit.
               </p>
 
-              <ReportTable rows={report.exhibitorStats} columns={exhibitorColumns} emptyText="No approved exhibitors or recorded visits found." />
+              <ReportTable
+                rows={report.exhibitorStats}
+                columns={exhibitorColumns}
+                emptyText="No approved exhibitors or recorded visits found."
+              />
             </CardContent>
           </Card>
 
@@ -283,9 +442,15 @@ export default function AnalyticsDashboard() {
             </CardHeader>
 
             <CardContent>
-              <ReportTable rows={report.sessionStats} columns={sessionColumns} emptyText="No sessions found." />
+              <ReportTable
+                rows={report.sessionStats}
+                columns={sessionColumns}
+                emptyText="No sessions found."
+              />
             </CardContent>
           </Card>
-        </> : null}
-    </div>;
+        </>
+      ) : null}
+    </div>
+  );
 }

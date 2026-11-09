@@ -99,7 +99,7 @@ export function NavUser({ onSignOut }) {
 
               <div className="grid flex-1 text-left text-sm">
                 <span className="truncate font-medium">{user.name}</span>
-                <span className="truncate text-xs text-muted-foreground">
+                <span className="truncate text-xs text-muted-foreground [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
                   {user.email}
                 </span>
               </div>
@@ -116,7 +116,7 @@ export function NavUser({ onSignOut }) {
           >
             <DropdownMenuLabel>
               <p className="truncate">{user.name}</p>
-              <p className="mt-1 text-xs font-normal capitalize text-muted-foreground">
+              <p className="mt-1 text-xs font-normal capitalize text-muted-foreground [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
                 {user.role}
               </p>
             </DropdownMenuLabel>

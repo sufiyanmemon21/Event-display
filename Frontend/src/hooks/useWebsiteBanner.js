@@ -1,13 +1,13 @@
-import { useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from "react";
 
-const key = 'eventsphere.websiteBanner';
-const changed = 'eventsphere-banner-changed';
+const key = "eventsphere.websiteBanner";
+const changed = "eventsphere-banner-changed";
 
 function snapshot() {
   try {
-    return localStorage.getItem(key) || '{}';
+    return localStorage.getItem(key) || "{}";
   } catch {
-    return '{}';
+    return "{}";
   }
 }
 
@@ -23,10 +23,10 @@ function subscribe(listener) {
   function onStorage(event) {
     if (event.key === key || event.key === null) listener();
   }
-  window.addEventListener('storage', onStorage);
+  window.addEventListener("storage", onStorage);
   window.addEventListener(changed, listener);
   return () => {
-    window.removeEventListener('storage', onStorage);
+    window.removeEventListener("storage", onStorage);
     window.removeEventListener(changed, listener);
   };
 }
@@ -41,5 +41,5 @@ export function saveWebsiteBanner(banner) {
 }
 
 export default function useWebsiteBanner() {
-  return parse(useSyncExternalStore(subscribe, snapshot, () => '{}'));
+  return parse(useSyncExternalStore(subscribe, snapshot, () => "{}"));
 }

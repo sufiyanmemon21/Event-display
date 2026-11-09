@@ -10,9 +10,21 @@ function subscribe(update) {
 }
 
 function useAnimatedIcon() {
-  const reduced = useSyncExternalStore(subscribe, () => window.matchMedia(query).matches, () => true);
+  const reduced = useSyncExternalStore(
+    subscribe,
+    () => window.matchMedia(query).matches,
+    () => true,
+  );
   const { ref, triggerProps } = useIconHover();
-  return { iconProps: { ref, isAnimated: !reduced, duration: 0.55, "aria-hidden": true }, triggerProps: reduced ? {} : triggerProps };
+  return {
+    iconProps: {
+      ref,
+      isAnimated: !reduced,
+      duration: 0.55,
+      "aria-hidden": true,
+    },
+    triggerProps: reduced ? {} : triggerProps,
+  };
 }
 
 export default function AnimatedIcon({ icon: Icon, size = 16, children }) {

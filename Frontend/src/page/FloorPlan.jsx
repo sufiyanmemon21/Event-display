@@ -3,7 +3,7 @@ import EllipsisLoader from "@/components/EllipsisLoader";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { PageHeading } from "@/components/workspace";
 import WorkspaceSelect from "@/components/workspace-select";
-import useLiveRefresh from '@/hooks/useLiveRefresh';
+import useLiveRefresh from "@/hooks/useLiveRefresh";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import { Button } from "@/components/ui/button";
@@ -30,9 +30,11 @@ export default function FloorPlan() {
   const userId = localStorage.getItem("userId");
   const busy = loading || saving;
   const dirty = Boolean(layout) && JSON.stringify(layout) !== savedLayout;
-  const selectedEvent = events.find(event => event._id === eventId);
+  const selectedEvent = events.find((event) => event._id === eventId);
   const organizerId = selectedEvent?.organizer?._id || selectedEvent?.organizer;
-  const canEdit = Boolean(selectedEvent) && (role === "admin" || role === "organizer" && organizerId === userId);
+  const canEdit =
+    Boolean(selectedEvent) &&
+    (role === "admin" || (role === "organizer" && organizerId === userId));
   useEffect(() => {
     const controller = new AbortController();
     async function loadEvents() {
@@ -40,7 +42,7 @@ export default function FloorPlan() {
       setEventError("");
       try {
         const response = await API.get("/events/all", {
-          signal: controller.signal
+          signal: controller.signal,
         });
         if (!controller.signal.aborted) {
           setEvents(response.data.events.filter(isExpo));
@@ -73,13 +75,20 @@ export default function FloorPlan() {
   }
   async function loadFloorPlan(id = eventId, { switching = false } = {}) {
     if (!id || busy) return;
-    if (!switching && dirty && !(await confirm("Reload and discard unsaved floor plan changes?"))) {
+    if (
+      !switching &&
+      dirty &&
+      !(await confirm("Reload and discard unsaved floor plan changes?"))
+    ) {
       return;
     }
     setLoading(true);
     setError("");
     try {
-      const [layoutResponse, boothResponse] = await Promise.all([API.get(`/booths/layout/${id}`), API.get(`/booths/event/${id}`)]);
+      const [layoutResponse, boothResponse] = await Promise.all([
+        API.get(`/booths/layout/${id}`),
+        API.get(`/booths/event/${id}`),
+      ]);
       const nextLayout = layoutResponse.data.layout;
       setLayout(nextLayout);
       setSavedLayout(JSON.stringify(nextLayout));
@@ -99,14 +108,16 @@ export default function FloorPlan() {
   function resizeGrid(field, value) {
     const size = Number(value);
     if (!Number.isInteger(size) || size < 1 || size > 20) return;
-    const outsideGrid = layout.placements.some(item => field === "rows" ? item.row > size : item.column > size);
+    const outsideGrid = layout.placements.some((item) =>
+      field === "rows" ? item.row > size : item.column > size,
+    );
     if (outsideGrid) {
       toast.error("Move or remove booths outside the smaller grid first.");
       return;
     }
-    setLayout(previous => ({
+    setLayout((previous) => ({
       ...previous,
-      [field]: size
+      [field]: size,
     }));
   }
   function placeBooth(row, column) {
@@ -115,24 +126,31 @@ export default function FloorPlan() {
       toast.info("Select a booth first.");
       return;
     }
-    const occupied = layout.placements.find(item => item.row === row && item.column === column);
+    const occupied = layout.placements.find(
+      (item) => item.row === row && item.column === column,
+    );
     if (occupied && occupied.booth !== selectedBoothId) {
       toast.error("This cell already contains another booth.");
       return;
     }
-    setLayout(previous => ({
+    setLayout((previous) => ({
       ...previous,
-      placements: [...previous.placements.filter(item => item.booth !== selectedBoothId), {
-        booth: selectedBoothId,
-        row,
-        column
-      }]
+      placements: [
+        ...previous.placements.filter((item) => item.booth !== selectedBoothId),
+        {
+          booth: selectedBoothId,
+          row,
+          column,
+        },
+      ],
     }));
   }
   function removeSelectedBooth() {
-    setLayout(previous => ({
+    setLayout((previous) => ({
       ...previous,
-      placements: previous.placements.filter(item => item.booth !== selectedBoothId)
+      placements: previous.placements.filter(
+        (item) => item.booth !== selectedBoothId,
+      ),
     }));
   }
   async function saveFloorPlan() {
@@ -153,51 +171,98 @@ export default function FloorPlan() {
       setSaving(false);
     }
   }
-  const boothMap = new Map(booths.map(booth => [booth._id, booth]));
-  const cellMap = new Map((layout?.placements || []).map(item => [`${item.row}:${item.column}`, item]));
-  const placedIds = new Set((layout?.placements || []).map(item => item.booth));
-  const unplacedBooths = booths.filter(booth => !placedIds.has(booth._id));
-  return <div className="w-full space-y-6">
-      <PageHeading title="Floor plan studio" description="Arrange your expo space and locate exhibitors." />
+  const boothMap = new Map(booths.map((booth) => [booth._id, booth]));
+  const cellMap = new Map(
+    (layout?.placements || []).map((item) => [
+      `${item.row}:${item.column}`,
+      item,
+    ]),
+  );
+  const placedIds = new Set(
+    (layout?.placements || []).map((item) => item.booth),
+  );
+  const unplacedBooths = booths.filter((booth) => !placedIds.has(booth._id));
+  return (
+    <div className="w-full space-y-6">
+      <PageHeading
+        title="Floor plan studio"
+        description="Arrange your expo space and locate exhibitors."
+      />
 
-      <Card className="workspace-event-scope">
+      <Card className="workspace-event-scope workspace:gap-[10px] workspace:border workspace:border-border workspace:py-[14px]">
         <CardHeader>
           <CardTitle>Select an Expo</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
-          {eventError ? <>
+          {eventError ? (
+            <>
               <p role="alert">{eventError}</p>
-              <Button variant="outline" onClick={() => setEventRetry(previous => previous + 1)}>
+              <Button
+                variant="outline"
+                onClick={() => setEventRetry((previous) => previous + 1)}
+              >
                 Try Again
               </Button>
-            </> : <>
+            </>
+          ) : (
+            <>
               <Label htmlFor="floor-plan-event">Expo</Label>
-              <WorkspaceSelect id="floor-plan-event" value={eventId} onChange={changeEvent} disabled={loadingEvents || busy} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
-                <option value="">
-                  Select an Expo
-                </option>
-                {events.map(event => <option key={event._id} value={event._id}>
+              <WorkspaceSelect
+                id="floor-plan-event"
+                value={eventId}
+                onChange={changeEvent}
+                disabled={loadingEvents || busy}
+                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="">Select an Expo</option>
+                {events.map((event) => (
+                  <option key={event._id} value={event._id}>
                     {event.title}
-                  </option>)}
+                  </option>
+                ))}
               </WorkspaceSelect>
-              {loadingEvents && <EllipsisLoader scope="inline" label="Loading expos" />}
-              {!loadingEvents && events.length === 0 && <p className="text-sm text-muted-foreground">No expos are available yet.</p>}
+              {loadingEvents && (
+                <EllipsisLoader scope="inline" label="Loading expos" />
+              )}
+              {!loadingEvents && events.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  No expos are available yet.
+                </p>
+              )}
 
-              <Button onClick={() => loadFloorPlan()} disabled={!eventId || loadingEvents || busy}>
-                {loading ? <EllipsisLoader scope="inline" /> : "Load / Reload Floor Plan"}
+              <Button
+                onClick={() => loadFloorPlan()}
+                disabled={!eventId || loadingEvents || busy}
+              >
+                {loading ? (
+                  <EllipsisLoader scope="inline" />
+                ) : (
+                  "Load / Reload Floor Plan"
+                )}
               </Button>
-            </>}
+            </>
+          )}
         </CardContent>
       </Card>
 
-      {error && <p role="alert" className="text-destructive">
+      {error && (
+        <p role="alert" className="text-destructive">
           {error}
-        </p>}
+        </p>
+      )}
 
       {loading && <EllipsisLoader scope="page" label="Loading floor plan" />}
-      {layout && !loading && <div className={canEdit ? "workspace-floor-studio" : "min-w-0"}>
-          {canEdit && <Card className="workspace-floor-controls">
+      {layout && !loading && (
+        <div
+          className={
+            canEdit
+              ? "workspace-floor-studio grid min-w-0 gap-[18px] items-start min-[1120px]:[grid-template-columns:minmax(250px,_.76fr)_minmax(0,_2fr)]"
+              : "min-w-0"
+          }
+        >
+          {canEdit && (
+            <Card className="workspace-floor-controls min-w-0 [border:1px_solid_var(--border)]">
               <CardHeader>
                 <CardTitle>Layout controls</CardTitle>
               </CardHeader>
@@ -207,34 +272,65 @@ export default function FloorPlan() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
                       <Label htmlFor="layout-rows">Rows</Label>
-                      <Input id="layout-rows" type="number" min={1} max={20} value={layout.rows} onChange={event => resizeGrid("rows", event.target.value)} />
+                      <Input
+                        id="layout-rows"
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={layout.rows}
+                        onChange={(event) =>
+                          resizeGrid("rows", event.target.value)
+                        }
+                      />
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="layout-columns">Columns</Label>
-                      <Input id="layout-columns" type="number" min={1} max={20} value={layout.columns} onChange={event => resizeGrid("columns", event.target.value)} />
+                      <Input
+                        id="layout-columns"
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={layout.columns}
+                        onChange={(event) =>
+                          resizeGrid("columns", event.target.value)
+                        }
+                      />
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="layout-booth">Booth to Place or Move</Label>
-                    <WorkspaceSelect id="layout-booth" value={selectedBoothId} onChange={event => setSelectedBoothId(event.target.value)} className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm">
+                    <WorkspaceSelect
+                      id="layout-booth"
+                      value={selectedBoothId}
+                      onChange={(event) =>
+                        setSelectedBoothId(event.target.value)
+                      }
+                      className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    >
                       <option value="">Select a booth</option>
-                      {booths.map(booth => <option key={booth._id} value={booth._id}>
+                      {booths.map((booth) => (
+                        <option key={booth._id} value={booth._id}>
                           {booth.boothNumber}
                           {placedIds.has(booth._id) ? " — Placed" : ""}
-                        </option>)}
+                        </option>
+                      ))}
                     </WorkspaceSelect>
                   </div>
 
                   <p className="text-sm text-muted-foreground">
-                    Select a booth, then click an empty cell. To move it,
-                    click another empty cell. Removing it from the plan
-                    does not delete the booth or cancel its reservation.
+                    Select a booth, then click an empty cell. To move it, click
+                    another empty cell. Removing it from the plan does not
+                    delete the booth or cancel its reservation.
                   </p>
 
-                  <div className="workspace-floor-actions">
-                    <Button variant="outline" onClick={removeSelectedBooth} disabled={!placedIds.has(selectedBoothId)}>
+                  <div className="workspace-floor-actions flex flex-wrap gap-2 [&_button]:whitespace-normal [&_button]:min-h-[38px] [&_button]:h-auto [&_button]:text-left">
+                    <Button
+                      variant="outline"
+                      onClick={removeSelectedBooth}
+                      disabled={!placedIds.has(selectedBoothId)}
+                    >
                       Remove Selected Booth from Plan
                     </Button>
 
@@ -242,21 +338,30 @@ export default function FloorPlan() {
                       {saving ? "Saving..." : "Save Floor Plan"}
                     </Button>
 
-                    <Button variant="outline" disabled={!dirty} onClick={() => setLayout(JSON.parse(savedLayout))}>
+                    <Button
+                      variant="outline"
+                      disabled={!dirty}
+                      onClick={() => setLayout(JSON.parse(savedLayout))}
+                    >
                       Discard Changes
                     </Button>
                   </div>
                 </fieldset>
 
-                {dirty && <p className="text-sm" role="status">
+                {dirty && (
+                  <p className="text-sm" role="status">
                     Unsaved layout changes.
-                  </p>}
+                  </p>
+                )}
 
-                {conflict && <p className="text-sm text-destructive">
+                {conflict && (
+                  <p className="text-sm text-destructive">
                     Reload the latest floor plan before editing again.
-                  </p>}
+                  </p>
+                )}
               </CardContent>
-            </Card>}
+            </Card>
+          )}
 
           <Card className="min-w-0">
             <CardHeader>
@@ -267,38 +372,68 @@ export default function FloorPlan() {
             </CardHeader>
 
             <CardContent className="space-y-4">
-              {layout.revision === 0 && <p className="text-sm text-muted-foreground">
+              {layout.revision === 0 && (
+                <p className="text-sm text-muted-foreground">
                   No saved floor plan yet.
-                </p>}
+                </p>
+              )}
 
-              <div className="workspace-floor-canvas overflow-x-auto rounded-lg border p-3 sm:p-4">
-                <div className="grid gap-2" style={{
-              gridTemplateColumns: `repeat(${layout.columns}, 90px)`
-            }}>
-                  {Array.from({
-                length: layout.rows * layout.columns
-              }, (_, index) => {
-                const row = Math.floor(index / layout.columns) + 1;
-                const column = index % layout.columns + 1;
-                const placement = cellMap.get(`${row}:${column}`);
-                const booth = boothMap.get(placement?.booth);
-                const available = booth?.status === "Available";
-                return <Button variant="outline" key={`${row}:${column}`} type="button" disabled={!canEdit || busy || conflict} onClick={() => placeBooth(row, column)} aria-label={`Row ${row}, column ${column}: ${booth ? `Booth ${booth.boothNumber}, ${booth.status}` : placement ? "Unavailable booth" : "Empty"}`} title={booth?.reservedBy?.companyName || `Row ${row}, column ${column}`} className={`flex min-h-24 flex-col items-center justify-center gap-1 rounded-md border p-2 text-center text-xs ${booth ? available ? "border-green-600 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-200" : "border-red-600 bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-200" : "border-dashed bg-muted/40"} ${booth && booth._id === selectedBoothId ? "ring-2 ring-primary ring-offset-2" : ""}`}>
+              <div
+                className="workspace-floor-canvas overflow-x-auto rounded-lg border p-3 sm:p-4 [background-color:var(--muted)]
+          [background-image:radial-gradient(var(--input)_1px,_transparent_1px)] [background-size:14px_14px]"
+              >
+                <div
+                  className="grid grid-cols-[repeat(var(--floor-columns),90px)] gap-2"
+                  style={{
+                    "--floor-columns": layout.columns,
+                  }}
+                >
+                  {Array.from(
+                    {
+                      length: layout.rows * layout.columns,
+                    },
+                    (_, index) => {
+                      const row = Math.floor(index / layout.columns) + 1;
+                      const column = (index % layout.columns) + 1;
+                      const placement = cellMap.get(`${row}:${column}`);
+                      const booth = boothMap.get(placement?.booth);
+                      const available = booth?.status === "Available";
+                      return (
+                        <Button
+                          variant="outline"
+                          key={`${row}:${column}`}
+                          type="button"
+                          disabled={!canEdit || busy || conflict}
+                          onClick={() => placeBooth(row, column)}
+                          aria-label={`Row ${row}, column ${column}: ${booth ? `Booth ${booth.boothNumber}, ${booth.status}` : placement ? "Unavailable booth" : "Empty"}`}
+                          title={
+                            booth?.reservedBy?.companyName ||
+                            `Row ${row}, column ${column}`
+                          }
+                          className={`flex min-h-24 flex-col items-center justify-center gap-1 rounded-md border p-2 text-center text-xs [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem] ${booth ? (available ? "border-green-600 bg-green-50 text-green-900 dark:bg-green-950 dark:text-green-200" : "border-red-600 bg-red-50 text-red-900 dark:bg-red-950 dark:text-red-200") : "border-dashed bg-muted/40"} ${booth && booth._id === selectedBoothId ? "ring-2 ring-primary ring-offset-2" : ""}`}
+                        >
                           <span className="break-all font-semibold">
-                            {booth?.boothNumber || (placement ? "Unavailable" : `${row}, ${column}`)}
+                            {booth?.boothNumber ||
+                              (placement ? "Unavailable" : `${row}, ${column}`)}
                           </span>
                           {booth && <span>{booth.status}</span>}
-                        </Button>;
-              })}
+                        </Button>
+                      );
+                    },
+                  )}
                 </div>
               </div>
 
               <p className="text-sm text-muted-foreground">
                 Booths not placed:{" "}
-                {unplacedBooths.length ? unplacedBooths.map(booth => booth.boothNumber).join(", ") : "None"}
+                {unplacedBooths.length
+                  ? unplacedBooths.map((booth) => booth.boothNumber).join(", ")
+                  : "None"}
               </p>
             </CardContent>
           </Card>
-        </div>}
-    </div>;
+        </div>
+      )}
+    </div>
+  );
 }

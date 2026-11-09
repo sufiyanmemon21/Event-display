@@ -5,22 +5,39 @@ let generation = 0;
 let pending;
 let timer;
 const listeners = new Set();
-const emit = value => {
+const emit = (value) => {
   state = { ...state, ...value };
-  listeners.forEach(listener => listener());
+  listeners.forEach((listener) => listener());
 };
-const apply = data => emit({
-  url: data.hasLogo ? API.getUri({ url: "/website-settings/logo/image", params: { v: data.version } }) : "",
-  filename: data.filename, loading: false, error: "",
-});
+const apply = (data) =>
+  emit({
+    url: data.hasLogo
+      ? API.getUri({
+          url: "/website-settings/logo/image",
+          params: { v: data.version },
+        })
+      : "",
+    filename: data.filename,
+    loading: false,
+    error: "",
+  });
 export function refreshWebsiteLogo() {
   if (pending) return pending;
   const revision = generation;
-  pending = API.get("/website-settings/logo").then(({ data }) => {
-    if (revision === generation) apply(data);
-  }).catch(() => {
-    if (revision === generation) emit({ loading: false, error: "Unable to load the saved logo. Please retry." });
-  }).finally(() => { pending = null; });
+  pending = API.get("/website-settings/logo")
+    .then(({ data }) => {
+      if (revision === generation) apply(data);
+    })
+    .catch(() => {
+      if (revision === generation)
+        emit({
+          loading: false,
+          error: "Unable to load the saved logo. Please retry.",
+        });
+    })
+    .finally(() => {
+      pending = null;
+    });
   return pending;
 }
 export async function saveWebsiteLogo(file) {
@@ -29,7 +46,9 @@ export async function saveWebsiteLogo(file) {
   if (file) {
     const data = new FormData();
     data.append("logo", file);
-    response = await API.put("/website-settings/logo", data, { headers: { "Content-Type": "multipart/form-data" } });
+    response = await API.put("/website-settings/logo", data, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   } else {
     response = await API.delete("/website-settings/logo");
   }
@@ -54,7 +73,11 @@ function subscribe(listener) {
   };
 }
 export function useWebsiteLogoState() {
-  return useSyncExternalStore(subscribe, () => state, () => state);
+  return useSyncExternalStore(
+    subscribe,
+    () => state,
+    () => state,
+  );
 }
 export default function useWebsiteLogo() {
   return useWebsiteLogoState().url;

@@ -1,2 +1,4 @@
-import Login from './login';
-export default function Signup() { return <Login signup />; }
+import Login from "./login";
+export default function Signup() {
+  return <Login signup />;
+}

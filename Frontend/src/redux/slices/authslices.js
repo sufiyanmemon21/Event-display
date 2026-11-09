@@ -8,41 +8,36 @@ export const registerUser = createAsyncThunk(
       const response = await api.post("/auth/register", userData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || error.message
-      );
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
+  },
 );
 
 export const AllUsers = createAsyncThunk(
-  'auth/allusers',
+  "auth/allusers",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await api.get("/auth/allusers")
-      return res.data
+      const res = await api.get("/auth/allusers");
+      return res.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-        error.message
-      );
+      return rejectWithValue(error.response?.data?.message || error.message);
     }
-  }
-)
+  },
+);
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: "",
     loading: false,
-    error: ""
+    error: "",
   },
   reducers: {
     logout: (state) => {
       state.user = null;
       state.loading = false;
       state.error = null;
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -74,7 +69,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
       });
-  }
+  },
 });
 
 export const { logout } = authSlice.actions;

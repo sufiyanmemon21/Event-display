@@ -11,7 +11,11 @@ import { toast } from "react-toastify";
 function safeWebsite(value) {
   try {
     const url = new URL(value);
-    if (["http:", "https:"].includes(url.protocol) && !url.username && !url.password) {
+    if (
+      ["http:", "https:"].includes(url.protocol) &&
+      !url.username &&
+      !url.password
+    ) {
       return url.href;
     }
   } catch {
@@ -19,19 +23,29 @@ function safeWebsite(value) {
   }
   return "";
 }
-function CompanyLogo({
-  exhibitorId,
-  companyName
-}) {
+function CompanyLogo({ exhibitorId, companyName }) {
   const [failed, setFailed] = useState(false);
   const baseURL = API.defaults.baseURL.replace(/\/+$/, "");
   const logoURL = `${baseURL}/exhibitor-files/${exhibitorId}/logo`;
   if (failed) {
-    return <div aria-hidden="true" className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border bg-muted text-xl font-semibold">
+    return (
+      <div
+        aria-hidden="true"
+        className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border bg-muted text-xl font-semibold"
+      >
         {companyName?.trim().charAt(0).toUpperCase() || "E"}
-      </div>;
+      </div>
+    );
   }
-  return <img src={logoURL} alt={`${companyName} logo`} loading="lazy" onError={() => setFailed(true)} className="h-16 w-16 shrink-0 rounded-md border bg-white object-contain p-2" />;
+  return (
+    <img
+      src={logoURL}
+      alt={`${companyName} logo`}
+      loading="lazy"
+      onError={() => setFailed(true)}
+      className="h-16 w-16 shrink-0 rounded-md border bg-white object-contain p-2"
+    />
+  );
 }
 export default function ExhibitorSearch() {
   const confirm = useConfirmation();
@@ -39,7 +53,7 @@ export default function ExhibitorSearch() {
   const [category, setCategory] = useState("");
   const [filters, setFilters] = useState({
     keyword: "",
-    category: ""
+    category: "",
   });
   const [exhibitors, setExhibitors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,7 +73,7 @@ export default function ExhibitorSearch() {
       try {
         const response = await API.get("/exhibitors/search", {
           params: filters,
-          signal: controller.signal
+          signal: controller.signal,
         });
         if (!controller.signal.aborted) {
           setExhibitors(response.data.exhibitors);
@@ -82,17 +96,30 @@ export default function ExhibitorSearch() {
       setLoadingVisits(true);
       setVisitError("");
       try {
-        const [visitResponse, registrationResponse] = await Promise.all([API.get("/booths/visits/mine", {
-          signal: controller.signal
-        }), API.get("/attendees/all", {
-          signal: controller.signal
-        })]);
+        const [visitResponse, registrationResponse] = await Promise.all([
+          API.get("/booths/visits/mine", {
+            signal: controller.signal,
+          }),
+          API.get("/attendees/all", {
+            signal: controller.signal,
+          }),
+        ]);
         if (controller.signal.aborted) return;
-        setVisitedIds(visitResponse.data.visits.map(visit => visit.exhibitor?._id || visit.exhibitor));
-        setRegisteredEventIds(registrationResponse.data.attendees.map(item => item.event?._id || item.event).filter(Boolean));
+        setVisitedIds(
+          visitResponse.data.visits.map(
+            (visit) => visit.exhibitor?._id || visit.exhibitor,
+          ),
+        );
+        setRegisteredEventIds(
+          registrationResponse.data.attendees
+            .map((item) => item.event?._id || item.event)
+            .filter(Boolean),
+        );
       } catch (err) {
         if (!controller.signal.aborted) {
-          setVisitError(err.response?.data?.msg || "Unable to load your visit status.");
+          setVisitError(
+            err.response?.data?.msg || "Unable to load your visit status.",
+          );
         }
       } finally {
         if (!controller.signal.aborted) setLoadingVisits(false);
@@ -105,7 +132,7 @@ export default function ExhibitorSearch() {
     event.preventDefault();
     setFilters({
       keyword: keyword.trim(),
-      category: category.trim()
+      category: category.trim(),
     });
   }
   function clearSearch() {
@@ -113,23 +140,37 @@ export default function ExhibitorSearch() {
     setCategory("");
     setFilters({
       keyword: "",
-      category: ""
+      category: "",
     });
   }
   async function handleVisit(item) {
     const eventId = item.event?._id || item.event;
-    if (!isAttendee || savingVisitId || loadingVisits || visitError || visitedIds.includes(item._id) || !registeredEventIds.includes(eventId) || !item.boothNumber) {
+    if (
+      !isAttendee ||
+      savingVisitId ||
+      loadingVisits ||
+      visitError ||
+      visitedIds.includes(item._id) ||
+      !registeredEventIds.includes(eventId) ||
+      !item.boothNumber
+    ) {
       return;
     }
-    if (!(await confirm(`Confirm that you visited ${item.companyName} at booth ${item.boothNumber}?`))) {
+    if (
+      !(await confirm(
+        `Confirm that you visited ${item.companyName} at booth ${item.boothNumber}?`,
+      ))
+    ) {
       return;
     }
     setSavingVisitId(item._id);
     try {
       const response = await API.post("/booths/visit", {
-        exhibitorId: item._id
+        exhibitorId: item._id,
       });
-      setVisitedIds(previous => previous.includes(item._id) ? previous : [...previous, item._id]);
+      setVisitedIds((previous) =>
+        previous.includes(item._id) ? previous : [...previous, item._id],
+      );
       toast.success(response.data.msg);
     } catch (err) {
       toast.error(err.response?.data?.msg || "Unable to record booth visit.");
@@ -137,19 +178,38 @@ export default function ExhibitorSearch() {
       setSavingVisitId("");
     }
   }
-  return <div className="w-full space-y-6">
-      <PageHeading title="Discover exhibitors" description="Find companies and plan the connections that matter to you." />
+  return (
+    <div className="w-full space-y-6">
+      <PageHeading
+        title="Discover exhibitors"
+        description="Find companies and plan the connections that matter to you."
+      />
 
-      <form onSubmit={handleSearch} className="grid items-end gap-4 rounded-2xl border bg-card p-5 lg:grid-cols-[1fr_auto]">
+      <form
+        onSubmit={handleSearch}
+        className="grid items-end gap-4 rounded-2xl border bg-card p-5 lg:grid-cols-[1fr_auto]"
+      >
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="exhibitor-keyword">Search</Label>
-            <Input id="exhibitor-keyword" placeholder="Company, products or services..." value={keyword} onChange={event => setKeyword(event.target.value)} maxLength={100} />
+            <Input
+              id="exhibitor-keyword"
+              placeholder="Company, products or services..."
+              value={keyword}
+              onChange={(event) => setKeyword(event.target.value)}
+              maxLength={100}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="exhibitor-category">Category</Label>
-            <Input id="exhibitor-category" placeholder="Catering, Technology..." value={category} onChange={event => setCategory(event.target.value)} maxLength={100} />
+            <Input
+              id="exhibitor-category"
+              placeholder="Catering, Technology..."
+              value={category}
+              onChange={(event) => setCategory(event.target.value)}
+              maxLength={100}
+            />
           </div>
         </div>
 
@@ -158,49 +218,84 @@ export default function ExhibitorSearch() {
             Search
           </Button>
 
-          <Button type="button" variant="outline" onClick={clearSearch} disabled={loading || Boolean(savingVisitId)}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={clearSearch}
+            disabled={loading || Boolean(savingVisitId)}
+          >
             Clear
           </Button>
         </div>
       </form>
 
-      {isAttendee && <div className="space-y-3 rounded-md border p-4">
+      {isAttendee && (
+        <div className="space-y-3 rounded-md border p-4">
           <p className="text-sm text-muted-foreground">
-            After visiting an exhibitor booth, mark it as visited.
-            Each exhibitor visit is recorded once for your account.
+            After visiting an exhibitor booth, mark it as visited. Each
+            exhibitor visit is recorded once for your account.
           </p>
 
-          <Button variant="outline" disabled={loadingVisits || Boolean(savingVisitId)} onClick={() => setVisitRefresh(previous => previous + 1)}>
-            {loadingVisits ? <EllipsisLoader scope="inline" /> : "Refresh Visit Status"}
+          <Button
+            variant="outline"
+            disabled={loadingVisits || Boolean(savingVisitId)}
+            onClick={() => setVisitRefresh((previous) => previous + 1)}
+          >
+            {loadingVisits ? (
+              <EllipsisLoader scope="inline" />
+            ) : (
+              "Refresh Visit Status"
+            )}
           </Button>
 
-          {visitError && <p role="alert" className="text-sm text-destructive">
+          {visitError && (
+            <p role="alert" className="text-sm text-destructive">
               {visitError}
-            </p>}
-        </div>}
+            </p>
+          )}
+        </div>
+      )}
 
-      {loading ? <EllipsisLoader scope="page" label="Loading exhibitors" /> : error ? <div className="space-y-3">
+      {loading ? (
+        <EllipsisLoader scope="page" label="Loading exhibitors" />
+      ) : error ? (
+        <div className="space-y-3">
           <p role="alert">{error}</p>
-          <Button variant="outline" onClick={() => setFilters({
-        ...filters
-      })}>
+          <Button
+            variant="outline"
+            onClick={() =>
+              setFilters({
+                ...filters,
+              })
+            }
+          >
             Try Again
           </Button>
-        </div> : exhibitors.length === 0 ? <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground">No exhibitors found.</p> : <>
+        </div>
+      ) : exhibitors.length === 0 ? (
+        <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground [.workspace-form-body_fieldset_>_p&]:py-[14px]">
+          No exhibitors found.
+        </p>
+      ) : (
+        <>
           <p className="text-sm text-muted-foreground">
             Showing up to 100 approved profiles.
           </p>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {exhibitors.map(item => {
-          const website = safeWebsite(item.website);
-          const eventId = item.event?._id || item.event;
-          const visited = visitedIds.includes(item._id);
-          const registered = registeredEventIds.includes(eventId);
-          return <Card key={item._id}>
+            {exhibitors.map((item) => {
+              const website = safeWebsite(item.website);
+              const eventId = item.event?._id || item.event;
+              const visited = visitedIds.includes(item._id);
+              const registered = registeredEventIds.includes(eventId);
+              return (
+                <Card key={item._id}>
                   <CardContent className="space-y-4 p-6">
                     <div className="flex items-center gap-4">
-                      <CompanyLogo exhibitorId={item._id} companyName={item.companyName} />
+                      <CompanyLogo
+                        exhibitorId={item._id}
+                        companyName={item.companyName}
+                      />
 
                       <h2 className="min-w-0 break-words text-lg font-semibold">
                         {item.companyName}
@@ -211,40 +306,82 @@ export default function ExhibitorSearch() {
                       {item.description}
                     </p>
 
-                    {item.products && <p className="whitespace-pre-wrap break-words text-sm">
+                    {item.products && (
+                      <p className="whitespace-pre-wrap break-words text-sm">
                         Products / Services: {item.products}
-                      </p>}
+                      </p>
+                    )}
 
-                    <div className="grid gap-x-6 gap-y-3 rounded-xl bg-muted/40 p-4 text-sm sm:grid-cols-2">
+                    <div className="grid gap-x-6 gap-y-3 rounded-xl bg-muted/40 p-4 text-sm sm:grid-cols-2 [.workspace-form-body_fieldset_>_p&]:py-[14px]">
                       <p>Category: {item.category || "Not provided"}</p>
                       <p>Event: {item.event?.title || "Unavailable"}</p>
                       <p>Booth: {item.boothNumber || "Not assigned"}</p>
                       <p>Status: {item.status}</p>
                     </div>
 
-                    {item.contactEmail && <a href={`mailto:${item.contactEmail}`} className="block break-all text-sm underline underline-offset-4">
+                    {item.contactEmail && (
+                      <a
+                        href={`mailto:${item.contactEmail}`}
+                        className="block break-all text-sm underline underline-offset-4"
+                      >
                         {item.contactEmail}
-                      </a>}
+                      </a>
+                    )}
 
-                    {item.phone && <p className="text-sm">Phone: {item.phone}</p>}
+                    {item.phone && (
+                      <p className="text-sm">Phone: {item.phone}</p>
+                    )}
 
-                    {website && <a href={website} target="_blank" rel="noopener noreferrer" className="block text-sm underline underline-offset-4">
+                    {website && (
+                      <a
+                        href={website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-sm underline underline-offset-4"
+                      >
                         Visit Website
-                      </a>}
+                      </a>
+                    )}
 
-                    {isAttendee && <div className="space-y-2 border-t pt-3">
-                        <Button variant={visited ? "outline" : "default"} onClick={() => handleVisit(item)} disabled={visited || loadingVisits || Boolean(visitError) || Boolean(savingVisitId) || !registered || !item.boothNumber}>
-                          {visited ? "Visited" : savingVisitId === item._id ? "Saving..." : "Mark as Visited"}
+                    {isAttendee && (
+                      <div className="space-y-2 border-t pt-3">
+                        <Button
+                          variant={visited ? "outline" : "default"}
+                          onClick={() => handleVisit(item)}
+                          disabled={
+                            visited ||
+                            loadingVisits ||
+                            Boolean(visitError) ||
+                            Boolean(savingVisitId) ||
+                            !registered ||
+                            !item.boothNumber
+                          }
+                        >
+                          {visited
+                            ? "Visited"
+                            : savingVisitId === item._id
+                              ? "Saving..."
+                              : "Mark as Visited"}
                         </Button>
 
-                        {!visited && !loadingVisits && !visitError && <p className="text-xs text-muted-foreground">
-                            {!registered ? "Register for this event to record a visit." : !item.boothNumber ? "A booth has not been assigned yet." : "Confirm only after visiting this booth."}
-                          </p>}
-                      </div>}
+                        {!visited && !loadingVisits && !visitError && (
+                          <p className="text-xs text-muted-foreground [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
+                            {!registered
+                              ? "Register for this event to record a visit."
+                              : !item.boothNumber
+                                ? "A booth has not been assigned yet."
+                                : "Confirm only after visiting this booth."}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
-                </Card>;
-        })}
+                </Card>
+              );
+            })}
           </div>
-        </>}
-    </div>;
+        </>
+      )}
+    </div>
+  );
 }

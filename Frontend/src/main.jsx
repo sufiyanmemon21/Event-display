@@ -12,7 +12,6 @@ import LiveUpdates from "./components/LiveUpdates";
 import ScrollToTop from "./components/ScrollToTop";
 import App from "./App.jsx";
 import "./index.css";
-import "./premium.css";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -45,5 +44,5 @@ createRoot(document.getElementById("root")).render(
         </ThemeProvider>
       </Provider>
     </BrowserRouter>
-  </StrictMode>
+  </StrictMode>,
 );

@@ -1,11 +1,7 @@
 import EllipsisLoader from "@/components/EllipsisLoader";
-import AuthLayout from '@/components/auth/AuthLayout';
+import AuthLayout from "@/components/auth/AuthLayout";
 import { useState } from "react";
-import {
-  Link,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { toast } from "react-toastify";
 import API, { clearAuth } from "@/api/api";
@@ -38,9 +34,7 @@ export default function Reset() {
       new TextEncoder().encode(password).length > 72 ||
       !/\S/.test(password)
     ) {
-      setError(
-        "Password must be at least 8 characters and at most 72 bytes."
-      );
+      setError("Password must be at least 8 characters and at most 72 bytes.");
       return;
     }
 
@@ -63,7 +57,7 @@ export default function Reset() {
     } catch (error) {
       setError(
         error.response?.data?.msg ||
-          "Unable to reset password. Please try again."
+          "Unable to reset password. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -71,10 +65,16 @@ export default function Reset() {
   }
 
   return (
-    <AuthLayout title="Account recovery" description="Securely recover your EventSphere account.">
+    <AuthLayout
+      title="Account recovery"
+      description="Securely recover your EventSphere account."
+    >
       {!validToken ? (
         <>
-          <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950" role="alert">
+          <p
+            className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"
+            role="alert"
+          >
             This reset link is invalid. Request a new link to continue.
           </p>
           <Link
@@ -89,7 +89,11 @@ export default function Reset() {
           <form onSubmit={handleSubmit} className="grid gap-3">
             <div className="grid gap-1">
               <Label htmlFor="new-password">New password</Label>
-              <div className="celebration-auth-password">
+              <div
+                className="celebration-auth-password relative [&_input]:pe-[50px] [&_button]:absolute [&_button]:inset-[0_0_0_auto]
+          [&_button]:grid [&_button]:w-[44px] [&_button]:place-items-center [&_button]:rounded-[0_7px_7px_0]
+          [&_button]:text-[var(--account-copy)] [&_button:hover]:text-[var(--account-accent-hover)]"
+              >
                 <Input
                   id="new-password"
                   type={showPassword ? "text" : "password"}
@@ -104,14 +108,19 @@ export default function Reset() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((value) => !value)}
-                  aria-label={showPassword ? "Hide passwords" : "Show passwords"}
+                  aria-label={
+                    showPassword ? "Hide passwords" : "Show passwords"
+                  }
                   aria-pressed={showPassword}
                   disabled={loading}
                 >
                   {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                 </button>
               </div>
-              <p id="new-password-help" className="text-xs leading-5 text-[#556c74]">
+              <p
+                id="new-password-help"
+                className="text-xs leading-5 text-[#556c74] [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]"
+              >
                 Use at least 8 characters.
               </p>
             </div>
@@ -129,16 +138,23 @@ export default function Reset() {
               />
             </div>
             {error && (
-              <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">
+              <p
+                className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+                role="alert"
+              >
                 {error}
               </p>
             )}
             <Button
               type="submit"
               disabled={loading}
-              className="celebration-auth-submit w-full text-sm font-semibold"
+              className="celebration-auth-submit w-full text-sm font-semibold min-h-[46px] rounded-[7px] [background:var(--account-accent)] text-[#fffaf6] hover:[background:var(--account-accent-hover)]"
             >
-              {loading ? <EllipsisLoader scope="inline" label="Updating password" /> : "Reset password"}
+              {loading ? (
+                <EllipsisLoader scope="inline" label="Updating password" />
+              ) : (
+                "Reset password"
+              )}
             </Button>
           </form>
           <Link

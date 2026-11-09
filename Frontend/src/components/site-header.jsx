@@ -5,8 +5,22 @@ import { ThemeContext } from "@/context/theme-context";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { LogOut } from "lucide-react";
@@ -38,24 +52,29 @@ function getTitle(pathname) {
   return titles[`/${path.split("/")[1]}`] || "EventSphere";
 }
 function initials(name = "") {
-  return name.trim().split(/\s+/).slice(0, 2).map(part => part[0]).join("").toUpperCase();
+  return name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
 }
-export function SiteHeader({
-  user,
-  onSignOut
-}) {
-  const {
-    theme,
-    toggleTheme
-  } = useContext(ThemeContext);
-  const {
-    pathname
-  } = useLocation();
+export function SiteHeader({ user, onSignOut }) {
+  const { theme, toggleTheme } = useContext(ThemeContext);
+  const { pathname } = useLocation();
   const title = getTitle(pathname);
-  const portal = user?.role ? `${user.role[0].toUpperCase()}${user.role.slice(1)} Portal` : "Workspace";
-  return <header className="workspace-topbar sticky top-0 z-30 flex h-16 shrink-0 items-center border-b border-border/80 backdrop-blur-xl">
+  const portal = user?.role
+    ? `${user.role[0].toUpperCase()}${user.role.slice(1)} Portal`
+    : "Workspace";
+  return (
+    <header
+      className="workspace-topbar sticky top-0 z-30 flex h-16 shrink-0 items-center border-b border-border/80 backdrop-blur-xl
+          workspace:[background:color-mix(in_srgb,_var(--card)_94%,_transparent)]
+          workspace:[box-shadow:0_2px_12px_#5738260a] workspace:min-h-[68px]"
+    >
       <div className="flex w-full items-center gap-3 px-4 sm:px-6">
-        <SidebarTrigger className="-ml-1 rounded-xl" />
+        <SidebarTrigger className="-ml-1 rounded-xl [.workspace-form-body_fieldset_>_p&]:py-[14px]" />
         <Separator orientation="vertical" className="h-5" />
         <Breadcrumb className="min-w-0 flex-1">
           <BreadcrumbList className="flex-nowrap gap-2">
@@ -74,21 +93,44 @@ export function SiteHeader({
         </Breadcrumb>
 
         <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
-          <Button asChild variant="ghost" size="sm" className="hidden text-muted-foreground lg:inline-flex">
+          <Button
+            asChild
+            variant="ghost"
+            size="sm"
+            className="hidden text-muted-foreground lg:inline-flex"
+          >
             <Link to="/">
               View website
               <ArrowUpRight className="ml-1 size-4" />
             </Link>
           </Button>
-          <Button type="button" variant="outline" size="icon" onClick={toggleTheme} aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"} className="rounded-xl">
-            {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={toggleTheme}
+            aria-label={
+              theme === "dark" ? "Switch to light mode" : "Switch to dark mode"
+            }
+            className="rounded-xl [.workspace-form-body_fieldset_>_p&]:py-[14px]"
+          >
+            {theme === "dark" ? (
+              <Sun className="size-4" />
+            ) : (
+              <Moon className="size-4" />
+            )}
           </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button type="button" variant="ghost" aria-label={`Account menu for ${user?.name || "member"}`} className="h-11 gap-2 rounded-xl border border-border bg-card px-1.5 sm:px-2.5">
+              <Button
+                type="button"
+                variant="ghost"
+                aria-label={`Account menu for ${user?.name || "member"}`}
+                className="h-11 gap-2 rounded-xl border border-border bg-card px-1.5 sm:px-2.5 [.workspace-form-body_fieldset_>_p&]:py-[14px]"
+              >
                 <Avatar className="size-8 sm:size-9">
-                  <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
+                  <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
                     {initials(user?.name)}
                   </AvatarFallback>
                 </Avatar>
@@ -96,7 +138,7 @@ export function SiteHeader({
                   <span className="truncate text-sm font-semibold">
                     {user?.name || "Account"}
                   </span>
-                  <span className="truncate text-xs capitalize text-muted-foreground">
+                  <span className="truncate text-xs capitalize text-muted-foreground [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
                     {user?.role || "member"}
                   </span>
                 </span>
@@ -108,7 +150,7 @@ export function SiteHeader({
                 <span className="block truncate text-sm font-medium text-foreground">
                   {user?.name || "Account"}
                 </span>
-                <span className="mt-1 block truncate text-xs text-muted-foreground">
+                <span className="mt-1 block truncate text-xs text-muted-foreground [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
                   {user?.email}
                 </span>
                 <Badge variant="secondary" className="mt-2 capitalize">
@@ -116,7 +158,11 @@ export function SiteHeader({
                 </Badge>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              {user?.role === "exhibitor" && <DropdownMenuItem asChild><Link to="/exhibitor-profile">Exhibitor profile</Link></DropdownMenuItem>}
+              {user?.role === "exhibitor" && (
+                <DropdownMenuItem asChild>
+                  <Link to="/exhibitor-profile">Exhibitor profile</Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onSelect={onSignOut}>
                 <LogOut className="size-4" />
                 Sign out
@@ -125,5 +171,6 @@ export function SiteHeader({
           </DropdownMenu>
         </div>
       </div>
-    </header>;
+    </header>
+  );
 }
