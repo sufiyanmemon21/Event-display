@@ -2,6 +2,8 @@ import mongoose from "mongoose";
 import Booth from "../models/boothmodel.js";
 import Event from "../models/eventmodel.js";
 import Exhibitor from "../models/exhibitormodel.js";
+import BoothHold from "../models/boothholdmodel.js";
+import { claimBooth } from "../services/boothholds.js";
 
 function fail(status, message) {
   const error = new Error(message);
@@ -94,6 +96,7 @@ async function reserveBooth(req, res) {
       return res.status(400).json({ msg: "Invalid booth ID" });
     }
 
+    await BoothHold.init();
     const reservedBooth = await mongoose.connection.transaction(
       async (session) => {
         const booth = await Booth.findById(boothId).session(session);
@@ -126,6 +129,7 @@ async function reserveBooth(req, res) {
           fail(409, "You already have a booth for this event");
         }
 
+        await claimBooth(req.user._id, boothId, session);
         const updated = await Booth.findOneAndUpdate(
           {
             _id: boothId,

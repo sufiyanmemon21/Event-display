@@ -3,6 +3,8 @@ import Booth from "../models/boothmodel.js";
 import Event from "../models/eventmodel.js";
 import Exhibitor from "../models/exhibitormodel.js";
 import Notification from "../models/notificationmodel.js";
+import BoothHold from "../models/boothholdmodel.js";
+import { claimBooth } from "../services/boothholds.js";
 
 function fail(status, message) {
   const error = new Error(message);
@@ -23,6 +25,7 @@ export async function assignBooth(req, res) {
   }
 
   try {
+    await BoothHold.init();
     const assignedBooth = await mongoose.connection.transaction(
       async (session) => {
         const booth = await Booth.findById(boothId).session(session);
@@ -72,6 +75,7 @@ export async function assignBooth(req, res) {
           fail(409, "This exhibitor already has a booth for this event");
         }
 
+        await claimBooth(exhibitor.contactPerson, boothId, session);
         const updated = await Booth.findOneAndUpdate(
           {
             _id: booth._id,

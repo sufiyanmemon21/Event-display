@@ -2,7 +2,8 @@ import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import { PageHeading, RecordBrowser } from "@/components/workspace";
-import { UnavailableAction } from "@/components/integration-state";
+import useAuth from "@/hooks/useAuth";
+import { isExpo } from "@/hooks/useExpos";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,19 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 export default function EventApprovals() {
+  const user = useAuth();
+  const [saving, setSaving] = useState(false);
+  const [reviewError, setReviewError] = useState("");
+  const canReview = (item) => item && (!item.approvalStatus || item.approvalStatus === "Pending") && (isExpo(item) ? user?.role === "admin" : user?.role === "exhibitor" && String(item.reviewExhibitor?._id || item.reviewExhibitor) === String(user?._id || user?.id));
+  async function review(status) {
+    if (saving || !canReview(selected)) return;
+    setSaving(true); setReviewError("");
+    try {
+      await API.patch(`/events/${selected._id}/review`, { status, updatedAt: selected.updatedAt });
+      setSelected(null); setRefresh(value => value + 1);
+    } catch (error) { setReviewError(error.response?.data?.msg || "Unable to save the review."); }
+    finally { setSaving(false); }
+  }
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -25,7 +39,7 @@ export default function EventApprovals() {
       setLoading(true);
       setError("");
       try {
-        const response = await API.get("/events/all", {
+        const response = await API.get("/events/workspace", {
           signal: controller.signal,
         });
         if (!controller.signal.aborted) setEvents(response.data.events);
@@ -45,7 +59,7 @@ export default function EventApprovals() {
     <div className="space-y-6">
       <PageHeading
         title="Events & approvals"
-        description="Browse event details. Approval actions are currently unavailable."
+        description="Assigned exhibitors review Events. Admins review Expos."
       >
         <Button
           variant="outline"
@@ -65,6 +79,8 @@ export default function EventApprovals() {
         <RecordBrowser
           records={events}
           label="events"
+          statusOptions={["Pending", "Approved", "Rejected"]}
+          statusValue={item => item.approvalStatus || "Legacy listing"}
           searchText={(item) =>
             [
               item.title,
@@ -81,7 +97,7 @@ export default function EventApprovals() {
                   <CardContent className="space-y-4 p-6">
                     <div className="flex flex-wrap gap-2">
                       <Badge variant="secondary">{item.category}</Badge>
-                      <Badge variant="outline">Approval not recorded</Badge>
+                      <Badge variant="outline">{item.approvalStatus || "Legacy listing"}</Badge>
                     </div>
                     <h2 className="text-xl font-semibold">{item.title}</h2>
                     <p className="line-clamp-3 text-sm leading-relaxed text-muted-foreground">
@@ -105,7 +121,7 @@ export default function EventApprovals() {
                         </dd>
                       </div>
                     </dl>
-                    <Button variant="outline" onClick={() => setSelected(item)}>
+                    <Button variant="outline" onClick={() => { setReviewError(""); setSelected(item); }}>
                       Review details
                     </Button>
                   </CardContent>
@@ -118,26 +134,26 @@ export default function EventApprovals() {
       <Dialog
         open={Boolean(selected)}
         onOpenChange={(open) => {
-          if (!open) setSelected(null);
+          if (!open && !saving) setSelected(null);
         }}
       >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>{selected?.title}</DialogTitle>
             <DialogDescription>
-              Existing expo record. Approval actions are not supported.
+              Review all listing details before making your decision.
             </DialogDescription>
           </DialogHeader>
           <p className="whitespace-pre-wrap text-sm leading-relaxed">
             {selected?.description}
           </p>
           <p className="text-sm">Location: {selected?.location}</p>
-          <div className="flex flex-wrap gap-3">
-            <UnavailableAction>Approve unavailable</UnavailableAction>
-            <Button variant="destructive" disabled>
-              Reject unavailable
-            </Button>
-          </div>
+          <p className="text-sm">Reviewer: {selected && isExpo(selected) ? "Admin" : selected?.reviewExhibitor?.name || "Awaiting Admin assignment"}</p>
+          {reviewError && <p role="alert" className="text-destructive">{reviewError}</p>}
+          {canReview(selected) && <div className="flex flex-wrap gap-3">
+            <Button disabled={saving} onClick={() => review("Approved")}>Approve</Button>
+            <Button variant="destructive" disabled={saving} onClick={() => review("Rejected")}>Reject</Button>
+          </div>}
         </DialogContent>
       </Dialog>
     </div>

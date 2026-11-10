@@ -16,3 +16,8 @@ export function isPastEvent(date, now = new Date()) {
     `${parts.year}-${parts.month}-${parts.day}`
   );
 }
+
+export function todayDate(now = new Date()) {
+  const parts = Object.fromEntries(karachiDate.formatToParts(now).map(({ type, value }) => [type, value]));
+  return `${parts.year}-${parts.month}-${parts.day}`;
+}

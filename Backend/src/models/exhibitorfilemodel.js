@@ -9,7 +9,7 @@ const exhibitorFileSchema = new mongoose.Schema(
     },
     kind: {
       type: String,
-      enum: ["logo", "document"],
+      enum: ["logo", "photo", "document"],
       required: true,
     },
     filename: {

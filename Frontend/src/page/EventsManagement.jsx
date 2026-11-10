@@ -1,3 +1,4 @@
+import { todayDate } from "@/lib/eventDates";
 import BoothSelection from "@/page/BoothSelection";
 import CoverImageField from "@/components/CoverImageField";
 import ExhibitorApplicationForm from "@/components/ExhibitorApplicationForm";
@@ -98,6 +99,9 @@ export default function EventsManagement({ listingType = "expo" }) {
   const [location, setLocation] = useState("");
   const [category, setCategory] = useState("");
   const [selectedType, setSelectedType] = useState(listingType);
+  const [reviewers, setReviewers] = useState([]);
+  const [reviewExhibitor, setReviewExhibitor] = useState("");
+  const [reviewerError, setReviewerError] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [existingImage, setExistingImage] = useState("");
   const [editingId, setEditingId] = useState("");
@@ -109,6 +113,18 @@ export default function EventsManagement({ listingType = "expo" }) {
   const userId = localStorage.getItem("userId");
   const isOrganizer = role === "organizer" || role === "admin";
   const isExhibitor = role === "exhibitor";
+  const canCreate = isOrganizer && (listingType !== "expo" || role === "admin");
+  const eventsEndpoint = isOrganizer || isExhibitor ? "/events/workspace" : "/events/all";
+  useEffect(() => {
+    if (role !== "admin") return;
+    const controller = new AbortController();
+    API.get("/events/reviewers", { signal: controller.signal }).then(({ data }) => {
+      if (!controller.signal.aborted) setReviewers(data.reviewers);
+    }).catch(() => {
+      if (!controller.signal.aborted) setReviewerError("Unable to load exhibitors. Close this page and try again.");
+    });
+    return () => controller.abort();
+  }, [role]);
   const busy = saving || Boolean(deletingId);
   const canRegister = isExhibitor && listingType === "expo";
   const [applications, setApplications] = useState([]);
@@ -154,7 +170,7 @@ export default function EventsManagement({ listingType = "expo" }) {
     if (!background) setLoading(true);
     setLoadError("");
     try {
-      const response = await API.get("/events/all");
+      const response = await API.get(eventsEndpoint);
       setEvents(response.data.events);
     } catch {
       if (!background) setLoadError("Failed to load events. Please try again.");
@@ -166,7 +182,7 @@ export default function EventsManagement({ listingType = "expo" }) {
     const controller = new AbortController();
     async function loadInitialEvents() {
       try {
-        const response = await API.get("/events/all", {
+        const response = await API.get(eventsEndpoint, {
           signal: controller.signal,
         });
         if (!controller.signal.aborted) {
@@ -182,7 +198,7 @@ export default function EventsManagement({ listingType = "expo" }) {
     }
     loadInitialEvents();
     return () => controller.abort();
-  }, []);
+  }, [eventsEndpoint]);
   useLiveRefresh(() => {
     if (!busy && !loading && !loadError) void fetchEvents(true);
     if (canRegister && !registrationBusy) refreshApplications();
@@ -198,14 +214,16 @@ export default function EventsManagement({ listingType = "expo" }) {
     setSelectedType(listingType);
     setImageFile(null);
     setExistingImage("");
+    setReviewExhibitor("");
     setEditingId("");
   }
   function canManage(event) {
     const organizerId = event.organizer?._id || event.organizer;
-    return isOrganizer && (role === "admin" || organizerId === userId);
+    return isOrganizer && (!isExpo(event) || role === "admin") && (role === "admin" || organizerId === userId);
   }
   function handleEdit(event) {
     setEditingId(event._id);
+    setReviewExhibitor(event.reviewExhibitor?._id || event.reviewExhibitor || "");
     setTitle(event.title);
     setDescription(event.description);
     setDate(event.date.slice(0, 10));
@@ -233,7 +251,7 @@ export default function EventsManagement({ listingType = "expo" }) {
       toast.error("Please fill all fields.");
       return;
     }
-    const eventData = { ...data, time, endTime };
+    const eventData = { ...data, time, endTime, ...(role === "admin" && data.listingType === "event" ? { reviewExhibitor } : {}) };
     setSaveError("");
     setSaving(true);
     try {
@@ -260,7 +278,7 @@ export default function EventsManagement({ listingType = "expo" }) {
         : undefined;
       if (editingId) {
         await API.put(`/events/update/${editingId}`, payload, options);
-        toast.success(`${listingName} updated successfully.`);
+        toast.success(`${listingName} saved and submitted for review.`);
       } else {
         await API.post("/events/create", payload, options);
         toast.success(`${listingName} created successfully.`);
@@ -302,7 +320,7 @@ export default function EventsManagement({ listingType = "expo" }) {
         title={collectionName}
         description={
           isExhibitor
-            ? `Browse ${collectionName.toLowerCase()}. Only administrators and organizers can create ${collectionName.toLowerCase()}.`
+            ? `Browse ${collectionName.toLowerCase()}. ${listingType === "expo" ? "Only Admins can create and approve Expos." : "Review Events assigned to you in Events & Approvals."}`
             : `Manage your ${collectionName.toLowerCase()} and their public listings.`
         }
       >
@@ -311,7 +329,7 @@ export default function EventsManagement({ listingType = "expo" }) {
             {listingType === "expo" ? "Create Expo" : "Add Event"}
           </Button>
         )}
-        {isOrganizer && (
+        {canCreate && (
           <FormPanel
             showCancel={false}
             closeButtonOnly
@@ -368,6 +386,7 @@ export default function EventsManagement({ listingType = "expo" }) {
                       <Label htmlFor="event-date">Date</Label>
                       <Input
                         id="event-date"
+                    min={editingId && date < todayDate() ? date : todayDate()}
                         type="date"
                         value={date}
                         onChange={(event) => setDate(event.target.value)}
@@ -431,12 +450,23 @@ export default function EventsManagement({ listingType = "expo" }) {
                           required
                         >
                           <option value="event">Event</option>
-                          <option value="expo">Expo</option>
+                          {role === "admin" && <option value="expo">Expo</option>}
                         </WorkspaceSelect>
                       </div>
                     )}
 
-                    <CoverImageField
+                    {role === "admin" && (editingId ? selectedType : listingType) === "event" && <div className="col-span-full space-y-2">
+                  <Label htmlFor="event-reviewer">Assigned exhibitor</Label>
+                  <WorkspaceSelect id="event-reviewer" value={reviewExhibitor} onChange={event => setReviewExhibitor(event.target.value)} required>
+                    <option value="">Select an exhibitor</option>
+                    {reviewers.map(item => <option key={item._id} value={item._id}>{item.name} — {item.email}</option>)}
+                  </WorkspaceSelect>
+                  <p className="text-sm text-muted-foreground">This exhibitor reviews the Event and its attendee requests.</p>
+                  {reviewerError && <p role="alert" className="text-sm text-destructive">{reviewerError}</p>}
+                  {!reviewerError && !reviewers.length && <p className="text-sm text-muted-foreground">No exhibitor accounts are available yet.</p>}
+                </div>}
+                <p className="col-span-full text-sm text-muted-foreground">Saving sends this listing for review before it appears publicly.</p>
+                <CoverImageField
                       existingImage={existingImage}
                       file={imageFile}
                       onChange={setImageFile}
@@ -622,6 +652,7 @@ export default function EventsManagement({ listingType = "expo" }) {
                           <p className="mt-1 line-clamp-2 text-xs text-muted-foreground [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
                             {event.description}
                           </p>
+                          <Badge variant="outline" className="mt-2">{event.approvalStatus || "Legacy listing"}</Badge>
                         </TableCell>
                         <TableCell>
                           <Badge variant="secondary">{event.category}</Badge>
@@ -730,7 +761,7 @@ export default function EventsManagement({ listingType = "expo" }) {
         <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader className="min-w-0 pr-8 text-left">
             <div className="mb-3 flex flex-wrap gap-2">
-              <Badge variant="outline">{listingName}</Badge>
+              <Badge variant="outline">{listingName}</Badge><Badge variant="secondary">{details?.approvalStatus || "Legacy listing"}</Badge>
               {details?.category && (
                 <Badge variant="secondary">{details.category}</Badge>
               )}

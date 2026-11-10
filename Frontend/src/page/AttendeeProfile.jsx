@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import API, { clearAuth } from "@/api/api";
 import useAuth from "@/hooks/useAuth";
 import useLiveRefresh from "@/hooks/useLiveRefresh";
+import { isExpo } from "@/hooks/useExpos";
 import { isPastEvent } from "@/lib/eventDates";
 
 const statuses = ["Pending", "Confirmed", "Rejected", "Cancelled"];
@@ -86,6 +87,7 @@ function BookingCard({ booking }) {
 
   return (
     <article className="grid min-w-0 content-start gap-4 rounded-xl border border-[#e2c9bd] bg-[var(--public-paper)] p-5 shadow-sm [.workspace-form-body_fieldset_>_p&]:py-[14px]">
+      {booking.checkedInAt && <p className="text-sm font-medium text-primary">Checked in: {new Date(booking.checkedInAt).toLocaleString()}</p>}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-widest text-[#87584d] [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
@@ -228,6 +230,7 @@ export default function AttendeeProfile() {
   const eventId = params.get("event");
   const [bookings, setBookings] = useState([]);
   const [event, setEvent] = useState(null);
+  const [listingFilter, setListingFilter] = useState("All");
   const [status, setStatus] = useState("All");
   const [ticket, setTicket] = useState("Standard");
   const [loading, setLoading] = useState(true);
@@ -311,10 +314,7 @@ export default function AttendeeProfile() {
   }
 
   const alreadyBooked = bookings.find((item) => item.event?._id === eventId);
-  const visible =
-    status === "All"
-      ? bookings
-      : bookings.filter((item) => (item.status || "Confirmed") === status);
+  const visible = bookings.filter(item => (status === "All" || (item.status || "Confirmed") === status) && (listingFilter === "All" || (item.event && isExpo(item.event) === (listingFilter === "Expos"))));
 
   return (
     <PublicPageShell>
@@ -425,6 +425,7 @@ export default function AttendeeProfile() {
               </Button>
             </div>
           </div>
+          <label className="mb-4 flex flex-wrap items-center gap-3 text-sm">Booking history<select aria-label="Booking history type" value={listingFilter} onChange={event => setListingFilter(event.target.value)} className="min-h-10 rounded-md border border-[#e2c9bd] bg-[var(--public-paper)] px-3">{["All", "Events", "Expos"].map(value => <option key={value}>{value}</option>)}</select></label>
           {error && (
             <p role="alert" className="mb-3 text-sm text-red-800">
               {error}

@@ -175,13 +175,15 @@ function App() {
               element={
                 <ProtectedRoute
                   loadingScope="page"
-                  allowedRoles={["admin", "organizer", "attendee"]}
+                  allowedRoles={["admin", "organizer", "attendee", "exhibitor"]}
                 />
               }
             >
               <Route path="attendees" element={<AttendeesManagement />} />
+
             </Route>
 
+            <Route element={<ProtectedRoute loadingScope="page" allowedRoles={["admin", "organizer", "exhibitor"]} />}><Route path="event-approvals" element={<EventApprovals />} /></Route>
             <Route
               element={
                 <ProtectedRoute loadingScope="page" allowedRoles={["admin"]} />
@@ -210,7 +212,7 @@ function App() {
               }
             >
               <Route path="analytics" element={<AnalyticsDashboard />} />
-              <Route path="event-approvals" element={<EventApprovals />} />
+
               <Route
                 path="add-product"
                 element={<Navigate to="/dashboard" replace />}

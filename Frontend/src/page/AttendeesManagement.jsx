@@ -1,3 +1,4 @@
+import PassScanner from "@/components/PassScanner";
 import EllipsisLoader from "@/components/EllipsisLoader";
 
 import {
@@ -20,6 +21,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "react-toastify";
 import { useConfirmation } from "@/hooks/useConfirmation";
+import { isExpo } from "@/hooks/useExpos";
+import useAuth from "@/hooks/useAuth";
 import { isPastEvent } from "@/lib/eventDates";
 async function fetchRegistrationData(isAttendee, signal) {
   const [registrationResponse, eventResponse] = await Promise.all([
@@ -38,6 +41,8 @@ async function fetchRegistrationData(isAttendee, signal) {
   };
 }
 export default function AttendeesManagement() {
+  const user = useAuth();
+  const [eventFilter, setEventFilter] = useState("");
   const confirm = useConfirmation();
   const [formOpen, setFormOpen] = useState(false);
   const [attendees, setAttendees] = useState([]);
@@ -50,7 +55,8 @@ export default function AttendeesManagement() {
   const [reviewing, setReviewing] = useState("");
   const role = localStorage.getItem("userRole");
   const isAttendee = role === "attendee";
-  const isOrganizer = role === "organizer" || role === "admin";
+  const isOrganizer = role === "organizer" || role === "admin" || role === "exhibitor";
+  const canReview = (event) => event && (isExpo(event) ? role === "admin" : role === "exhibitor" && String(event.reviewExhibitor?._id || event.reviewExhibitor) === String(user?._id || user?.id));
   const canView = isAttendee || isOrganizer;
   useEffect(() => {
     if (!canView) return;
@@ -160,6 +166,7 @@ export default function AttendeesManagement() {
         }
       />
 
+      {["admin", "exhibitor"].includes(role) && <PassScanner />}
       {isAttendee && (
         <FormPanel
           open={formOpen}
@@ -246,6 +253,13 @@ export default function AttendeesManagement() {
         </FormPanel>
       )}
 
+      <div className="max-w-md space-y-2">
+        <Label htmlFor="registration-event-filter">Expo / Event</Label>
+        <WorkspaceSelect id="registration-event-filter" value={eventFilter} onChange={event => setEventFilter(event.target.value)}>
+          <option value="">All Expos and Events</option>
+          {[...new Map(attendees.filter(item => item.event).map(item => [item.event._id, item.event])).values()].map(event => <option key={event._id} value={event._id}>{event.title}</option>)}
+        </WorkspaceSelect>
+      </div>
       {loading ? (
         <EllipsisLoader scope="page" label="Loading registrations" />
       ) : loadError ? (
@@ -262,7 +276,7 @@ export default function AttendeesManagement() {
         </p>
       ) : (
         <RecordBrowser
-          records={attendees}
+          records={attendees.filter(item => !eventFilter || item.event?._id === eventFilter)}
           label="registrations"
           statusOptions={
             isOrganizer
@@ -284,6 +298,7 @@ export default function AttendeesManagement() {
                     <TableHead>Event date</TableHead>
                     <TableHead>Location</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead>Attendance</TableHead>
                     {isOrganizer && <TableHead>Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
@@ -351,10 +366,12 @@ export default function AttendeesManagement() {
                           {registration.status || "Confirmed"}
                         </Badge>
                       </TableCell>
+                      <TableCell>{registration.checkedInAt ? `Checked in ${new Date(registration.checkedInAt).toLocaleString()}` : "Not checked in"}</TableCell>
                       {isOrganizer && (
                         <TableCell>
                           <div className="flex flex-wrap gap-2">
-                            {registration.status === "Pending" && (
+                            {!canReview(registration.event) && <span className="text-muted-foreground">Assigned reviewer only</span>}
+                            {canReview(registration.event) && registration.status === "Pending" && (
                               <>
                                 <Button
                                   size="sm"
@@ -377,7 +394,7 @@ export default function AttendeesManagement() {
                                 </Button>
                               </>
                             )}
-                            {(!registration.status ||
+                            {canReview(registration.event) && (!registration.status ||
                               ["Pending", "Confirmed"].includes(
                                 registration.status,
                               )) && (

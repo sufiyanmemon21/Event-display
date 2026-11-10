@@ -10,6 +10,7 @@ import {
   getFiles,
   getPublicLogo,
   getPrivateLogo,
+  getPrivatePhoto,
   downloadDocument,
 } from "../controllers/exhibitorfilecontroller.js";
 
@@ -54,6 +55,8 @@ exhibitorFileRouter.get(
   canReadFiles,
   downloadDocument
 );
+
+exhibitorFileRouter.get("/:id/private-photo", canReadFiles, getPrivatePhoto);
 
 exhibitorFileRouter.post(
   "/:id/:kind",

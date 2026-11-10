@@ -1,17 +1,20 @@
 import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import useAuth from "@/hooks/useAuth";
+import { Link, useLocation } from "react-router-dom";
 import PublicPageShell from "@/components/landing/PublicPageShell";
 import API from "@/api/api";
 
 export default function PassVerification() {
-  const { hash } = useLocation();
+  const { hash, pathname } = useLocation();
+  const user = useAuth();
+  const staff = ["admin", "exhibitor"].includes(user?.role);
   const [result, setResult] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
     API.post(
-      "/attendees/passes/verify",
+      staff ? "/attendees/passes/check-in" : "/attendees/passes/verify",
       { token: hash.slice(1) },
       { signal: controller.signal },
     )
@@ -28,7 +31,7 @@ export default function PassVerification() {
           });
       });
     return () => controller.abort();
-  }, [hash]);
+  }, [hash, staff]);
 
   const current = result?.hash === hash ? result : null;
 
@@ -46,11 +49,13 @@ export default function PassVerification() {
           ) : (
             <div role="status">
               <p className="font-semibold text-green-800">
-                Valid confirmed booking
+                {staff ? (current.data.alreadyCheckedIn ? "Already checked in" : "Attendance checked in") : "Valid confirmed booking"}
               </p>
               <p>
-                {current.data.title} · {current.data.ticketType}
+                {current.data.title}{current.data.ticketType && ` · ${current.data.ticketType}`}
               </p>
+              {current.data.checkedInAt && <p>Checked in: {new Date(current.data.checkedInAt).toLocaleString()}</p>}
+              {!staff && <p className="mt-4 text-sm">An authorized reviewer must scan this pass to record attendance.{!user && <> <Link className="underline" to="/login" state={{ from: pathname + hash }}>Staff sign in</Link></>}</p>}
             </div>
           )}
         </section>

@@ -3,6 +3,7 @@ import Attendee from "../models/attendeemodel.js";
 import Event from "../models/eventmodel.js";
 import { publishUpdate } from "../services/liveupdates.js";
 import { isPastEvent } from "../services/eventdates.js";
+import { canReviewEvent, isPublished } from "../services/eventworkflow.js";
 
 async function registerAttendee(req, res) {
   try {
@@ -39,6 +40,7 @@ async function registerAttendee(req, res) {
     if (isPastEvent(selectedEvent.date)) {
       return res.status(409).json({ msg: "Bookings are closed for past events." });
     }
+    if (!isPublished(selectedEvent)) return res.status(409).json({ msg: "This listing must be approved before tickets can be booked." });
 
     await Attendee.init();
 
@@ -64,7 +66,7 @@ async function registerAttendee(req, res) {
     });
 
     return res.status(201).json({
-      msg: "Booking requested. The organizer will review it.",
+      msg: "Booking requested. The assigned reviewer will review it.",
       registration,
     });
   } catch (error) {
@@ -96,15 +98,22 @@ async function getAttendees(req, res) {
       filter.event = {
         $in: events.map((event) => event._id),
       };
+    } else if (req.user.role === "exhibitor") {
+      const events = await Event.find({ reviewExhibitor: req.user._id }).select("_id");
+      filter.event = { $in: events.map(event => event._id) };
     } else if (req.user.role !== "admin") {
       return res.status(403).json({
         msg: "You do not have access to attendee registrations",
       });
     }
+    if (req.query.event) {
+      if (!mongoose.isObjectIdOrHexString(req.query.event)) return res.status(400).json({ msg: "Select a valid event or expo." });
+      filter = { $and: [filter, { event: req.query.event }] };
+    }
 
     const attendees = await Attendee.find(filter)
       .populate("user", "name email")
-      .populate("event", "title date location")
+      .populate("event", "title date location listingType category reviewExhibitor approvalStatus")
       .sort({ createdAt: -1 });
 
     return res.status(200).json({ attendees });
@@ -125,11 +134,12 @@ async function updateBookingStatus(req, res) {
   const status = req.body?.status;
   if (!mongoose.isObjectIdOrHexString(id)) return res.status(400).json({ msg: "Invalid booking ID" });
 
-  const booking = await Attendee.findById(id).populate("event", "organizer");
+  const booking = await Attendee.findById(id).populate("event", "organizer listingType category title reviewExhibitor approvalStatus date");
   if (!booking?.event) return res.status(404).json({ msg: "Booking not found" });
-  if (req.user.role !== "admin" && !booking.event.organizer.equals(req.user._id)) {
-    return res.status(403).json({ msg: "You can only manage bookings for your own events" });
+  if (!canReviewEvent(req.user, booking.event)) {
+    return res.status(403).json({ msg: "Only the assigned Event exhibitor or the Expo Admin can review this booking." });
   }
+  if (status === "Confirmed" && (!isPublished(booking.event) || isPastEvent(booking.event.date))) return res.status(409).json({ msg: "Only approved, current listings can accept bookings." });
   if (!bookingTransitions[booking.status]?.includes(status)) {
     return res.status(409).json({ msg: "That status change is no longer available" });
   }

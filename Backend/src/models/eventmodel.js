@@ -35,6 +35,10 @@ const eventSchema = new mongoose.Schema({
     enum: ["event", "expo"]
   },
   hasImage: { type: Boolean, default: false },
+  approvalStatus: { type: String, enum: ["Pending", "Approved", "Rejected"] },
+  reviewExhibitor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  reviewedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  reviewedAt: Date,
   coverData: { type: Buffer, select: false },
   organizer: {
     type: mongoose.Schema.Types.ObjectId,
@@ -43,6 +47,7 @@ const eventSchema = new mongoose.Schema({
   }
 }, {
   timestamps: true,
+  optimisticConcurrency: true,
   toJSON: {
     transform(_document, result) {
       delete result.coverData;

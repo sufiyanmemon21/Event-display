@@ -9,20 +9,20 @@ import {
   BellIcon,
   ChartNoAxesColumnIcon,
   TicketIcon,
+  UserPlusIcon,
+  LogInIcon,
+  MailIcon,
+  SearchIcon,
+  MapIcon,
+  ClipboardCheckIcon,
+  UserRoundIcon,
 } from "@animateicons/react/lucide";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   CalendarDays,
-  Map,
-  Search,
   MessageSquare,
-  Mail,
-  LogIn,
-  UserPlus,
   Settings2,
-  ClipboardCheck,
-  UserRound,
 } from "lucide-react";
 import useWebsiteLogo from "@/hooks/useWebsiteLogo";
 import { NavMain } from "@/components/nav-main";
@@ -67,18 +67,11 @@ const menuItems = [
     roles: ["organizer", "admin", "exhibitor"],
   },
   {
-    title: "Profile",
-    url: "/exhibitor-profile",
-    icon: <UserRound className="size-4" />,
-    group: "Workspace",
-    roles: ["exhibitor"],
-  },
-  {
     title: "Attendees",
     url: "/attendees",
     animatedIcon: UsersIcon,
     group: "Workspace",
-    roles: ["organizer", "admin", "attendee"],
+    roles: allRoles,
   },
   {
     title: "Booths",
@@ -90,7 +83,7 @@ const menuItems = [
   {
     title: "Floor Plan",
     url: "/floor-plan",
-    icon: <Map className="size-4" />,
+    animatedIcon: MapIcon,
     group: "Workspace",
     roles: allRoles,
   },
@@ -104,7 +97,7 @@ const menuItems = [
   {
     title: "Search Exhibitors",
     url: "/exhibitor-search",
-    icon: <Search className="size-4" />,
+    animatedIcon: SearchIcon,
     group: "Discovery",
     roles: allRoles,
   },
@@ -148,19 +141,19 @@ const menuItems = [
     url: "/expo-tickets",
     animatedIcon: TicketIcon,
     group: "Workspace",
-    roles: ["admin", "organizer", "attendee"],
+    roles: allRoles,
   },
   {
     title: "Events & Approvals",
     url: "/event-approvals",
-    icon: <ClipboardCheck className="size-4" />,
+    animatedIcon: ClipboardCheckIcon,
     group: "Manage",
-    roles: ["admin", "organizer"],
+    roles: ["admin", "organizer", "exhibitor"],
   },
   {
     title: "Contact Messages",
     url: "/contact-messages",
-    icon: <Mail className="size-4" />,
+    animatedIcon: MailIcon,
     group: "Administration",
     roles: ["admin"],
   },
@@ -174,7 +167,7 @@ const menuItems = [
   {
     title: "Contact",
     url: "/contact",
-    icon: <Mail className="size-4" />,
+    animatedIcon: MailIcon,
     group: "More",
     public: true,
   },
@@ -227,13 +220,13 @@ export function AppSidebar({ onSignOut, ...props }) {
       {
         title: "Login",
         url: "/dashboard/login",
-        icon: <LogIn className="size-4" />,
+        animatedIcon: LogInIcon,
         group: "Account",
       },
       {
         title: "Create Account",
         url: "/dashboard/signup",
-        icon: <UserPlus className="size-4" />,
+        animatedIcon: UserPlusIcon,
         group: "Account",
       },
     );
@@ -282,9 +275,10 @@ export function AppSidebar({ onSignOut, ...props }) {
         <NavMain items={items} />
       </SidebarContent>
 
-      {account.loggedIn && !["admin", "exhibitor"].includes(account.role) && (
+      {account.loggedIn && account.role !== "admin" && (
         <SidebarFooter className="border-t border-sidebar-border px-3 py-3">
-          <NavUser onSignOut={onSignOut} />
+          {["attendee", "exhibitor"].includes(account.role) && <NavMain items={[{ title: "My profile", url: account.role === "attendee" ? "/profile" : "/exhibitor-profile", animatedIcon: UserRoundIcon, group: "Account" }]} />}
+          {account.role !== "exhibitor" && <NavUser onSignOut={onSignOut} />}
         </SidebarFooter>
       )}
     </Sidebar>

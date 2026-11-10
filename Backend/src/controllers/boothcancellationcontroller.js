@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import Booth from "../models/boothmodel.js";
 import Exhibitor from "../models/exhibitormodel.js";
+import { releaseBooth } from "../services/boothholds.js";
 
 function fail(status, message) {
   const error = new Error(message);
@@ -65,6 +66,7 @@ export async function cancelBoothReservation(req, res) {
 
         exhibitor.boothNumber = "";
         await exhibitor.save({ session });
+        await releaseBooth(req.user._id, boothId, session);
 
         return updated;
       }

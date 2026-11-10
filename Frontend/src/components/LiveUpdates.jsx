@@ -2,10 +2,9 @@ import { useEffect } from "react";
 import API from "@/api/api";
 export default function LiveUpdates() {
   useEffect(() => {
-    const url = new URL(
-      "updates",
-      API.defaults.baseURL.replace(/\/$/, "") + "/",
-    );
+    const base = new URL(API.defaults.baseURL || "/", window.location.origin);
+    base.pathname = base.pathname.replace(/\/$/, "") + "/";
+    const url = new URL("updates", base);
     const source = new EventSource(url.href);
     const refresh = () => window.dispatchEvent(new Event("eventsphere-update"));
     source.addEventListener("changed", refresh);

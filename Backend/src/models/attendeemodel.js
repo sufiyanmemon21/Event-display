@@ -20,6 +20,8 @@ const attendeeSchema = new mongoose.Schema(
     phone: { type: String, trim: true, maxlength: 32 },
     guestCount: { type: Number, min: 1, validate: Number.isSafeInteger },
     details: { type: String, trim: true, maxlength: 2000 },
+    checkedInAt: Date,
+    checkedInBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     status: {
       type: String,
       enum: ["Pending", "Confirmed", "Rejected", "Cancelled"],

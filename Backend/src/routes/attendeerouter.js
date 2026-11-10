@@ -4,7 +4,7 @@ import {
   getAttendees,
   updateBookingStatus,
 } from "../controllers/attendeecontroller.js";
-import { issueBookingPass, verifyBookingPass } from "../controllers/bookingpasscontroller.js";
+import { issueBookingPass, verifyBookingPass, checkInBookingPass } from "../controllers/bookingpasscontroller.js";
 import {
   authenticate,
   authorize,
@@ -13,8 +13,9 @@ import {
 const attendeeRouter = express.Router();
 
 attendeeRouter.post("/passes/verify", verifyBookingPass);
+attendeeRouter.post("/passes/check-in", authenticate, authorize("admin", "exhibitor"), checkInBookingPass);
 attendeeRouter.get("/:id/pass", authenticate, authorize("attendee"), issueBookingPass);
-attendeeRouter.patch("/:id/status", authenticate, authorize("admin", "organizer"), updateBookingStatus);
+attendeeRouter.patch("/:id/status", authenticate, authorize("admin", "exhibitor"), updateBookingStatus);
 
 attendeeRouter.post(
   "/register",
@@ -26,7 +27,7 @@ attendeeRouter.post(
 attendeeRouter.get(
   "/all",
   authenticate,
-  authorize("admin", "organizer", "attendee"),
+  authorize("admin", "organizer", "exhibitor", "attendee"),
   getAttendees
 );
 

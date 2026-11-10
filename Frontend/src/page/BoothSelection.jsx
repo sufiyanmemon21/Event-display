@@ -67,7 +67,8 @@ export default function BoothSelection({
       reservedBy === myApplication._id
     );
   }
-  const hasReservation = booths.some(isMyBooth);
+  const activeApplication = role === "exhibitor" ? applications.find(item => item.boothNumber) : null;
+  const hasReservation = booths.some(isMyBooth) || Boolean(activeApplication);
   const approved = myApplication?.status === "Approved";
   const sortedBooths = [...booths].sort((first, second) =>
     first.boothNumber.localeCompare(second.boothNumber, undefined, {
@@ -276,6 +277,7 @@ export default function BoothSelection({
   }
   return (
     <div className="w-full space-y-6">
+                  {activeApplication && <p role="status" className="rounded-xl border bg-card p-4 text-sm">Your active booth is {activeApplication.boothNumber} at {activeApplication.event?.title || "another expo"}. Cancel it in that Expo before reserving another booth.</p>}
       {!expo && (
         <>
           <PageHeading
@@ -315,7 +317,7 @@ export default function BoothSelection({
                       </option>
                     ))}
                   </WorkspaceSelect>
-                  {loadingEvents && (
+      {loadingEvents && (
                     <EllipsisLoader scope="inline" label="Loading expos" />
                   )}
 

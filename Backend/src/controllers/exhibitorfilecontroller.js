@@ -44,7 +44,7 @@ function canUpload(req, res, next) {
     });
   }
 
-  if (!["logo", "document"].includes(req.params.kind)) {
+  if (!["logo", "photo", "document"].includes(req.params.kind)) {
     return res.status(400).json({ msg: "Invalid upload type" });
   }
 
@@ -80,10 +80,10 @@ async function uploadFile(req, res) {
     let filename;
     let contentType;
 
-    if (kind === "logo") {
+    if (kind !== "document") {
       if (req.file.size > 2 * 1024 * 1024) {
         return res.status(400).json({
-          msg: "Logo must be 2 MB or smaller",
+          msg: "Image must be 2 MB or smaller",
         });
       }
 
@@ -99,13 +99,13 @@ async function uploadFile(req, res) {
           (metadata.pages && metadata.pages > 1)
         ) {
           return res.status(400).json({
-            msg: "Select a non-animated JPG or PNG logo",
+            msg: "Select a non-animated JPG or PNG image",
           });
         }
 
         data = await image
           .rotate()
-          .resize(400, 400, {
+          .resize(kind === "photo" ? 1200 : 400, kind === "photo" ? 900 : 400, {
             fit: "inside",
             withoutEnlargement: true,
           })
@@ -117,7 +117,7 @@ async function uploadFile(req, res) {
         });
       }
 
-      filename = "company-logo.png";
+      filename = `company-${kind}.png`;
       contentType = "image/png";
     } else {
       try {
@@ -168,7 +168,7 @@ async function uploadFile(req, res) {
     );
 
     return res.status(200).json({
-      msg: `${kind === "logo" ? "Logo" : "Document"} uploaded successfully`,
+      msg: `${kind === "logo" ? "Logo" : kind === "photo" ? "Photo" : "Document"} uploaded successfully`,
     });
   } catch (error) {
     if (error.code === 11000) {
@@ -206,7 +206,7 @@ async function sendFile(req, res, kind, download) {
 
     if (!file) {
       return res.status(404).json({
-        msg: `${kind === "logo" ? "Logo" : "Document"} not uploaded`,
+        msg: `${kind === "logo" ? "Logo" : kind === "photo" ? "Photo" : "Document"} not uploaded`,
       });
     }
 
@@ -234,6 +234,10 @@ async function getPublicLogo(req, res) {
 
 async function getPrivateLogo(req, res) {
   return sendFile(req, res, "logo", false);
+}
+
+export async function getPrivatePhoto(req, res) {
+  return sendFile(req, res, "photo", false);
 }
 
 async function downloadDocument(req, res) {

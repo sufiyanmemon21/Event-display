@@ -1,5 +1,6 @@
 import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from "react";
+import { isExpo } from "@/hooks/useExpos";
 import API from "@/api/api";
 import { PageHeading, RecordBrowser } from "@/components/workspace";
 
@@ -28,6 +29,7 @@ export default function ExpoTickets() {
   const [error, setError] = useState("");
   const [refresh, setRefresh] = useState(0);
   const [ticketType, setTicketType] = useState("all");
+  const [expo, setExpo] = useState("");
   const [selected, setSelected] = useState(null);
   useEffect(() => {
     const controller = new AbortController();
@@ -39,7 +41,7 @@ export default function ExpoTickets() {
           signal: controller.signal,
         });
         if (!controller.signal.aborted)
-          setRegistrations(response.data.attendees);
+          setRegistrations(response.data.attendees.filter(item => item.event && isExpo(item.event)));
       } catch (err) {
         if (!controller.signal.aborted) {
           setError(
@@ -83,6 +85,7 @@ export default function ExpoTickets() {
           ))}
         </WorkspaceSelect>
       </div>
+      <div className="max-w-md space-y-2"><Label htmlFor="expo-filter">Expo</Label><WorkspaceSelect id="expo-filter" value={expo} onChange={event => setExpo(event.target.value)}><option value="">All Expos</option>{[...new Map(registrations.map(item => [item.event._id, item.event])).values()].map(event => <option key={event._id} value={event._id}>{event.title}</option>)}</WorkspaceSelect></div>
       {loading ? (
         <EllipsisLoader scope="page" label="Loading ticket registrations" />
       ) : error ? (
@@ -92,9 +95,11 @@ export default function ExpoTickets() {
       ) : (
         <RecordBrowser
           records={registrations.filter(
-            (item) => ticketType === "all" || item.ticketType === ticketType,
+            (item) => (!expo || item.event._id === expo) && (ticketType === "all" || item.ticketType === ticketType),
           )}
           label="ticket registrations"
+          statusOptions={["Pending", "Confirmed", "Rejected", "Cancelled"]}
+          statusValue={item => item.status || "Confirmed"}
           searchText={(item) =>
             [
               item.user?.name,
@@ -114,6 +119,8 @@ export default function ExpoTickets() {
                       "Expo",
                       "Ticket type",
                       "Registered",
+                      "Approval",
+                      "Attendance",
                       "Details",
                     ].map((label) => (
                       <TableHead key={label}>{label}</TableHead>
@@ -142,6 +149,8 @@ export default function ExpoTickets() {
                           ? new Date(item.createdAt).toLocaleDateString("en-GB")
                           : "Not recorded"}
                       </TableCell>
+                      <TableCell><Badge variant="outline">{item.status || "Confirmed"}</Badge></TableCell>
+                      <TableCell>{item.checkedInAt ? "Checked in" : "Not checked in"}</TableCell>
                       <TableCell>
                         <Button
                           size="sm"

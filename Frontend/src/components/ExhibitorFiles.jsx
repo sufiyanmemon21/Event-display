@@ -16,7 +16,7 @@ async function getErrorMessage(error, fallback) {
   }
   return data?.msg || data?.error || fallback;
 }
-export function LogoPreview({ exhibitorId, fallback }) {
+export function LogoPreview({ exhibitorId, fallback, kind = "logo" }) {
   const [url, setUrl] = useState("");
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -25,7 +25,7 @@ export function LogoPreview({ exhibitorId, fallback }) {
     async function loadLogo() {
       try {
         const response = await API.get(
-          `/exhibitor-files/${exhibitorId}/private-logo`,
+          `/exhibitor-files/${exhibitorId}/private-${kind}`,
           {
             responseType: "blob",
             signal: controller.signal,
@@ -45,7 +45,7 @@ export function LogoPreview({ exhibitorId, fallback }) {
         URL.revokeObjectURL(logo.url);
       }
     };
-  }, [exhibitorId]);
+  }, [exhibitorId, kind]);
   if (failed) {
     if (fallback) return fallback;
     return (
@@ -60,7 +60,7 @@ export function LogoPreview({ exhibitorId, fallback }) {
   return (
     <img
       src={url}
-      alt="Company logo"
+      alt={kind === "photo" ? "Exhibitor profile photo" : "Company logo"}
       className="h-24 w-24 rounded-md border object-contain p-2"
     />
   );
@@ -107,9 +107,9 @@ function CompanyFiles({ exhibitorId, canUpload }) {
     const file = input.files?.[0];
     input.value = "";
     if (!file || busy || loading || error || !canUpload) return;
-    const limit = kind === "logo" ? 2 : 5;
+    const limit = kind !== "document" ? 2 : 5;
     const allowedTypes =
-      kind === "logo" ? ["image/jpeg", "image/png"] : ["application/pdf"];
+      kind !== "document" ? ["image/jpeg", "image/png"] : ["application/pdf"];
     if (!allowedTypes.includes(file.type)) {
       toast.error(
         kind === "logo"
@@ -133,7 +133,7 @@ function CompanyFiles({ exhibitorId, canUpload }) {
         timeout: 60000,
       });
       toast.success(
-        kind === "logo" ? "Company logo uploaded." : "Document uploaded.",
+        kind === "logo" ? "Company logo uploaded." : kind === "photo" ? "Profile photo uploaded." : "Document uploaded.",
       );
       refreshFiles();
     } catch (err) {
@@ -200,6 +200,7 @@ function CompanyFiles({ exhibitorId, canUpload }) {
             </p>
           )}
 
+          {files.some(file => file.kind === "photo") && <LogoPreview exhibitorId={exhibitorId} kind="photo" />}
           {hasDocument ? (
             <Button
               type="button"
@@ -239,6 +240,7 @@ function CompanyFiles({ exhibitorId, canUpload }) {
             />
           </div>
 
+          <div className="space-y-2"><Label htmlFor={`photo-${exhibitorId}`}>Profile photo — JPG or PNG, maximum 2 MB</Label><Input id={`photo-${exhibitorId}`} type="file" accept="image/jpeg,image/png" onChange={event => handleUpload(event, "photo")} /></div>
           <div className="space-y-2">
             <Label
               htmlFor={`document-${exhibitorId}`}
@@ -265,7 +267,7 @@ function CompanyFiles({ exhibitorId, canUpload }) {
         </fieldset>
       )}
 
-      {(busy === "logo" || busy === "document") && (
+      {["logo", "photo", "document"].includes(busy) && (
         <p className="text-sm" role="status">
           Uploading file...
         </p>

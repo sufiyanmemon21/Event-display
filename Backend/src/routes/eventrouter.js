@@ -1,5 +1,6 @@
 import express from "express";
 import multer from "multer";
+import { getReviewers, getWorkspaceEvents, reviewEvent } from "../controllers/eventreviewcontroller.js";
 import {
   createEvent,
   getEvents,
@@ -15,7 +16,7 @@ import {
 
 const eventRouter = express.Router();
 const coverUpload = multer({
-  limits: { fileSize: 3 * 1024 * 1024, files: 1, fields: 8, fieldSize: 20_000 }
+  limits: { fileSize: 3 * 1024 * 1024, files: 1, fields: 9, fieldSize: 20_000 }
 }).single("image");
 
 function uploadCover(req, res, next) {
@@ -29,6 +30,9 @@ function uploadCover(req, res, next) {
 }
 
 eventRouter.get("/all", getEvents);
+eventRouter.get("/workspace", authenticate, authorize("admin", "organizer", "exhibitor"), getWorkspaceEvents);
+eventRouter.get("/reviewers", authenticate, authorize("admin"), getReviewers);
+eventRouter.patch("/:id/review", authenticate, authorize("admin", "exhibitor"), reviewEvent);
 eventRouter.get("/:id/image", getEventCover);
 eventRouter.get("/:id", getEvent);
 

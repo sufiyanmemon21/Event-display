@@ -1,4 +1,5 @@
 
+import { publishUpdate } from "../services/liveupdates.js";
 import mongoose from "mongoose";
 import sharp from "sharp";
 import Event from "../models/eventmodel.js";
@@ -6,6 +7,9 @@ import Exhibitor from "../models/exhibitormodel.js";
 import Attendee from "../models/attendeemodel.js";
 import Booth from "../models/boothmodel.js";
 import Session from "../models/sessionmodel.js";
+import User from "../models/authmodel.js";
+import { isExpo, isPublished, publicEventFilter } from "../services/eventworkflow.js";
+import { isPastEvent } from "../services/eventdates.js";
 
 async function readCover(req, res, data) {
   if (!req.file) return true;
@@ -56,7 +60,7 @@ function readEvent(body = {}) {
 
   const date = new Date(body.date);
 
-  if (Number.isNaN(date.getTime())) {
+  if (Number.isNaN(date.getTime()) || !/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(body.date) || date.toISOString().slice(0, 10) !== body.date) {
     return { error: "Please enter a valid date" };
   }
 
@@ -95,6 +99,16 @@ async function createEvent(req, res) {
       return res.status(400).json({ msg: result.error });
     }
 
+    if (isPastEvent(result.data.date)) return res.status(400).json({ msg: "Choose today or a future date." });
+    if (isExpo(result.data) && req.user.role !== "admin") return res.status(403).json({ msg: "Only an Admin can create Expos." });
+    if (!isExpo(result.data) && req.user.role === "admin") {
+      if (!mongoose.isObjectIdOrHexString(req.body.reviewExhibitor) || !await User.exists({ _id: req.body.reviewExhibitor, role: "exhibitor" })) {
+        return res.status(400).json({ msg: "Assign an exhibitor to review this Event." });
+      }
+      result.data.reviewExhibitor = req.body.reviewExhibitor;
+    }
+    if (isExpo(result.data)) result.data.reviewExhibitor = undefined;
+    result.data.approvalStatus = "Pending";
     if (!await readCover(req, res, result.data)) return;
 
     const event = await Event.create({
@@ -115,7 +129,7 @@ async function createEvent(req, res) {
 
 async function getEvents(req, res) {
   try {
-    const events = await Event.find()
+    const events = await Event.find(publicEventFilter)
       .populate("organizer", "name")
       .sort({ date: 1 });
 
@@ -140,7 +154,7 @@ async function getEvent(req, res) {
       "name"
     );
 
-    if (!event) {
+    if (!event || !isPublished(event)) {
       return res.status(404).json({ msg: "Event not found" });
     }
 
@@ -176,16 +190,28 @@ async function updateEvent(req, res) {
       return res.status(400).json({ msg: result.error });
     }
 
+    if (isPastEvent(result.data.date) && result.data.date.getTime() !== event.date.getTime()) return res.status(400).json({ msg: "Choose today or a future date." });
+    if ((isExpo(event) || isExpo(result.data)) && req.user.role !== "admin") return res.status(403).json({ msg: "Only an Admin can update Expos." });
+    if (req.user.role === "admin" && !isExpo(result.data)) {
+      const reviewer = req.body.reviewExhibitor || event.reviewExhibitor;
+      if (!mongoose.isObjectIdOrHexString(reviewer) || !await User.exists({ _id: reviewer, role: "exhibitor" })) return res.status(400).json({ msg: "Assign an exhibitor to review this Event." });
+      result.data.reviewExhibitor = reviewer;
+    }
+    result.data.approvalStatus = "Pending";
+    result.data.reviewedAt = undefined;
+    result.data.reviewedBy = undefined;
     if (!await readCover(req, res, result.data)) return;
 
     Object.assign(event, result.data);
     await event.save();
+    publishUpdate();
 
     return res.status(200).json({
       msg: "Event updated successfully",
       event,
     });
-  } catch {
+  } catch (error) {
+    if (error.name === "VersionError") return res.status(409).json({ msg: "This event changed. Refresh before saving." });
     return res.status(500).json({
       msg: "Unable to update event",
     });
@@ -236,3 +262,4 @@ async function deleteEvent(req, res) {
 }
 
 export { createEvent, getEvents, getEvent, updateEvent, deleteEvent };
+
