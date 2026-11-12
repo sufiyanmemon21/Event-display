@@ -107,6 +107,7 @@ async function createEvent(req, res) {
       }
       result.data.reviewExhibitor = req.body.reviewExhibitor;
     }
+    if (req.user.role === "exhibitor" && !isExpo(result.data)) result.data.reviewExhibitor = req.user._id;
     if (isExpo(result.data)) result.data.reviewExhibitor = undefined;
     result.data.approvalStatus = "Pending";
     if (!await readCover(req, res, result.data)) return;

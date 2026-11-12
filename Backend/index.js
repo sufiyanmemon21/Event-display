@@ -29,6 +29,11 @@ async function startServer() {
       process.exit(1);
     });
   } catch (error) {
+    if (["MongooseServerSelectionError", "MongoServerSelectionError", "MongoNetworkError"].includes(error.name)) {
+      console.error("MongoDB is temporarily unreachable. Retrying backend startup in 5 seconds.");
+      setTimeout(startServer, 5000);
+      return;
+    }
     console.error("Backend startup failed:", error.name);
     process.exit(1);
   }

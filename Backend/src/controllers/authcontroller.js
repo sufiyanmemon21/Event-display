@@ -1,3 +1,4 @@
+import { validSignupEmail, validSignupPassword } from "../services/signupvalidation.js";
 import bcrypt from "bcrypt";
 import User from "../models/authmodel.js";
 import { createToken } from "../middleware/authmiddleware.js";
@@ -14,17 +15,10 @@ function safeUser(user) {
     name: user.name,
     email: user.email,
     role: user.role || "attendee",
+    ...(user.companyName ? { companyName: user.companyName } : {}),
   };
 }
 
-function validPassword(password) {
-  return (
-    typeof password === "string" &&
-    password.length >= 8 &&
-    Buffer.byteLength(password, "utf8") <= 72 &&
-    /\S/.test(password)
-  );
-}
 
 export async function Register(req, res) {
   try {
@@ -42,13 +36,13 @@ export async function Register(req, res) {
       });
     }
 
-    if (!emailPattern.test(email) || email.length > 254) {
+    if (!validSignupEmail(email)) {
       return res.status(400).json({ msg: "Enter a valid email address" });
     }
 
-    if (!validPassword(password)) {
+    if (!validSignupPassword(password)) {
       return res.status(400).json({
-        msg: "Password must be at least 8 characters and at most 72 bytes",
+        msg: "Use at least 8 characters with uppercase, lowercase, a number and a symbol (maximum 72 bytes)",
       });
     }
 
@@ -58,6 +52,10 @@ export async function Register(req, res) {
       });
     }
 
+    const companyName = typeof req.body.companyName === "string" ? req.body.companyName.trim() : "";
+    if (role === "exhibitor" && (companyName.length < 2 || companyName.length > 150)) {
+      return res.status(400).json({ msg: "Company name must contain between 2 and 150 characters" });
+    }
     const existing = await User.exists({ email });
 
     if (existing) {
@@ -70,6 +68,7 @@ export async function Register(req, res) {
 
     const user = await User.create({
       name: name.trim(),
+      ...(role === "exhibitor" ? { companyName } : {}),
       email,
       password: hashedPassword,
       role,

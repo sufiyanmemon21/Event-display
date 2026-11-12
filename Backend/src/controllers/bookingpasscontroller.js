@@ -1,3 +1,4 @@
+import { passVerificationUrl } from "../services/passurl.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import QRCode from "qrcode";
@@ -14,15 +15,14 @@ export async function issueBookingPass(req, res) {
   if (!booking?.event) return res.status(404).json({ msg: "Booking not found" });
   if (booking.status !== "Confirmed") return res.status(409).json({ msg: "Only confirmed bookings have a pass" });
 
-  const token = jwt.sign({}, process.env.JWT_SECRET, { ...passOptions, subject: id, algorithm: "HS256", noTimestamp: true });
-  const url = new URL("/passes/verify", process.env.FRONTEND_URL || req.get("origin") || `${req.protocol}://${req.get("host")}`);
-  url.hash = token;
+  const token = jwt.sign({}, process.env.JWT_SECRET, { ...passOptions, subject: id, jwtid: id, algorithm: "HS256", noTimestamp: true });
+  const url = passVerificationUrl(token);
   const qr = await QRCode.toBuffer(url.href, { width: 360, margin: 3, errorCorrectionLevel: "M" });
 
   res.set("Cache-Control", "no-store");
   if (req.query.format === "qr") return res.type("png").send(qr);
 
-  const pdf = Buffer.from(await renderBookingPass({ booking, attendeeName: req.user.name, qr }));
+  const pdf = Buffer.from(await renderBookingPass({ booking, attendeeName: req.user.name, qr, website: url.hostname }));
   return res.type("pdf").attachment(`eventsphere-pass-${id}.pdf`).send(pdf);
 }
 

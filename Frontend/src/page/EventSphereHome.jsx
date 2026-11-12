@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
   ArrowUpRight,
+  ArrowUp,
   Building2,
   Cake,
   Flower2,
@@ -158,12 +159,14 @@ export default function EventSphereHome() {
           </div>
           <div
             id="occasion-photos"
-            className={`celebration-photos grid grid-cols-4 gap-[10px] [&_figure]:relative [&_figure]:overflow-hidden [&_figure]:rounded-[12px] [&_figure]:m-0 [&_img]:block [&_img]:w-full [&_img]:h-[clamp(170px,_22vw,_290px)] [&_img]:object-cover [&_figcaption]:absolute [&_figcaption]:inset-[auto_0_0] [&_figcaption]:[background:linear-gradient(transparent,_rgb(30_20_17_/_78%))] [&_figcaption]:text-[#fff] [&_figcaption]:p-[27px_13px_12px] [&_figcaption]:text-[.76rem] [&.is-filtered]:[grid-template-columns:1fr_1fr] max-[640px]:grid-cols-2 max-[640px]:[&.is-filtered]:grid-cols-2 max-[640px]:[&_img]:h-[clamp(125px,_37vw,_200px)]${occasion ? " is-filtered" : ""}`}
+            className={`celebration-photos grid grid-cols-4 gap-[10px] [&.is-filtered]:grid-cols-2 max-[640px]:grid-cols-2${occasion ? " is-filtered" : ""}`}
           >
             {photos.map(({ name, photo, alt }) => (
-              <figure key={name}>
-                <img src={photo} alt={alt} loading="lazy" />
-                <figcaption>{name}</figcaption>
+              <figure key={name} tabIndex={0} className="group relative m-0 overflow-hidden rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#87584d]">
+                <img src={photo} alt={alt} loading="lazy" className="block h-[clamp(170px,22vw,290px)] w-full object-cover max-[640px]:h-[clamp(125px,37vw,200px)]" />
+                <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#1e1411]/80 via-transparent to-transparent transition-opacity duration-300 group-hover:opacity-0 group-focus-visible:opacity-0 motion-reduce:transition-none" />
+                <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[#241813]/55 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none" />
+                <figcaption className="absolute bottom-3 left-3 max-w-[calc(100%-24px)] text-[.76rem] font-medium text-white transition-[left,bottom,translate,font-size] duration-300 ease-out group-hover:bottom-1/2 group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:translate-y-1/2 group-hover:text-center group-hover:text-xl group-focus-visible:bottom-1/2 group-focus-visible:left-1/2 group-focus-visible:-translate-x-1/2 group-focus-visible:translate-y-1/2 group-focus-visible:text-center group-focus-visible:text-xl motion-reduce:transition-none">{name}</figcaption>
               </figure>
             ))}
             {occasion && (
@@ -312,6 +315,15 @@ export default function EventSphereHome() {
           </form>
         </section>
       </main>
+      <button
+        type="button"
+        aria-label="Back to top"
+        title="Back to top"
+        onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })}
+        className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-5 z-40 grid size-11 place-items-center rounded-full border border-[#d8baad] bg-[#fffaf6] text-[#87584d] shadow-lg transition-colors hover:bg-[#87584d] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#87584d] motion-reduce:transition-none"
+      >
+        <ArrowUp size={20} aria-hidden="true" />
+      </button>
     </PublicPageShell>
   );
 }

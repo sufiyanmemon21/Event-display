@@ -51,7 +51,7 @@ function rounded(page, x, top, width, height, radius, fill, border) {
   page.drawSvgPath(path, { x, y: top, color: fill, borderColor: border, borderWidth: border ? 1.5 : 0 });
 }
 
-export async function renderBookingPass({ booking, attendeeName, qr }) {
+export async function renderBookingPass({ booking, attendeeName, qr, website = "event-display-frontend.vercel.app" }) {
   const document = await PDFDocument.create();
   const body = await document.embedFont(StandardFonts.Helvetica);
   const bold = await document.embedFont(StandardFonts.HelveticaBold);
@@ -63,13 +63,13 @@ export async function renderBookingPass({ booking, attendeeName, qr }) {
   const date = new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeZone: "UTC" }).format(booking.event.date);
   const dateLines = wrap(bold, date, 12, 235);
   const detailsHeight = Math.max(location.length, dateLines.length) * 17;
-  const height = Math.max(370, 214 + title.length * 29 + name.length * 19 + detailsHeight + 44);
+  const height = Math.max(410, 280 + title.length * 29 + name.length * 19 + detailsHeight + 44);
   const page = document.addPage([850, height]);
   document.setTitle(`EventSphere pass - ${booking.event.title}`);
   document.setAuthor("EventSphere");
   page.drawRectangle({ x: 0, y: 0, width: 850, height, color: colors.paper });
   rounded(page, 18, height - 18, 814, height - 36, 22, colors.card, colors.gold);
-  rounded(page, 34, height - 34, 532, 57, 14, colors.brown);
+  rounded(page, 34, height - 34, 532, 64, 12, colors.brown);
   rounded(page, 610, height - 34, 204, height - 68, 16, colors.stub);
 
   const text = (value, x, top, size, font = body, color = colors.ink) => page.drawText(printable(font, value), {
@@ -77,13 +77,13 @@ export async function renderBookingPass({ booking, attendeeName, qr }) {
   });
   const lines = (values, x, top, size, font, leading) => values.forEach((value, index) => text(value, x, top + index * leading, size, font));
   text("EventSphere", 50, 45, 22, serif, colors.card);
-  text("CONFIRMED ENTRY PASS", 50, 73, 8, bold, colors.card);
+  text("EVENTS & CELEBRATIONS  /  ADMISSION PASS", 50, 78, 8, body, colors.card);
   const ticket = printable(bold, booking.ticketType || "Standard").toUpperCase();
   text(ticket, 550 - bold.widthOfTextAtSize(ticket, 10), 57, 10, bold, colors.card);
-  let top = 108;
+  let top = 120;
   lines(title, 50, top, 25, serif, 29);
   top += title.length * 29 + 17;
-  text("PASS HOLDER", 50, top, 9, bold, colors.muted);
+  text("ISSUED TO", 50, top, 9, bold, colors.muted);
   top += 19;
   lines(name, 50, top, 15, bold, 19);
   top += name.length * 19 + 24;
@@ -93,8 +93,11 @@ export async function renderBookingPass({ booking, attendeeName, qr }) {
   lines(dateLines, 50, top, 12, bold, 17);
   lines(location, 311, top, 12, bold, 17);
   const reference = String(booking._id);
-  text("BOOKING REFERENCE", 50, height - 64, 8, bold, colors.muted);
-  text(reference, 50, height - 48, 11, mono, colors.brown);
+  page.drawLine({ start: { x: 50, y: 85 }, end: { x: 550, y: 85 }, thickness: 0.6, color: colors.stub });
+  text("UNIQUE PASS ID", 50, height - 72, 8, bold, colors.muted);
+  text(reference.toUpperCase(), 50, height - 57, 10, mono, colors.brown);
+
+  text(website, 50, height - 37, 8, body, colors.muted);
 
   page.drawLine({ start: { x: 588, y: 28 }, end: { x: 588, y: height - 28 }, thickness: 1.5, color: colors.gold, dashArray: [5, 6] });
   for (const y of [18, height - 18]) {
@@ -107,7 +110,8 @@ export async function renderBookingPass({ booking, attendeeName, qr }) {
   };
   centered("SCAN FOR ENTRY", 239, 11);
   centered("Present this QR code at check-in", 260, 8, body, colors.muted);
-  centered("CONFIRMED", height - 87, 9, bold, colors.brown);
-  centered(reference, height - 58, 8, mono, colors.muted);
+  rounded(page, 646, 91, 132, 25, 12, colors.card);
+  centered("CONFIRMED BOOKING", height - 85, 8, bold, colors.brown);
+  centered("One booking. One unique pass.", height - 47, 8, body, colors.muted);
   return document.save();
 }

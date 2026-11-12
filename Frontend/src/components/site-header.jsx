@@ -97,10 +97,10 @@ export function SiteHeader({ user, onSignOut }) {
             asChild
             variant="ghost"
             size="sm"
-            className="hidden text-muted-foreground lg:inline-flex"
+            className="inline-flex rounded-xl border border-border bg-card text-foreground"
           >
             <Link to="/">
-              View website
+              Website
               <ArrowUpRight className="ml-1 size-4" />
             </Link>
           </Button>

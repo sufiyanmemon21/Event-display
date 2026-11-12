@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import LandingNavigation from "@/components/landing/LandingNavigation";
 import planningImage from "@/assets/last.avif";
 
-export default function AuthLayout({ title, description, children }) {
+export default function AuthLayout({ title, description, children, photoBackground = false }) {
   useEffect(() => {
     document.title = title + " — EventSphere";
   }, [title]);
@@ -21,20 +21,24 @@ export default function AuthLayout({ title, description, children }) {
                    [&_>_main_div:has(>_[data-loading-scope='page'])]:w-full [color-scheme:light]"
       id="top"
     >
-      <LandingNavigation />
+      {!photoBackground && <LandingNavigation />}
       <main
-        className="celebration-auth-main [.public-theme.celebration-auth_>_&]:grid
+        className={photoBackground ? "relative isolate grid min-h-dvh items-center px-4 py-8 sm:px-8 sm:py-12" : `celebration-auth-main [.public-theme.celebration-auth_>_&]:grid
           [.public-theme.celebration-auth_>_&]:items-center [.public-theme.celebration-auth_>_&]:min-h-dvh
           [.public-theme.celebration-auth_>_&]:p-[110px_clamp(16px,_5vw,_64px)_40px]
-          [.public-theme.celebration-auth_>_&]:[background:radial-gradient(ellipse_at_15%_22%,_#fffaf0_0,_transparent_48%),_radial-gradient(ellipse_at_89%_68%,_#edcfad80_0,_transparent_42%),_linear-gradient(145deg,_#f9eee4_0%,_#f0ddd1_65%,_#f7ebe1_100%)]"
+          [.public-theme.celebration-auth_>_&]:[background:radial-gradient(ellipse_at_15%_22%,_#fffaf0_0,_transparent_48%),_radial-gradient(ellipse_at_89%_68%,_#edcfad80_0,_transparent_42%),_linear-gradient(145deg,_#f9eee4_0%,_#f0ddd1_65%,_#f7ebe1_100%)]`}
       >
+        {photoBackground && <>
+          <img src={planningImage} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" fetchPriority="high" />
+          <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[#30201a]/45" />
+        </>}
         <div
-          className="celebration-auth-spread grid [grid-template-columns:1fr_1fr] w-[min(100%,_1080px)] mx-auto overflow-hidden
+          className={photoBackground ? "mx-auto w-full max-w-[560px] overflow-hidden rounded-2xl border border-white/60 bg-[#fffaf6]/95 shadow-2xl backdrop-blur-sm" : `celebration-auth-spread grid [grid-template-columns:1fr_1fr] w-[min(100%,_1080px)] mx-auto overflow-hidden
           [border:1px_solid_#e2c9bd] rounded-[18px] [background:#fffaf6]
           [box-shadow:0_28px_70px_#51311f23,_0_3px_10px_#51311f12] max-[760px]:[grid-template-columns:1fr]
-          max-[760px]:max-w-[490px]"
+          max-[760px]:max-w-[490px]`}
         >
-          <div
+          {!photoBackground && <div
             className="celebration-auth-photo relative isolate grid items-end min-h-[500px] p-[clamp(26px,_4vw,_56px)]
           [background:#69534b] [&_img]:absolute [&_img]:inset-0 [&_img]:w-full [&_img]:h-full [&_img]:z-[-2]
           [&_img]:object-cover [&::after]:absolute [&::after]:inset-0 [&::after]:w-full [&::after]:h-full
@@ -50,7 +54,7 @@ export default function AuthLayout({ title, description, children }) {
               <br />
               <em>Joyfully celebrated.</em>
             </p>
-          </div>
+          </div>}
           <section
             className="celebration-auth-panel self-center min-w-0 p-[clamp(26px,_4vw,_56px)] text-[var(--account-ink)]
           [&_p:not([role='alert'])]:text-[var(--account-copy)] [&_a]:text-[var(--account-accent-hover)]

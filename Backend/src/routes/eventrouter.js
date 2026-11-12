@@ -39,7 +39,7 @@ eventRouter.get("/:id", getEvent);
 eventRouter.post(
   "/create",
   authenticate,
-  authorize("admin", "organizer"),
+  authorize("admin", "organizer", "exhibitor"),
   uploadCover,
   createEvent
 );

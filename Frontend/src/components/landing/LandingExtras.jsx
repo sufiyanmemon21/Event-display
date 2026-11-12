@@ -1,7 +1,7 @@
 import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, ChevronDown, MessageSquare, Quote } from "lucide-react";
+import { ArrowUpRight, ChevronDown, MessageSquare, Quote, Star } from "lucide-react";
 import api from "@/api/api";
 
 const questions = [
@@ -75,27 +75,30 @@ function ClientReviews() {
       {!loadError && !reviews && <EllipsisLoader label="Loading reviews" />}
       {!loadError && reviews?.length === 0 && <p>No client reviews yet.</p>}
       {!!reviews?.length && (
-        <div className="celebration-extras-grid grid grid-cols-3 gap-[clamp(12px,_2vw,_24px)] max-[640px]:[grid-template-columns:1fr]">
+        <div className="flex flex-wrap justify-center gap-6">
           {reviews.map(({ _id, name, message: review, rating }) => (
             <figure
               key={_id}
-              className="celebration-review grid content-start gap-3 p-[22px] [overflow-wrap:anywhere] [border:1px_solid_#e2c9bd]
-          rounded-[14px] [background:#fffaf6] [&_svg]:text-[var(--accent)] [&_figcaption]:text-[var(--accent)]
-          [&_blockquote]:whitespace-pre-wrap [&_blockquote]:leading-[1.55] [&_figcaption]:font-[650]"
+              className="m-0 flex min-h-64 w-full min-w-0 flex-col rounded-2xl border border-[#e7d6ca] bg-[#fffdf9] p-6 shadow-[0_8px_28px_#51311f08] transition-[box-shadow,border-color] duration-200 hover:border-[#c8a685] hover:shadow-[0_12px_32px_#51311f12] sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] only:max-w-xl only:sm:w-full motion-reduce:transition-none sm:p-8"
             >
-              <Quote size={23} aria-hidden="true" />
-              {rating && (
-                <span aria-label={`${rating} out of 5 stars`}>
-                  {"★".repeat(rating)}
-                  {"☆".repeat(5 - rating)}
-                </span>
-              )}
-              <blockquote>{review}</blockquote>
-              <figcaption>{name}</figcaption>
+              <div className="mb-6 flex items-center justify-between gap-4">
+                {rating ? (
+                  <span className="flex gap-1" role="img" aria-label={`${rating} out of 5 stars`}>
+                    {Array.from({ length: 5 }, (_, index) => (
+                      <Star key={index} size={16} aria-hidden="true" className={index < rating ? "fill-[#b38946] text-[#b38946]" : "text-[#dfd3c4]"} />
+                    ))}
+                  </span>
+                ) : <span />}
+                <Quote size={28} strokeWidth={1.25} className="text-[#c3a98e]" aria-hidden="true" />
+              </div>
+              <blockquote className="mb-8 flex-1 whitespace-pre-wrap font-serif text-xl leading-relaxed text-[#49352d] [overflow-wrap:anywhere]">{review}</blockquote>
+              <figcaption className="flex items-center gap-3 border-t border-[#eee2d7] pt-5">
+                <span aria-hidden="true" className="grid size-11 shrink-0 place-items-center rounded-full bg-[#f2e8dc] font-serif text-lg text-[#87584d]">{name?.trim().charAt(0).toUpperCase() || "G"}</span>
+                <span className="min-w-0 text-sm font-semibold text-[#69483b] [overflow-wrap:anywhere]">{name}</span>
+              </figcaption>
             </figure>
           ))}
-        </div>
-      )}
+        </div>   )}
     </section>
   );
 }
@@ -113,7 +116,7 @@ export default function LandingExtras({ photos }) {
           text-[.86rem] font-bold [&_svg]:text-[#9d6a10] hover:border-[#b68a46]
           hover:[box-shadow:inset_1px_1px_0_#ffffffbf,_0_8px_24px_#523a1840] focus-visible:[outline:2px_solid_#87584d]
           focus-visible:outline-offset-[-4px] max-[700px]:top-[auto]
-          max-[700px]:bottom-[max(1rem,_env(safe-area-inset-bottom))] max-[700px]:[translate:none]
+          max-[700px]:bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4rem)] max-[700px]:[translate:none]
           max-[700px]:p-[8px_5px] max-[700px]:text-[.75rem] motion-reduce:transition-none"
       >
         <MessageSquare size={19} aria-hidden="true" /> Feedback

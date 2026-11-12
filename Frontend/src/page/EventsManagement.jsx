@@ -113,7 +113,7 @@ export default function EventsManagement({ listingType = "expo" }) {
   const userId = localStorage.getItem("userId");
   const isOrganizer = role === "organizer" || role === "admin";
   const isExhibitor = role === "exhibitor";
-  const canCreate = isOrganizer && (listingType !== "expo" || role === "admin");
+  const canCreate = listingType === "expo" ? role === "admin" : isOrganizer || isExhibitor;
   const eventsEndpoint = isOrganizer || isExhibitor ? "/events/workspace" : "/events/all";
   useEffect(() => {
     if (role !== "admin") return;
@@ -320,11 +320,11 @@ export default function EventsManagement({ listingType = "expo" }) {
         title={collectionName}
         description={
           isExhibitor
-            ? `Browse ${collectionName.toLowerCase()}. ${listingType === "expo" ? "Only Admins can create and approve Expos." : "Review Events assigned to you in Events & Approvals."}`
+            ? `Browse ${collectionName.toLowerCase()}. ${listingType === "expo" ? "Only Admins can create and approve Expos." : "Create Events and review them in Events & Approvals."}`
             : `Manage your ${collectionName.toLowerCase()} and their public listings.`
         }
       >
-        {isExhibitor && (
+        {isExhibitor && listingType === "expo" && (
           <Button type="button" variant="outline" disabled>
             {listingType === "expo" ? "Create Expo" : "Add Event"}
           </Button>
@@ -336,7 +336,7 @@ export default function EventsManagement({ listingType = "expo" }) {
             title={
               editingId ? `Edit ${listingLabel}` : `Create ${listingLabel}`
             }
-            trigger={`Create ${listingName}`}
+            trigger={isExhibitor ? "Add Event" : `Create ${listingName}`}
             open={formOpen}
             onOpenChange={(value) => {
               if (!saving) {

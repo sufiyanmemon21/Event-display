@@ -157,3 +157,19 @@ test("global booth hold covers other Expos, concurrent claims and cancellation",
   await claimBooth(reviewer._id, "booth2", {});
   assert.equal(holds.get(reviewer._id), "booth2");
 });
+
+
+test("exhibitors create regular Events but cannot create Expos", async t => {
+  let writes = 0;
+  t.mock.method(Event, "create", async value => { writes++; return value; });
+  let res = response();
+  await createEvent({ body: { ...listing, reviewExhibitor: admin._id }, user: reviewer }, res);
+  assert.equal(res.code, 201);
+  assert.equal(res.body.event.organizer, reviewer._id);
+  assert.equal(res.body.event.reviewExhibitor, reviewer._id);
+  assert.equal(res.body.event.approvalStatus, "Pending");
+  res = response();
+  await createEvent({ body: { ...listing, listingType: "expo" }, user: reviewer }, res);
+  assert.equal(res.code, 403);
+  assert.equal(writes, 1);
+});

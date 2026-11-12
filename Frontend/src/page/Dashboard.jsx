@@ -287,25 +287,21 @@ export default function Dashboard() {
   return (
     <div className="space-y-7">
       <div
-        className="workspace-heading workspace-overview flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between
-          workspace:border workspace:border-border workspace:rounded-[14px] workspace:[background:var(--card)]
-          workspace:shadow-[var(--workspace-shadow)] workspace:border-s-[3px] workspace:border-s-ring
-          [.eventsphere-workspace_&_p:last-child]:text-[1rem] workspace:border-0 workspace:bg-transparent
-          workspace:shadow-none workspace:p-[0_0_10px]"
+        className="workspace-heading workspace-overview flex min-w-0 flex-col gap-6 rounded-2xl border border-border border-s-[3px] border-s-ring bg-card p-5 shadow-[var(--workspace-shadow)] sm:p-7 xl:flex-row xl:items-center xl:justify-between"
       >
-        <div className="space-y-2">
+        <div className="min-w-0 space-y-3">
           <Badge variant="secondary" className="capitalize">
             {user?.role} workspace
           </Badge>
           <div>
-            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            <h1 className="break-words text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
               {user?.role === "admin"
                 ? "Admin Dashboard"
                 : user?.role === "exhibitor"
                   ? "Exhibitor Dashboard"
                   : `Welcome back${user?.name ? `, ${user.name}` : ""}`}
             </h1>
-            <p className="mt-2 text-sm text-sidebar-foreground/65 sm:text-base">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               {isOrganizer
                 ? "Overview of your listings, booths, exhibitors, and attendee bookings."
                 : "Your events. Your community. One connected workspace."}
@@ -314,7 +310,7 @@ export default function Dashboard() {
         </div>
         <Button
           variant="outline"
-          className="w-fit rounded-xl bg-card text-foreground [.workspace-form-body_fieldset_>_p&]:py-[14px]"
+          className="w-full shrink-0 rounded-xl bg-card text-foreground sm:w-auto [.workspace-form-body_fieldset_>_p&]:py-[14px]"
           disabled={loading}
           onClick={() => setRefresh((previous) => previous + 1)}
         >

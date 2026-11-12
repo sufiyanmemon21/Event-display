@@ -1,3 +1,4 @@
+import { validSignupEmail, validSignupPassword } from "@/lib/signupValidation";
 import EllipsisLoader from "@/components/EllipsisLoader";
 import { useState } from "react";
 import useAuth from "@/hooks/useAuth";
@@ -22,6 +23,7 @@ function accountDestination(account, returnTo) {
 
 export default function Login({ signup = false }) {
   const [params] = useSearchParams();
+  const [role, setRole] = useState(params.get("role") === "exhibitor" ? "exhibitor" : "attendee");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const user = useAuth();
@@ -43,6 +45,20 @@ export default function Login({ signup = false }) {
     if (loading) return;
     setError("");
     const values = Object.fromEntries(new FormData(event.currentTarget));
+    if (signup) {
+      if (!values.name || values.name.trim().length < 2 || values.name.trim().length > 80) {
+        setError("Enter your full name using 2–80 characters."); return;
+      }
+      if (values.role === "exhibitor" && (!values.companyName || values.companyName.trim().length < 2 || values.companyName.trim().length > 150)) {
+        setError("Enter your company name using 2–150 characters."); return;
+      }
+      if (!validSignupEmail(values.email)) {
+        setError("Enter a valid email address, such as name@gmail.com. Do not use slashes, spaces, or a dot at the beginning or end."); return;
+      }
+      if (!validSignupPassword(values.password)) {
+        setError("Use at least 8 characters with an uppercase letter, a lowercase letter, a number and a symbol. The maximum is 72 bytes."); return;
+      }
+    }
     if (signup && values.password !== values.confirmPassword) {
       setError("Your passwords do not match. Please check both fields.");
       return;
@@ -76,6 +92,7 @@ export default function Login({ signup = false }) {
   }
   return (
     <AuthLayout
+      photoBackground
       title={signup ? "Create an account" : "Welcome back"}
       description={
         signup
@@ -83,7 +100,7 @@ export default function Login({ signup = false }) {
           : "Sign in to your workspace and discover what comes next."
       }
     >
-      <form className="grid gap-3" onSubmit={submit}>
+      <form className="grid gap-3" onSubmit={submit} noValidate={signup}>
         {signup && (
           <>
             <div className="grid min-w-0 gap-1">
@@ -104,9 +121,8 @@ export default function Login({ signup = false }) {
                 id="role"
                 name="role"
                 aria-describedby="role-help"
-                defaultValue={
-                  params.get("role") === "exhibitor" ? "exhibitor" : "attendee"
-                }
+                value={role}
+                onChange={event => { setRole(event.target.value); setError(""); }}
               >
                 <option value="attendee">Attendee</option>
                 <option value="exhibitor">Exhibitor</option>
@@ -118,6 +134,10 @@ export default function Login({ signup = false }) {
                 Organizer accounts are managed by an administrator.
               </p>
             </div>
+            {role === "exhibitor" && <div className="grid min-w-0 gap-1">
+              <label htmlFor="companyName">Company name</label>
+              <input id="companyName" name="companyName" autoComplete="organization" required minLength={2} maxLength={150} placeholder="Your company name" />
+            </div>}
           </>
         )}
         <div className="grid min-w-0 gap-1">
@@ -140,7 +160,7 @@ export default function Login({ signup = false }) {
               newPassword
             />
             <p className="text-xs leading-5 [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
-              Use 8–72 characters (maximum 72 bytes).
+              Use at least 8 characters, including uppercase and lowercase letters, a number and a symbol (for example, @ or !). Maximum 72 bytes.
             </p>
           </>
         ) : (

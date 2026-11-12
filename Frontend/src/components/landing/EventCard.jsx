@@ -62,14 +62,14 @@ export default function EventCard({ event, index = 0 }) {
 
   return (
     <div
-      className="celebration-listing block min-w-0 rounded-[5px] text-[#362621]
-                   [box-shadow:0_4px_12px_#52301e0b,_0_12px_28px_#52301e08] [transition:translate_.2s_ease,_box-shadow_.2s_ease]
-                   hover:[translate:0_-3px] hover:[box-shadow:0_14px_32px_#52301e20]
+      className="celebration-listing block min-w-0 rounded-2xl text-[#362621]
+                   shadow-[0_4px_12px_#52301e0b,0_12px_28px_#52301e08] transition-[translate,box-shadow] duration-200 ease-out
+                   hover:-translate-y-1 hover:shadow-[0_14px_32px_#52301e20]
                    focus-visible:[outline:2px_solid_var(--ticket-accent)] focus-visible:outline-offset-4
-                   motion-reduce:transition-none motion-reduce:hover:[translate:none]"
+                   motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       data-kind={kind}
     >
-      <article className="celebration-listing-ticket flex flex-col h-full overflow-hidden [border:1px_solid_var(--ticket-line)] rounded-[inherit] [background:#fffaf5]">
+      <article className="celebration-listing-ticket flex flex-col h-full overflow-hidden [border:1px_solid_var(--ticket-line)] rounded-2xl [background:#fffaf5]">
         <div
           className="celebration-listing-photo relative flex-none h-[clamp(132px,_15vw,_188px)] overflow-hidden [background:#e9cfc0]
           [&_img]:block [&_img]:[transition:scale_.4s_ease] [.celebration-listing:hover_&_img]:[scale:1.035]
