@@ -90,6 +90,10 @@ test("bookings start pending and only the assigned reviewer can approve", async 
   await registerAttendee({ body: { event: id }, user: { _id: id } }, res);
   assert.equal(res.code, 409);
   event.approvalStatus = "Approved";
+  event.date = new Date("2000-01-01");
+  res = response();
+  await registerAttendee({ body: { event: id }, user: { _id: id } }, res);
+  assert.equal(res.code, 201);
   t.mock.method(Attendee, "findById", () => query({ event, status: "Pending" }));
   t.mock.method(Attendee, "findOneAndUpdate", async (_, update) => update.$set);
   res = response();
@@ -98,6 +102,10 @@ test("bookings start pending and only the assigned reviewer can approve", async 
   res = response();
   await updateBookingStatus({ params: { id }, body: { status: "Confirmed" }, user: reviewer }, res);
   assert.equal(res.body.status, "Confirmed");
+  event.listingType = "expo";
+  res = response();
+  await registerAttendee({ body: { event: id }, user: { _id: id } }, res);
+  assert.equal(res.code, 409);
   t.mock.method(Event, "find", filter => { assert.deepEqual(filter, { reviewExhibitor: reviewer._id }); return query([{ _id: id }]); });
   t.mock.method(Attendee, "find", filter => { assert.deepEqual(filter, { $and: [{ event: { $in: [id] } }, { event: admin._id }] }); return query([]); });
   res = response();
@@ -137,25 +145,46 @@ test("QR check-in rejects invalid, unconfirmed, unauthorized and wrong-date tick
   assert.equal((await scan()).code, 409);
 });
 
-test("global booth hold covers other Expos, concurrent claims and cancellation", async t => {
-  let applications = [{ _id: id, boothNumber: "A1" }];
-  t.mock.method(Exhibitor, "find", () => query(applications));
-  t.mock.method(Booth, "exists", () => query(null));
+test("booth holds allow one reservation per exhibitor per Expo", async t => {
+  const expoA = "507f1f77bcf86cd799439021";
+  const expoB = "507f1f77bcf86cd799439022";
+  const applicationA = { _id: "507f1f77bcf86cd799439031", boothNumber: "", event: expoA };
+  const applicationB = { _id: "507f1f77bcf86cd799439032", boothNumber: "", event: expoB };
+  const applications = [applicationA, applicationB];
+  t.mock.method(Exhibitor, "find", filter =>
+    query(applications.filter(item => item.event === filter.event)),
+  );
+  t.mock.method(Booth, "exists", filter =>
+    query([...holds.values()].some(hold => filter.reservedBy.$in.includes(hold.applicationId))),
+  );
   const holds = new Map();
   t.mock.method(BoothHold, "create", async ([hold]) => {
-    if (holds.has(hold._id)) throw Object.assign(new Error("Duplicate hold"), { code: 11000 });
-    holds.set(hold._id, hold.booth);
+    const key = `${hold.user}:${hold.event}`;
+    if (holds.has(key)) throw Object.assign(new Error("Duplicate hold"), { code: 11000 });
+    holds.set(key, { ...hold, applicationId: applications.find(item => item.event === hold.event)?._id });
   });
-  t.mock.method(BoothHold, "deleteOne", filter => ({ session: async () => { if (holds.get(filter._id) === filter.booth) holds.delete(filter._id); } }));
-  await assert.rejects(claimBooth(reviewer._id, "booth2", {}), { status: 409 });
-  applications = [];
-  const results = await Promise.allSettled([claimBooth(reviewer._id, "booth1", {}), claimBooth(reviewer._id, "booth2", {})]);
-  assert.equal(results.filter(result => result.status === "fulfilled").length, 1);
-  await releaseBooth(reviewer._id, "wrong-booth", {});
+  t.mock.method(BoothHold, "deleteOne", filter => ({
+    session: async () => {
+      const key = `${filter.user}:${filter.event}`;
+      if (holds.get(key)?.booth === filter.booth) holds.delete(key);
+    },
+  }));
+  await claimBooth(reviewer._id, "booth-b1", expoB, {});
   assert.equal(holds.size, 1);
-  await releaseBooth(reviewer._id, "booth1", {});
-  await claimBooth(reviewer._id, "booth2", {});
-  assert.equal(holds.get(reviewer._id), "booth2");
+  await releaseBooth(reviewer._id, "booth-b1", expoB, {});
+  const concurrent = await Promise.allSettled([
+    claimBooth(reviewer._id, "booth-b2", expoB, {}),
+    claimBooth(reviewer._id, "booth-b3", expoB, {}),
+  ]);
+  assert.equal(concurrent.filter(result => result.status === "fulfilled").length, 1);
+  assert.equal(concurrent.filter(result => result.status === "rejected").length, 1);
+  await claimBooth(reviewer._id, "booth-a1", expoA, {});
+  assert.equal(holds.size, 2);
+  await assert.rejects(claimBooth(reviewer._id, "booth-a2", expoA, {}), { status: 409 });
+  await releaseBooth(reviewer._id, "wrong-booth", expoB, {});
+  assert.equal(holds.size, 2);
+  await releaseBooth(reviewer._id, holds.get(`${reviewer._id}:${expoB}`).booth, expoB, {});
+  assert.equal(holds.size, 1);
 });
 
 

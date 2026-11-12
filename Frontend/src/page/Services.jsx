@@ -15,7 +15,7 @@ const services = [
   [
     CalendarDays,
     "Event planning",
-    "Keep event dates, details, and schedules organized in one connected workspace.",
+    "Manage event dates, details, and schedules in one place.",
   ],
   [
     Building2,

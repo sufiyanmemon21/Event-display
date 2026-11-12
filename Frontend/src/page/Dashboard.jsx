@@ -304,7 +304,7 @@ export default function Dashboard() {
             <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
               {isOrganizer
                 ? "Overview of your listings, booths, exhibitors, and attendee bookings."
-                : "Your events. Your community. One connected workspace."}
+                : "Manage your registrations, booth reservations, and event activity."}
             </p>
           </div>
         </div>

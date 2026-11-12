@@ -75,7 +75,7 @@ export async function assignBooth(req, res) {
           fail(409, "This exhibitor already has a booth for this event");
         }
 
-        await claimBooth(exhibitor.contactPerson, boothId, session);
+        await claimBooth(exhibitor.contactPerson, boothId, booth.event, session);
         const updated = await Booth.findOneAndUpdate(
           {
             _id: booth._id,

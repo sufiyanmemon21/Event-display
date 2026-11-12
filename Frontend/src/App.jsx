@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import EventSphereHome from "./page/EventSphereHome";
 const Dashboard = lazy(() => import("./page/Dashboard"));
 const EventBooking = lazy(() => import("./page/EventBooking"));
+const ExpoBooking = lazy(() => import("./page/ExpoBooking"));
 const AttendeeProfile = lazy(() => import("./page/AttendeeProfile"));
 const PassVerification = lazy(() => import("./page/PassVerification"));
 const Contact = lazy(() => import("./page/Contact"));
@@ -107,6 +108,7 @@ function App() {
         <Route element={<ProtectedRoute allowedRoles={["attendee"]} />}>
           <Route path="profile" element={<AttendeeProfile />} />
           <Route path="book" element={<EventBooking />} />
+          <Route path="expo-booking" element={<ExpoBooking />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={allRoles} />}>

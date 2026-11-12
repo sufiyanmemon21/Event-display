@@ -66,7 +66,7 @@ export async function cancelBoothReservation(req, res) {
 
         exhibitor.boothNumber = "";
         await exhibitor.save({ session });
-        await releaseBooth(req.user._id, boothId, session);
+        await releaseBooth(req.user._id, boothId, booth.event, session);
 
         return updated;
       }

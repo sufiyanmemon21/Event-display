@@ -129,7 +129,7 @@ async function reserveBooth(req, res) {
           fail(409, "You already have a booth for this event");
         }
 
-        await claimBooth(req.user._id, boothId, session);
+        await claimBooth(req.user._id, boothId, booth.event, session);
         const updated = await Booth.findOneAndUpdate(
           {
             _id: boothId,

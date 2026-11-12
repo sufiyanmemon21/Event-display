@@ -103,7 +103,7 @@ function BookingCard({ booking }) {
       </div>
       {event && (
         <div className="grid gap-1 text-sm text-[var(--public-copy)]">
-          {event.date && (
+          {isExpo(event) && event.date && (
             <p className="flex items-center gap-2">
               <CalendarDays size={16} />{" "}
               {dateFormat.format(new Date(event.date))}
@@ -289,7 +289,7 @@ export default function AttendeeProfile() {
   async function requestBooking(e) {
     e.preventDefault();
     if (saving || !eventId) return;
-    if (isPastEvent(event?.date)) {
+    if (event && isExpo(event) && isPastEvent(event.date)) {
       setEventError("Bookings are closed for past events.");
       return;
     }
@@ -365,7 +365,7 @@ export default function AttendeeProfile() {
                   <p className="text-sm text-[var(--public-copy)]">
                     You already have a booking for this event.
                   </p>
-                ) : isPastEvent(event.date) ? (
+                ) : isExpo(event) && isPastEvent(event.date) ? (
                   <p className="text-sm text-[var(--public-copy)]">
                     Bookings are closed for past events.
                   </p>

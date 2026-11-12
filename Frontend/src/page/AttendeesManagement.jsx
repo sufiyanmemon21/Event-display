@@ -98,7 +98,8 @@ export default function AttendeesManagement() {
   async function handleRegister(event) {
     event.preventDefault();
     if (saving || !eventId) return;
-    if (isPastEvent(events.find((item) => item._id === eventId)?.date)) {
+    const selectedEvent = events.find((item) => item._id === eventId);
+    if (selectedEvent && isExpo(selectedEvent) && isPastEvent(selectedEvent.date)) {
       toast.error("Bookings are closed for past events.");
       return;
     }
@@ -200,7 +201,7 @@ export default function AttendeesManagement() {
                       <option value="">Select an event</option>
 
                       {events.map((event) => {
-                        const closed = isPastEvent(event.date);
+                        const closed = isExpo(event) && isPastEvent(event.date);
                         return (
                           <option
                             key={event._id}

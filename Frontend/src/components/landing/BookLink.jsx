@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
 import useAuth from "@/hooks/useAuth";
 
-export default function BookLink({ eventId, children, ...props }) {
+export default function BookLink({ eventId, expo = false, children, ...props }) {
   const user = useAuth();
   const destination = eventId
-    ? `/book?event=${encodeURIComponent(eventId)}`
+    ? expo
+      ? `/expo-booking?expo=${encodeURIComponent(eventId)}`
+      : `/book?event=${encodeURIComponent(eventId)}`
     : "/book";
   return (
     <Link

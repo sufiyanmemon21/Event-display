@@ -54,60 +54,117 @@ function ListingDetailCard({ event, eventIndex, user, featured = false }) {
   const Heading = featured ? "h1" : "h3";
   return (
     <article
-      className="mx-auto flex h-full w-full max-w-sm flex-col overflow-hidden rounded-xl border border-[var(--public-line)]
-          bg-white shadow-[0_14px_38px_rgba(54,27,25,0.09)] [.workspace-form-body_fieldset_>_p&]:py-[14px]"
+      className={
+        featured
+          ? "grid min-w-0 items-center overflow-hidden rounded-2xl border border-[var(--public-line)] bg-[#fffdfa] shadow-[0_16px_40px_rgba(54,27,25,0.1)] md:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)]"
+          : "flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[var(--public-line)] bg-white shadow-[0_10px_28px_rgba(54,27,25,0.08)] transition-shadow hover:shadow-[0_16px_38px_rgba(54,27,25,0.14)]"
+      }
     >
       <img
         src={getEventImage(event, eventIndex)}
-        alt=""
-        className="h-44 w-full shrink-0 object-cover"
+        alt={`${event.title} cover image`}
+        className="block aspect-video w-full object-cover"
       />
-      <div className="flex flex-1 flex-col break-words p-5 text-left">
-        <p className="text-xs font-semibold uppercase tracking-[0.23em] text-[var(--public-teal)]">
+      <div
+        className={
+          featured
+            ? "min-w-0 break-words p-5 text-left sm:p-7"
+            : "flex min-w-0 flex-1 flex-col break-words p-5 text-left sm:p-6"
+        }
+      >
+        <p className="text-xs font-bold uppercase tracking-[0.23em] text-[#75483d]">
           {event.category || (backToEvents ? "Event" : "Expo")}
         </p>
-        <Heading className="mt-2 font-serif text-3xl font-semibold leading-tight text-[var(--public-ink)] sm:text-4xl">
+        <Heading
+          className={
+            featured
+              ? "mt-2 font-serif text-3xl font-semibold leading-tight text-[var(--public-ink)] sm:text-4xl"
+              : "mt-2 line-clamp-2 font-serif text-2xl font-semibold leading-tight text-[var(--public-ink)]"
+          }
+        >
           {event.title}
         </Heading>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--public-copy)]">
+        <p
+          className={
+            featured
+              ? "mt-4 text-sm leading-7 text-[#59443d] sm:text-base"
+              : "mt-3 line-clamp-3 text-sm leading-6 text-[#59443d]"
+          }
+        >
           {event.description || "More details will be shared by the organizer."}
         </p>
-        <div className="mt-6 grid gap-4 rounded-2xl bg-[var(--public-wash)] p-5 text-sm text-[var(--public-copy)] sm:grid-cols-2">
+        <div
+          className={
+            featured
+              ? "mt-5 grid gap-3 rounded-xl border border-[#ead9ce] bg-[#fbf4ed] p-4 text-sm text-[#493930] sm:grid-cols-2"
+              : "mt-4 grid gap-3 rounded-xl border border-[#ead9ce] bg-[#fbf4ed] p-3 text-sm text-[#493930] min-[420px]:grid-cols-2"
+          }
+        >
+          {isExpo(event) && (
+            <p className="flex items-center gap-3">
+              <CalendarDays
+                size={19}
+                aria-hidden="true"
+                className="shrink-0 text-[#80570e]"
+              />
+              <span>
+                <span className="block text-xs font-semibold uppercase tracking-wide text-[#59443d]">
+                  Date
+                </span>
+                {event.date
+                  ? new Date(event.date).toLocaleDateString("en-GB", {
+                      dateStyle: "long",
+                      timeZone: "UTC",
+                    })
+                  : "To be announced"}
+              </span>
+            </p>
+          )}
           <p className="flex items-center gap-3">
-            <CalendarDays
-              size={18}
-              className="shrink-0 text-[var(--public-teal)]"
+            <MapPin
+              size={19}
+              aria-hidden="true"
+              className="shrink-0 text-[#80570e]"
             />
-            {event.date
-              ? new Date(event.date).toLocaleDateString(undefined, {
-                  dateStyle: "long",
-                })
-              : "Date to be announced"}
+            <span>
+              <span className="block text-xs font-semibold uppercase tracking-wide text-[#59443d]">
+                Location
+              </span>
+              {event.location || "To be announced"}
+            </span>
           </p>
-          <p className="flex items-center gap-3">
-            <MapPin size={18} className="shrink-0 text-[var(--public-teal)]" />
-            {event.location || "Location to be announced"}
-          </p>
+          {!isExpo(event) && (
+            <p className="font-semibold text-[#694239] sm:col-span-2">
+              Booking requests are open anytime.
+            </p>
+          )}
         </div>
-        <div className="mt-auto flex flex-wrap gap-3 pt-7">
-          {isPastEvent(event.date) ? (
-            <p className="self-center text-sm font-medium text-[var(--public-copy)]">
-              Bookings closed · Event has passed
+        <div
+          className={
+            featured
+              ? "flex flex-col gap-3 pt-5 sm:flex-row"
+              : "mt-auto flex flex-col gap-3 pt-5 sm:flex-row"
+          }
+        >
+          {isExpo(event) && isPastEvent(event.date) ? (
+            <p className="flex min-h-12 items-center text-sm font-semibold text-[#513d34]">
+              Bookings closed · This expo has passed
             </p>
           ) : (
             (!user || user.role === "attendee") && (
               <BookLink
                 eventId={event._id}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--public-teal)] px-6 text-sm font-semibold text-white transition hover:bg-[var(--public-teal-dark)]"
+                expo={isExpo(event)}
+                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#70483d] px-4 text-sm font-bold text-white shadow-[0_4px_10px_#51342b24] transition hover:bg-[#59382f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#80570e]"
               >
                 {user ? "Book this event" : "Log in to book"}{" "}
-                <ArrowUpRight size={16} />
+                <ArrowUpRight size={17} aria-hidden="true" />
               </BookLink>
             )
           )}
           <Link
             to={featured ? catalogPath : `/expos/${event._id}`}
-            className="inline-flex min-h-11 items-center rounded-full border border-[var(--public-line)] px-6 text-sm font-semibold text-[#4a292a] transition hover:bg-[#fbf4ee]"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-[#b99479] bg-white px-4 text-sm font-semibold text-[#49352d] transition hover:bg-[#f8eee5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#80570e]"
           >
             {featured
               ? backToEvents
@@ -144,10 +201,10 @@ export function ExpoDetailPage() {
   return (
     <PublicPageShell>
       <main className="min-h-[65vh] px-4 py-10 sm:px-7 sm:py-14">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto w-full max-w-6xl">
           <Link
             to={catalogPath}
-            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-[var(--public-copy)] hover:text-[#a97818]"
+            className="mb-6 inline-flex min-h-11 items-center gap-2 rounded-lg px-2 text-sm font-semibold text-[#513d34] hover:text-[#80570e] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#80570e]"
           >
             <ArrowLeft size={16} />{" "}
             {backToEvents ? "Back to events" : "Back to expos"}
@@ -163,7 +220,7 @@ export function ExpoDetailPage() {
               <button
                 type="button"
                 onClick={data.retry}
-                className="mt-4 rounded-full bg-[var(--public-teal)] px-5 py-2 text-sm font-semibold text-white hover:bg-[var(--public-teal-dark)]"
+                className="mt-4 min-h-11 rounded-xl bg-[#70483d] px-5 py-2 text-sm font-semibold text-white hover:bg-[#59382f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#80570e]"
               >
                 Try again
               </button>
@@ -178,7 +235,7 @@ export function ExpoDetailPage() {
               </p>
               <Link
                 to="/expos"
-                className="mt-5 inline-flex items-center gap-2 rounded-full bg-[var(--public-teal)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--public-teal-dark)]"
+                className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#70483d] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#59382f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#80570e]"
               >
                 Explore expos <ArrowUpRight size={15} />
               </Link>
@@ -192,22 +249,23 @@ export function ExpoDetailPage() {
             />
           )}
           {!data.loading && !data.error && related.length > 0 && (
-            <section className="mt-14 text-center">
-              <h2 className="mb-5 font-serif text-2xl font-semibold text-[var(--public-ink)]">
-                You may also like
-              </h2>
-              <div className="mx-auto flex max-w-[49.25rem] flex-wrap justify-center gap-5">
+            <section className="mt-12 border-t border-[var(--public-line)] pt-9">
+              <div className="mb-6">
+                <p className="mb-2 text-xs font-bold uppercase tracking-[.2em] text-[#75483d]">
+                  Keep exploring
+                </p>
+                <h2 className="font-serif text-2xl font-semibold text-[var(--public-ink)] sm:text-3xl">
+                  You may also like
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {related.map((item, index) => (
-                  <div
+                  <ListingDetailCard
                     key={item._id}
-                    className="w-full max-w-sm sm:w-[calc(50%-0.625rem)]"
-                  >
-                    <ListingDetailCard
-                      event={item}
-                      eventIndex={index}
-                      user={user}
-                    />
-                  </div>
+                    event={item}
+                    eventIndex={index}
+                    user={user}
+                  />
                 ))}
               </div>
             </section>

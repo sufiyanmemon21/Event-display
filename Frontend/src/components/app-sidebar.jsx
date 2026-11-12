@@ -255,7 +255,7 @@ export function AppSidebar({ onSignOut, ...props }) {
                       EventSphere
                     </span>
                     <span className="truncate text-[11px] text-sidebar-foreground/60">
-                      Experience operations
+                      Event management
                     </span>
                   </span>
                 )}
