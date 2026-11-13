@@ -25,8 +25,8 @@ import { PanelLeftIcon } from "lucide-react";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "16rem";
-const SIDEBAR_WIDTH_MOBILE = "18rem";
+const SIDEBAR_WIDTH = "14rem";
+const SIDEBAR_WIDTH_MOBILE = "16rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
@@ -147,15 +147,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [--sidebar:oklch(0.2_0.04_258)]
-          [--sidebar-foreground:oklch(0.94_0.015_250)] [--sidebar-primary:oklch(0.76_0.14_190)]
-          [--sidebar-primary-foreground:oklch(0.2_0.04_258)] [--sidebar-accent:oklch(0.29_0.045_258)]
-          [--sidebar-accent-foreground:oklch(0.98_0.005_250)] [--sidebar-border:oklch(0.32_0.035_258)]
-          [--sidebar-ring:oklch(0.76_0.14_190)] dark:[--sidebar:oklch(0.13_0.025_258)]
-          dark:[--sidebar-foreground:oklch(0.92_0.015_250)] dark:[--sidebar-primary:oklch(0.72_0.14_190)]
-          dark:[--sidebar-primary-foreground:oklch(0.18_0.035_258)] dark:[--sidebar-accent:oklch(0.23_0.035_258)]
-          dark:[--sidebar-accent-foreground:oklch(0.96_0.01_250)] dark:[--sidebar-border:oklch(1_0_0/9%)]
-          dark:[--sidebar-ring:oklch(0.72_0.14_190)] [&>button]:hidden"
+          className="w-(--sidebar-width) bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
           style={{
             "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
           }}

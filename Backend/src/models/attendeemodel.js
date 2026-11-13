@@ -24,7 +24,7 @@ const attendeeSchema = new mongoose.Schema(
     checkedInBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     status: {
       type: String,
-      enum: ["Pending", "Confirmed", "Rejected", "Cancelled"],
+      enum: ["Pending", "Approved", "Confirmed", "Rejected", "Cancelled"],
       default: "Confirmed",
     },
   },

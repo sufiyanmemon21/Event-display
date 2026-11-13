@@ -125,29 +125,32 @@ async function getAttendees(req, res) {
 }
 
 const bookingTransitions = {
-  Pending: ["Confirmed", "Rejected", "Cancelled"],
+  Pending: ["Approved", "Rejected", "Cancelled"],
+  Approved: ["Cancelled"],
   Confirmed: ["Cancelled"],
 };
 
 async function updateBookingStatus(req, res) {
   const { id } = req.params;
-  const status = req.body?.status;
+  const status = req.body?.status === "Confirmed" ? "Approved" : req.body?.status;
   if (!mongoose.isObjectIdOrHexString(id)) return res.status(400).json({ msg: "Invalid booking ID" });
+  if (!["Approved", "Rejected", "Cancelled"].includes(status)) return res.status(400).json({ msg: "Choose a valid booking status." });
 
   const booking = await Attendee.findById(id).populate("event", "organizer listingType category title reviewExhibitor approvalStatus date");
   if (!booking?.event) return res.status(404).json({ msg: "Booking not found" });
-  if (!canReviewEvent(req.user, booking.event)) {
-    return res.status(403).json({ msg: "Only the assigned Event exhibitor or the Expo Admin can review this booking." });
+  if (req.user.role !== "admin" && !canReviewEvent(req.user, booking.event)) {
+    return res.status(403).json({ msg: "Only an Admin or the assigned Event exhibitor can review this booking." });
   }
-  if (status === "Confirmed" && (!isPublished(booking.event) || (isExpo(booking.event) && isPastEvent(booking.event.date)))) return res.status(409).json({ msg: "Only approved, current listings can accept bookings." });
-  if (!bookingTransitions[booking.status]?.includes(status)) {
+  if (status === booking.status) return res.json({ status: booking.status });
+  if (status === "Approved" && (!isPublished(booking.event) || (isExpo(booking.event) && isPastEvent(booking.event.date)))) return res.status(409).json({ msg: "Only approved, current listings can accept bookings." });
+  if (req.user.role !== "admin" && !bookingTransitions[booking.status]?.includes(status)) {
     return res.status(409).json({ msg: "That status change is no longer available" });
   }
 
   const previous = booking.status === "Confirmed"
     ? { $or: [{ status: "Confirmed" }, { status: { $exists: false } }] }
     : { status: booking.status };
-  const updated = await Attendee.findOneAndUpdate({ _id: id, ...previous }, { $set: { status } }, { new: true });
+  const updated = await Attendee.findOneAndUpdate({ _id: id, ...previous }, { $set: { status } }, { new: true, runValidators: true });
   if (!updated) return res.status(409).json({ msg: "Booking changed. Refresh and try again." });
   publishUpdate();
   return res.json({ status: updated.status });

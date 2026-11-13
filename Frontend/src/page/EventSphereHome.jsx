@@ -1,3 +1,4 @@
+import { validateContactForm, clearContactValidity } from "@/lib/contactValidation";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
@@ -68,6 +69,7 @@ const galleryPreview = occasions.filter(({ name }) =>
 
 function openInquiry(event) {
   event.preventDefault();
+  if (!validateContactForm(event.currentTarget)) return;
   const form = new FormData(event.currentTarget);
   const subject = encodeURIComponent(
     `EventSphere inquiry · ${form.get("package") || "General inquiry"}`,
@@ -82,10 +84,7 @@ export default function EventSphereHome() {
   const { hash, key } = useLocation();
   const [occasion, setOccasion] = useState("");
   const catalog = useExpos();
-  const latest = [...catalog.items].sort(
-    (left, right) =>
-      (Date.parse(right.createdAt) || 0) - (Date.parse(left.createdAt) || 0),
-  );
+  const latest = catalog.items;
   const expoItems = latest.filter(isExpo);
   const eventItems = latest.filter((item) => !isExpo(item));
   const photos = occasion
@@ -272,7 +271,7 @@ export default function EventSphereHome() {
             loading="lazy"
           />
           <form
-            onSubmit={openInquiry}
+            onSubmit={openInquiry} onInput={clearContactValidity}
             className="celebration-form min-w-0 grid gap-[10px] p-5 [border:1px_solid_#e2c9bd] rounded-[12px] [background:#fffaf6]
           [&_label]:grid [&_label]:gap-1 [&_label]:text-[var(--ink)] [&_label]:text-[.78rem] [&_input]:min-w-0
           [&_input]:w-full [&_input]:[border:1px_solid_#cfb3a7] [&_input]:rounded-[5px] [&_input]:[background:#fffdfb]

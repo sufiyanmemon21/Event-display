@@ -68,9 +68,9 @@ export default function EventCard({ event, index = 0 }) {
 
   return (
     <div
-      className="celebration-listing block min-w-0 rounded-2xl text-[#362621]
-                   shadow-[0_4px_12px_#52301e0b,0_12px_28px_#52301e08] transition-[translate,box-shadow] duration-200 ease-out
-                   hover:-translate-y-1 hover:shadow-[0_14px_32px_#52301e20]
+      className="celebration-listing group block min-w-0 rounded-2xl text-[#362621]
+                   shadow-[0_4px_12px_#52301e0b,0_12px_28px_#52301e08] transition-shadow duration-200 ease-out
+                   hover:shadow-[0_14px_32px_#52301e20]
                    focus-visible:[outline:2px_solid_var(--ticket-accent)] focus-visible:outline-offset-4
                    motion-reduce:transition-none motion-reduce:hover:translate-y-0"
       data-kind={kind}
@@ -78,14 +78,13 @@ export default function EventCard({ event, index = 0 }) {
       <article className="celebration-listing-ticket flex flex-col h-full overflow-hidden [border:1px_solid_var(--ticket-line)] rounded-2xl [background:#fffaf5]">
         <div
           className="celebration-listing-photo relative flex-none h-[clamp(132px,_15vw,_188px)] overflow-hidden [background:#e9cfc0]
-          [&_img]:block [&_img]:[transition:scale_.4s_ease] [.celebration-listing:hover_&_img]:[scale:1.035]
-          motion-reduce:[&_img]:transition-none motion-reduce:[.celebration-listing:hover_&_img]:[scale:none]"
+"
         >
           <img
             src={getEventImage(event, index)}
             alt=""
             loading="lazy"
-            className="absolute inset-0 size-full object-cover object-center"
+            className="absolute inset-0 size-full object-cover object-center transition-transform duration-300 group-hover:scale-105 motion-reduce:transform-none"
           />
           <span
             className="celebration-listing-kind absolute top-3 [border:1px_solid_#fff8ee] rounded-[4px] [background:#fff7edf2]
@@ -157,72 +156,14 @@ export default function EventCard({ event, index = 0 }) {
             ))}
           </dl>
         </div>
-        <div className="celebration-listing-stub flex flex-wrap items-center justify-between gap-[6px_10px] mx-[15px] p-[8px_0_10px] [border-top:1px_solid_var(--ticket-line)] text-[.8rem] text-[#634a40]">
-          {closed ? (
-            isExpo(event) ? (
-              <Link
-                to={`/expos/${event._id}`}
-                className="celebration-listing-action flex w-full items-center justify-between gap-3 min-h-[48px] p-[6px_8px_6px_18px]
-          [border:1px_solid_#8d583b] rounded-[999px] [background:linear-gradient(115deg,_#8b5235,_#57342b_70%)]
-          [background-size:160%_100%] [box-shadow:inset_0_1px_#fff2d54d,_0_4px_10px_#57342b29] text-[#fffaf6]
-          text-[.9rem] font-[650] [transition:background-position_.25s_ease,_box-shadow_.25s_ease] [&_>_span]:grid
-          [&_>_span]:place-items-center [&_>_span]:w-[32px] [&_>_span]:h-[32px] [&_>_span]:rounded-[50%]
-          [&_>_span]:[background:#f5dbaf] [&_>_span]:text-[#57342b] [&_svg]:[transition:translate_.25s_ease]
-          [.celebration-listing:hover_&]:[background-position:100%_0]
-          [.celebration-listing:hover_&]:[box-shadow:inset_0_1px_#fff2d54d,_0_6px_14px_#57342b40]
-          [.celebration-listing:focus-visible_&]:[background-position:100%_0]
-          [.celebration-listing:focus-visible_&]:[box-shadow:inset_0_1px_#fff2d54d,_0_6px_14px_#57342b40]
-          [.celebration-listing:hover_&_svg]:[translate:2px_-2px]
-          [.celebration-listing:focus-visible_&_svg]:[translate:2px_-2px] motion-reduce:transition-none
-          motion-reduce:[&_svg]:transition-none motion-reduce:[.celebration-listing:hover_&_svg]:[translate:none]
-          motion-reduce:[.celebration-listing:focus-visible_&_svg]:[translate:none]"
-            >
-              View details{" "}
-              <span aria-hidden="true">
-                <ArrowUpRight size={17} />
-              </span>
-              </Link>
-            ) : (
-              <span className="w-full py-3 text-center text-sm font-semibold text-[#69534b]">
-                Bookings closed
-              </span>
-            )
-          ) : (
-            <>
-              {isExpo(event) && (
-                <Link
-                  to={`/expos/${event._id}`}
-                  aria-label={`View details: ${event.title}`}
-                  className="inline-flex min-h-[48px] min-w-0 flex-1 items-center justify-center gap-2 rounded-full border border-[#8d583b] bg-[#fffaf5] px-3 text-center text-[.9rem] font-[650] text-[#57342b] transition-colors hover:bg-[#f5e9dd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#9a7026] motion-reduce:transition-none"
-                >
-                  View details <ArrowUpRight size={17} aria-hidden="true" />
-                </Link>
-              )}
-              <BookLink
-                eventId={event._id}
-                expo={isExpo(event)}
-                className="celebration-listing-action flex min-w-0 flex-1 items-center justify-between gap-3 min-h-[48px] p-[6px_8px_6px_18px]
-                [border:1px_solid_#8d583b] rounded-[999px] [background:linear-gradient(115deg,_#8b5235,_#57342b_70%)]
-                [background-size:160%_100%] [box-shadow:inset_0_1px_#fff2d54d,_0_4px_10px_#57342b29] text-[#fffaf6]
-                text-[.9rem] font-[650] [transition:background-position_.25s_ease,_box-shadow_.25s_ease] [&_>_span]:grid
-                [&_>_span]:place-items-center [&_>_span]:w-[32px] [&_>_span]:h-[32px] [&_>_span]:rounded-[50%]
-                [&_>_span]:[background:#f5dbaf] [&_>_span]:text-[#57342b] [&_svg]:[transition:translate_.25s_ease]
-                [.celebration-listing:hover_&]:[background-position:100%_0]
-                [.celebration-listing:hover_&]:[box-shadow:inset_0_1px_#fff2d54d,_0_6px_14px_#57342b40]
-                [.celebration-listing:focus-visible_&]:[background-position:100%_0]
-                [.celebration-listing:focus-visible_&]:[box-shadow:inset_0_1px_#fff2d54d,_0_6px_14px_#57342b40]
-                [.celebration-listing:hover_&_svg]:[translate:2px_-2px]
-                [.celebration-listing:focus-visible_&_svg]:[translate:2px_-2px] motion-reduce:transition-none
-                motion-reduce:[&_svg]:transition-none motion-reduce:[.celebration-listing:hover_&_svg]:[translate:none]
-                motion-reduce:[.celebration-listing:focus-visible_&_svg]:[translate:none]"
-                aria-label={`Book now: ${event.title}`}
-              >
-                Book Now{" "}
-                <span aria-hidden="true">
-                  <ArrowUpRight size={17} />
-                </span>
-              </BookLink>
-            </>
+        <div className="flex flex-wrap gap-2 border-t border-[var(--ticket-line)] mx-4 py-3">
+          <Link to={`/expos/${event._id}`} className="action-button flex-1" aria-label={`View details: ${event.title}`}>
+            View details <ArrowUpRight size={16} aria-hidden="true" />
+          </Link>
+          {closed ? <span className="w-full text-center text-sm text-[#69534b]">Bookings closed</span> : (
+            <BookLink eventId={event._id} expo={expo} className="flex-1" aria-label={`Book now: ${event.title}`}>
+              Book Now <ArrowUpRight size={16} aria-hidden="true" />
+            </BookLink>
           )}
         </div>
       </article>

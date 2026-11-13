@@ -69,9 +69,9 @@ export function SiteHeader({ user, onSignOut }) {
     : "Workspace";
   return (
     <header
-      className="workspace-topbar sticky top-0 z-30 flex h-16 shrink-0 items-center border-b border-border/80 backdrop-blur-xl
+      className="workspace-topbar sticky top-0 z-30 flex h-14 shrink-0 items-center border-b border-border/80 backdrop-blur-xl
           workspace:[background:color-mix(in_srgb,_var(--card)_94%,_transparent)]
-          workspace:[box-shadow:0_2px_12px_#5738260a] workspace:min-h-[68px]"
+          workspace:[box-shadow:0_2px_12px_#5738260a] workspace:min-h-14"
     >
       <div className="flex w-full items-center gap-3 px-4 sm:px-6">
         <SidebarTrigger className="-ml-1 rounded-xl [.workspace-form-body_fieldset_>_p&]:py-[14px]" />
@@ -127,9 +127,9 @@ export function SiteHeader({ user, onSignOut }) {
                 type="button"
                 variant="ghost"
                 aria-label={`Account menu for ${user?.name || "member"}`}
-                className="h-11 gap-2 rounded-xl border border-border bg-card px-1.5 sm:px-2.5 [.workspace-form-body_fieldset_>_p&]:py-[14px]"
+                className="h-9 gap-2 rounded-xl border border-border bg-card px-1.5 sm:px-2.5 [.workspace-form-body_fieldset_>_p&]:py-[14px]"
               >
-                <Avatar className="size-8 sm:size-9">
+                <Avatar className="size-7">
                   <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
                     {initials(user?.name)}
                   </AvatarFallback>

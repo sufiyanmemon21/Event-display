@@ -76,7 +76,7 @@ test("review authority and stale listing protection", async t => {
   assert.equal(res.body.event.approvalStatus, "Approved");
 });
 
-test("bookings start pending and only the assigned reviewer can approve", async t => {
+test("bookings start pending and admins or the assigned reviewer can approve", async t => {
   const event = { ...listing, approvalStatus: "Approved" };
   t.mock.method(Event, "findById", async () => event);
   t.mock.method(Attendee, "init", async () => {});
@@ -97,11 +97,11 @@ test("bookings start pending and only the assigned reviewer can approve", async 
   t.mock.method(Attendee, "findById", () => query({ event, status: "Pending" }));
   t.mock.method(Attendee, "findOneAndUpdate", async (_, update) => update.$set);
   res = response();
-  await updateBookingStatus({ params: { id }, body: { status: "Confirmed" }, user: admin }, res);
+  await updateBookingStatus({ params: { id }, body: { status: "Approved" }, user: { ...reviewer, _id: id } }, res);
   assert.equal(res.code, 403);
   res = response();
   await updateBookingStatus({ params: { id }, body: { status: "Confirmed" }, user: reviewer }, res);
-  assert.equal(res.body.status, "Confirmed");
+  assert.equal(res.body.status, "Approved");
   event.listingType = "expo";
   res = response();
   await registerAttendee({ body: { event: id }, user: { _id: id } }, res);
@@ -122,7 +122,7 @@ test("QR check-in rejects invalid, unconfirmed, unauthorized and wrong-date tick
   let writes = 0;
   t.mock.method(Attendee, "findOneAndUpdate", async (filter, update) => {
     assert.equal(filter.checkedInAt, null);
-    assert.deepEqual(filter.$or, [{ status: "Confirmed" }, { status: { $exists: false } }]);
+    assert.deepEqual(filter.$or, [{ status: { $in: ["Approved", "Confirmed"] } }, { status: { $exists: false } }]);
     if (booking.checkedInAt) return null;
     writes++;
     Object.assign(booking, update.$set);

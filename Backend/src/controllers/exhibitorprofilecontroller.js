@@ -1,5 +1,9 @@
 import mongoose from "mongoose";
 import Exhibitor from "../models/exhibitormodel.js";
+import User from "../models/authmodel.js";
+import Event from "../models/eventmodel.js";
+import { publicEventFilter } from "../services/eventworkflow.js";
+import { sortEventsUpcomingFirst } from "../services/eventdates.js";
 
 const publicFields = [
   "companyName",
@@ -194,4 +198,24 @@ async function searchProfiles(req, res) {
   }
 }
 
-export { updateProfile, searchProfiles };
+async function getPublicProfile(req, res) {
+  if (!mongoose.isObjectIdOrHexString(req.params.userId)) {
+    return res.status(400).json({ msg: "Invalid exhibitor ID." });
+  }
+  const exhibitor = await User.findOne({ _id: req.params.userId, role: "exhibitor" })
+    .select("name companyName");
+  if (!exhibitor) return res.status(404).json({ msg: "Exhibitor not found." });
+  const [events, profiles] = await Promise.all([
+    Event.find({ $and: [publicEventFilter, { $or: [
+      { reviewExhibitor: exhibitor._id }, { organizer: exhibitor._id },
+    ] }] }).populate("organizer", "name companyName role")
+      .populate("reviewExhibitor", "name companyName").sort({ date: 1 }),
+    Exhibitor.find({ contactPerson: exhibitor._id, status: "Approved" })
+      .select(publicFields).populate({ path: "event", select: "title", match: publicEventFilter })
+      .sort({ updatedAt: -1 }),
+  ]);
+  // Publish only company contact fields explicitly supplied for public profiles.
+  return res.json({ exhibitor, profiles: profiles.filter(profile => profile.event), events: sortEventsUpcomingFirst(events) });
+}
+
+export { updateProfile, searchProfiles, getPublicProfile };

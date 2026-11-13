@@ -108,16 +108,7 @@ export default function LandingExtras({ photos }) {
     <>
       <Link
         to="/share-feedback"
-        className="celebration-feedback-trigger fixed z-[40] right-0 top-[50%] [translate:0_-50%] [writing-mode:vertical-rl] flex
-          items-center gap-[7px] p-[12px_8px] [border:1px_solid_#dfc79f] [border-right:0] rounded-[12px_0_0_12px]
-          [background:linear-gradient(150deg,_#fffdf7ef,_#f8e8cbd9)] [backdrop-filter:blur(12px)] text-[#503925]
-          [box-shadow:inset_1px_1px_0_#ffffffbf,_0_7px_22px_#523a1828]
-          [transition:background-color_.2s_ease,_box-shadow_.2s_ease,_border-color_.2s_ease] tracking-[.035em]
-          text-[.86rem] font-bold [&_svg]:text-[#9d6a10] hover:border-[#b68a46]
-          hover:[box-shadow:inset_1px_1px_0_#ffffffbf,_0_8px_24px_#523a1840] focus-visible:[outline:2px_solid_#87584d]
-          focus-visible:outline-offset-[-4px] max-[700px]:top-[auto]
-          max-[700px]:bottom-[calc(max(1rem,env(safe-area-inset-bottom))+4rem)] max-[700px]:[translate:none]
-          max-[700px]:p-[8px_5px] max-[700px]:text-[.75rem] motion-reduce:transition-none"
+        className="action-button celebration-feedback-trigger fixed z-40 right-3 bottom-20 flex items-center gap-2 shadow-md"
       >
         <MessageSquare size={19} aria-hidden="true" /> Feedback
       </Link>

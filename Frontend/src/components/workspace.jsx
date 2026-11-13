@@ -24,9 +24,9 @@ export function PageHeading({ title, description, children }) {
   return (
     <div
       className="workspace-heading flex flex-col justify-between gap-5 sm:flex-row sm:items-end
-          workspace:p-[clamp(17px,_2.4vw,_30px)] workspace:border workspace:border-border workspace:rounded-[14px]
+          workspace:p-4 workspace:border workspace:border-border workspace:rounded-[14px]
           workspace:[background:var(--card)] workspace:shadow-[var(--workspace-shadow)] workspace:border-s-[3px]
-          workspace:border-s-ring [.eventsphere-workspace_&_p:last-child]:text-[1rem]"
+          workspace:border-s-ring [.eventsphere-workspace_&_p:last-child]:text-sm"
     >
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">

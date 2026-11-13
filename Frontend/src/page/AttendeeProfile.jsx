@@ -1,3 +1,4 @@
+import { bookingStatus } from "@/lib/bookingStatus";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,7 @@ import useLiveRefresh from "@/hooks/useLiveRefresh";
 import { isExpo } from "@/hooks/useExpos";
 import { isPastEvent } from "@/lib/eventDates";
 
-const statuses = ["Pending", "Confirmed", "Rejected", "Cancelled"];
+const statuses = ["Pending", "Approved", "Rejected", "Cancelled"];
 const tickets = ["Standard", "VIP", "Regular"];
 const dateFormat = new Intl.DateTimeFormat("en-GB", {
   dateStyle: "long",
@@ -36,7 +37,7 @@ function BookingCard({ booking }) {
   const [preview, setPreview] = useState("");
   const [working, setWorking] = useState("");
   const [error, setError] = useState("");
-  const status = booking.status || "Confirmed";
+  const status = bookingStatus(booking.status);
   const event = booking.event;
 
   useEffect(
@@ -97,7 +98,7 @@ function BookingCard({ booking }) {
             {event?.title || "Event unavailable"}
           </h3>
         </div>
-        <Badge variant={status === "Confirmed" ? "default" : "outline"}>
+        <Badge variant={status === "Approved" ? "default" : "outline"}>
           {status}
         </Badge>
       </div>
@@ -120,7 +121,7 @@ function BookingCard({ booking }) {
           Waiting for the organizer to confirm your booking.
         </p>
       )}
-      {status === "Confirmed" && event && (
+      {status === "Approved" && event && (
         <div className="grid gap-3 border-t border-[#e2c9bd] pt-4">
           <div className="flex flex-wrap gap-2">
             <Button
@@ -314,7 +315,7 @@ export default function AttendeeProfile() {
   }
 
   const alreadyBooked = bookings.find((item) => item.event?._id === eventId);
-  const visible = bookings.filter(item => (status === "All" || (item.status || "Confirmed") === status) && (listingFilter === "All" || (item.event && isExpo(item.event) === (listingFilter === "Expos"))));
+  const visible = bookings.filter(item => (status === "All" || (bookingStatus(item.status)) === status) && (listingFilter === "All" || (item.event && isExpo(item.event) === (listingFilter === "Expos"))));
 
   return (
     <PublicPageShell>

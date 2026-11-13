@@ -1,3 +1,4 @@
+import { validateContactForm, clearContactValidity } from "@/lib/contactValidation";
 import BookLink from "@/components/landing/BookLink";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -18,6 +19,7 @@ const details = [
 
 function openEmail(event) {
   event.preventDefault();
+  if (!validateContactForm(event.currentTarget)) return;
   const values = Object.fromEntries(new FormData(event.currentTarget));
   const subject = encodeURIComponent(values.subject);
   const body = encodeURIComponent(
@@ -105,7 +107,7 @@ export default function Contact() {
                 Fill out the form to open a message in your email app.
               </p>
             </div>
-            <form onSubmit={openEmail} className="grid gap-3">
+            <form onSubmit={openEmail} onInput={clearContactValidity} className="grid gap-3">
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="grid gap-1.5 text-xs font-medium text-[var(--public-copy)] [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
                   Full name

@@ -1,3 +1,4 @@
+import { bookingStatus } from "@/lib/bookingStatus";
 import PassScanner from "@/components/PassScanner";
 import EllipsisLoader from "@/components/EllipsisLoader";
 
@@ -56,7 +57,7 @@ export default function AttendeesManagement() {
   const role = localStorage.getItem("userRole");
   const isAttendee = role === "attendee";
   const isOrganizer = role === "organizer" || role === "admin" || role === "exhibitor";
-  const canReview = (event) => event && (isExpo(event) ? role === "admin" : role === "exhibitor" && String(event.reviewExhibitor?._id || event.reviewExhibitor) === String(user?._id || user?.id));
+  const canReview = (event) => event && (role === "admin" || !isExpo(event) && role === "exhibitor" && String(event.reviewExhibitor?._id || event.reviewExhibitor) === String(user?._id || user?.id));
   const canView = isAttendee || isOrganizer;
   useEffect(() => {
     if (!canView) return;
@@ -123,7 +124,7 @@ export default function AttendeesManagement() {
   async function reviewBooking(booking, status) {
     if (reviewing) return;
     if (
-      status !== "Confirmed" &&
+      status !== "Approved" &&
       !(await confirm(
         `${status === "Rejected" ? "Reject" : "Cancel"} this booking?`,
       ))
@@ -281,10 +282,10 @@ export default function AttendeesManagement() {
           label="registrations"
           statusOptions={
             isOrganizer
-              ? ["Pending", "Confirmed", "Rejected", "Cancelled"]
+              ? ["Pending", "Approved", "Rejected", "Cancelled"]
               : undefined
           }
-          statusValue={(item) => item.status || "Confirmed"}
+          statusValue={(item) => bookingStatus(item.status)}
           allStatusesLabel="All Registrations"
           emptyText="No registrations found."
         >
@@ -364,7 +365,7 @@ export default function AttendeesManagement() {
                       </TableCell>
                       <TableCell>
                         <Badge variant="secondary">
-                          {registration.status || "Confirmed"}
+                          {bookingStatus(registration.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>{registration.checkedInAt ? `Checked in ${new Date(registration.checkedInAt).toLocaleString()}` : "Not checked in"}</TableCell>
@@ -372,21 +373,21 @@ export default function AttendeesManagement() {
                         <TableCell>
                           <div className="flex flex-wrap gap-2">
                             {!canReview(registration.event) && <span className="text-muted-foreground">Assigned reviewer only</span>}
-                            {canReview(registration.event) && registration.status === "Pending" && (
+                            {canReview(registration.event) && (role === "admin" || registration.status === "Pending") && (
                               <>
                                 <Button
                                   size="sm"
-                                  disabled={Boolean(reviewing)}
+                                  disabled={Boolean(reviewing) || bookingStatus(registration.status) === "Approved"}
                                   onClick={() =>
-                                    reviewBooking(registration, "Confirmed")
+                                    reviewBooking(registration, "Approved")
                                   }
                                 >
-                                  Confirm
+                                  Approve
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="outline"
-                                  disabled={Boolean(reviewing)}
+                                  disabled={Boolean(reviewing) || registration.status === "Rejected"}
                                   onClick={() =>
                                     reviewBooking(registration, "Rejected")
                                   }
@@ -396,8 +397,8 @@ export default function AttendeesManagement() {
                               </>
                             )}
                             {canReview(registration.event) && (!registration.status ||
-                              ["Pending", "Confirmed"].includes(
-                                registration.status,
+                              ["Pending", "Approved"].includes(
+                                bookingStatus(registration.status),
                               )) && (
                               <Button
                                 size="sm"

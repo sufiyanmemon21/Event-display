@@ -285,23 +285,23 @@ export default function Dashboard() {
     CalendarIcon,
   ];
   return (
-    <div className="space-y-7">
+    <div className="space-y-5">
       <div
-        className="workspace-heading workspace-overview flex min-w-0 flex-col gap-6 rounded-2xl border border-border border-s-[3px] border-s-ring bg-card p-5 shadow-[var(--workspace-shadow)] sm:p-7 xl:flex-row xl:items-center xl:justify-between"
+        className="workspace-heading workspace-overview flex min-w-0 flex-col gap-4 rounded-xl border border-border border-s-[3px] border-s-ring bg-card p-4 shadow-[var(--workspace-shadow)] sm:p-5 xl:flex-row xl:items-center xl:justify-between"
       >
         <div className="min-w-0 space-y-3">
           <Badge variant="secondary" className="capitalize">
             {user?.role} workspace
           </Badge>
           <div>
-            <h1 className="break-words text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+            <h1 className="break-words text-2xl font-semibold leading-tight tracking-tight sm:text-3xl">
               {user?.role === "admin"
                 ? "Admin Dashboard"
                 : user?.role === "exhibitor"
                   ? "Exhibitor Dashboard"
                   : `Welcome back${user?.name ? `, ${user.name}` : ""}`}
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
               {isOrganizer
                 ? "Overview of your listings, booths, exhibitors, and attendee bookings."
                 : "Manage your registrations, booth reservations, and event activity."}
@@ -367,12 +367,12 @@ export default function Dashboard() {
           [.eventsphere-workspace_&::after]:pointer-events-none [.eventsphere-workspace_&::after]:right-[-8px]
           [.workspace-form-body_fieldset_>_p&]:py-[14px]"
                   >
-                    <CardContent className="flex items-center justify-between gap-4 p-5">
+                    <CardContent className="flex items-center justify-between gap-3 p-4">
                       <div className="space-y-2">
                         <p className="text-sm font-medium opacity-70">
                           {item.label}
                         </p>
-                        <p className="text-3xl font-semibold tracking-tight tabular-nums">
+                        <p className="text-2xl font-semibold tracking-tight tabular-nums">
                           {item.value}
                         </p>
                       </div>

@@ -64,7 +64,7 @@ function Button({
       data-variant={variant}
       data-size={size}
       className={
-        cn(buttonVariants({ variant, size, className })) +
+        cn(buttonVariants({ variant, size, className })) + " " +
         `[.eventsphere-workspace_.workspace-heading_>_&]:self-start
           [.eventsphere-workspace_.workspace-heading_>_&]:flex-none
           [body:has(.eventsphere-workspace)_&[data-variant='default']]:[box-shadow:0_2px_4px_#43291d22]
