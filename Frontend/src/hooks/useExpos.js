@@ -33,6 +33,7 @@ export default function useExpos() {
     api
       .get("/events/all", { signal: controller.signal })
       .then((response) => {
+        if (controller.signal.aborted) return;
         setState({
           loading: false,
           items: (response.data.events || []).map((item) => ({

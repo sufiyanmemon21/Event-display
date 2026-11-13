@@ -1,4 +1,4 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { TableSkeleton } from "@/components/LoadingSkeletons";
 import { useEffect, useState } from "react";
 import { isExpo } from "@/hooks/useExpos";
 import API from "@/api/api";
@@ -87,7 +87,7 @@ export default function ExpoTickets() {
       </div>
       <div className="max-w-md space-y-2"><Label htmlFor="expo-filter">Expo</Label><WorkspaceSelect id="expo-filter" value={expo} onChange={event => setExpo(event.target.value)}><option value="">All Expos</option>{[...new Map(registrations.map(item => [item.event._id, item.event])).values()].map(event => <option key={event._id} value={event._id}>{event.title}</option>)}</WorkspaceSelect></div>
       {loading ? (
-        <EllipsisLoader scope="page" label="Loading ticket registrations" />
+        <TableSkeleton label="Loading ticket registrations" columns={7} />
       ) : error ? (
         <p role="alert" className="text-destructive">
           {error}

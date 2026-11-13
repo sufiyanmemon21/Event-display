@@ -1,3 +1,4 @@
+import { CardGridSkeleton, TableSkeleton } from "@/components/LoadingSkeletons";
 import { isExpo } from "@/hooks/useExpos";
 import EllipsisLoader from "@/components/EllipsisLoader";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,7 +17,7 @@ import { PageHeading } from "@/components/workspace";
 import { FormPanel } from "@/components/workspace";
 import WorkspaceSelect from "@/components/workspace-select";
 import useLiveRefresh from "@/hooks/useLiveRefresh";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import API from "@/api/api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,6 +30,7 @@ export default function BoothSelection({
   onReservationChanged,
 }) {
   const confirm = useConfirmation();
+  const boothRequest = useRef(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [assignOpen, setAssignOpen] = useState(false);
   const [boothView, setBoothView] = useState(expo ? "table" : "grid");
@@ -130,33 +132,40 @@ export default function BoothSelection({
   const fetchBooths = useCallback(
     async (id = eventId) => {
       if (!id) return;
+      boothRequest.current?.abort();
+      const controller = new AbortController();
+      boothRequest.current = controller;
+      const options = { signal: controller.signal };
       setLoadingBooths(true);
       setBoothError("");
       setLoadedEventId("");
       try {
         const [boothResponse, applicationResponse] = await Promise.all([
-          API.get(`/booths/event/${id}`),
+          API.get(`/booths/event/${id}`, options),
           ["exhibitor", "organizer", "admin"].includes(role)
-            ? API.get("/exhibitors/all")
+            ? API.get("/exhibitors/all", options)
             : Promise.resolve(null),
         ]);
+        if (controller.signal.aborted) return;
         setBooths(boothResponse.data.booths);
         setApplications(applicationResponse?.data?.exhibitors || []);
         setAssignmentBoothId("");
         setAssignmentExhibitorId("");
         setLoadedEventId(id);
       } catch (error) {
+        if (controller.signal.aborted) return;
         setBooths([]);
         setApplications([]);
         setBoothError(
           error.response?.data?.msg || "Unable to load booth details.",
         );
       } finally {
-        setLoadingBooths(false);
+        if (!controller.signal.aborted) setLoadingBooths(false);
       }
     },
     [eventId, role],
   );
+  useEffect(() => () => boothRequest.current?.abort(), []);
   useEffect(() => {
     if (!expo) return;
     const timer = window.setTimeout(fetchBooths, 0);
@@ -333,13 +342,13 @@ export default function BoothSelection({
                     disabled={!eventId || busy || loadingEvents}
                   >
                     {loadingBooths ? (
-                      <EllipsisLoader scope="inline" label="Loading booths" />
+                      "Loading booths…"
                     ) : (
                       "Load / Refresh Booths"
                     )}
                   </Button>
 
-                  {!loadingEvents && events.length === 0 && (
+                  {!loadingEvents && !eventError && events.length === 0 && (
                     <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground [.workspace-form-body_fieldset_>_p&]:py-[14px]">
                       No expos are available yet.
                     </p>
@@ -393,10 +402,11 @@ export default function BoothSelection({
         </>
       )}
       {loadingBooths ? (
-        <EllipsisLoader
-          scope={expo ? "section" : "page"}
-          label="Loading booths"
-        />
+        boothView === "table" ? (
+          <TableSkeleton label="Loading booths" columns={4} rows={4} />
+        ) : (
+          <CardGridSkeleton label="Loading booths" className="sm:grid-cols-2" />
+        )
       ) : boothError ? (
         <div className="space-y-2">
           <p role="alert">{boothError}</p>

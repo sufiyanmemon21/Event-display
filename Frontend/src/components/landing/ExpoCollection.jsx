@@ -1,4 +1,4 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { CalendarDays, Search } from "lucide-react";
@@ -69,7 +69,7 @@ export default function ExpoCollection({
           </label>
         )}
         {data.loading ? (
-          <EllipsisLoader label="Finding your next experience" />
+          <CardGridSkeleton label="Finding your next experience" image count={limit ?? 3} />
         ) : data.error ? (
           <div
             className="flex min-h-48 flex-col items-center justify-center gap-4 rounded-2xl border border-[var(--public-line)] bg-white p-8 text-center text-[var(--public-copy)]"

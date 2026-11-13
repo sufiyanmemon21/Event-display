@@ -1,4 +1,4 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import { Badge } from "@/components/ui/badge";
 import { PageHeading } from "@/components/workspace";
 import { RecordBrowser } from "@/components/workspace";
@@ -257,7 +257,7 @@ export default function FeedbackSupport() {
       </div>
 
       {loading ? (
-        <EllipsisLoader scope="page" label="Loading feedback" />
+        <CardGridSkeleton label="Loading feedback" className="lg:grid-cols-2" />
       ) : loadError ? (
         <p role="alert">{loadError}</p>
       ) : feedbacks.length === 0 ? (

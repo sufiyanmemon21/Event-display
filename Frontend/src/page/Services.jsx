@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { useEffect } from "react";
 import {
   ArrowUpRight,
@@ -80,7 +81,7 @@ export default function Services() {
             </div>
             <div className="relative">
               <div className="overflow-hidden rounded-[1.75rem] border border-[var(--public-line)] bg-white p-2 shadow-[0_18px_40px_rgba(54,27,25,0.1)]">
-                <img
+                <ImageWithSkeleton
                   src={eventImage}
                   alt="A conference and event space prepared for attendees"
                   className="aspect-[1.4] w-full rounded-[1.25rem] object-cover"
@@ -102,7 +103,7 @@ export default function Services() {
                   ))}
                 </div>
               </div>
-              <img
+              <ImageWithSkeleton
                 src={planningImage}
                 alt=""
                 aria-hidden="true"

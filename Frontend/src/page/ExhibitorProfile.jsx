@@ -1,4 +1,4 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { ProfileSkeleton } from "@/components/LoadingSkeletons";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Building2, Pencil, RefreshCw } from "lucide-react";
@@ -67,8 +67,8 @@ export default function ExhibitorProfile() {
           <RefreshCw size={16} /> Refresh profile
         </Button>
       </PageHeading>
-      {loading && (
-        <EllipsisLoader scope="page" label="Loading company profiles" />
+      {loading && !profile && (
+        <ProfileSkeleton label="Loading company profiles" />
       )}
       {!loading && error && (
         <p role="alert" className="text-destructive">

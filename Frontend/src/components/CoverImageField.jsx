@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { useEffect, useRef, useState } from "react";
 import { ImageIcon, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,7 +31,7 @@ export default function CoverImageField({ existingImage, file, onChange }) {
       <div className="flex flex-col gap-4 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center [.workspace-form-body_fieldset_>_p&]:py-[14px]">
         <div className="flex h-24 w-36 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-background text-muted-foreground">
           {source && failedSource !== source ? (
-            <img
+            <ImageWithSkeleton
               src={source}
               alt={file ? "Selected cover preview" : "Current cover image"}
               className="h-full w-full object-cover"

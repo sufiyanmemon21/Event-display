@@ -13,6 +13,7 @@
     "check:syntax": "node scripts/check-source.js"
   },
   "dependencies": {
+    "@vercel/functions": "^3.11.2",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",

@@ -1,5 +1,7 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import BookLink from "@/components/landing/BookLink";
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { LoadingRegion } from "@/components/LoadingSkeletons";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowUpRight, CalendarDays, MapPin } from "lucide-react";
@@ -60,8 +62,10 @@ function ListingDetailCard({ event, eventIndex, user, featured = false }) {
           : "flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[var(--public-line)] bg-white shadow-[0_10px_28px_rgba(54,27,25,0.08)] transition-shadow hover:shadow-[0_16px_38px_rgba(54,27,25,0.14)]"
       }
     >
-      <img
+      <ImageWithSkeleton
         src={getEventImage(event, eventIndex)}
+        loading={featured ? "eager" : "lazy"}
+        fetchPriority={featured ? "high" : undefined}
         alt={`${event.title} cover image`}
         className="block aspect-video w-full object-cover"
       />
@@ -210,7 +214,17 @@ export function ExpoDetailPage() {
             {backToEvents ? "Back to events" : "Back to expos"}
           </Link>
           {data.loading ? (
-            <EllipsisLoader scope="page" label="Loading event details" />
+            <LoadingRegion label="Loading event details">
+              <div className="grid items-center overflow-hidden rounded-2xl border border-[var(--public-line)] bg-card md:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)]">
+                <Skeleton className="aspect-video w-full rounded-none" />
+                <div className="space-y-4 p-5 sm:p-7">
+                  <Skeleton className="h-8 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="h-11 w-40" />
+                </div>
+              </div>
+            </LoadingRegion>
           ) : data.error ? (
             <div
               role="alert"

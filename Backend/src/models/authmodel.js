@@ -1,5 +1,14 @@
 import mongoose from "mongoose";
 
+const recoveryOtpSchema = new mongoose.Schema(
+  { hash: String, expiresAt: Date, resendAt: Date, attempts: Number },
+  { _id: false }
+);
+const recoveryGrantSchema = new mongoose.Schema(
+  { hash: String, expiresAt: Date },
+  { _id: false }
+);
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -32,6 +41,8 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    recoveryOtp: { type: recoveryOtpSchema, select: false },
+    recoveryGrant: { type: recoveryGrantSchema, select: false },
     passwordResetToken: {
       type: String,
       select: false,
@@ -51,6 +62,8 @@ const userSchema = new mongoose.Schema(
       transform(_document, result) {
         delete result.password;
         delete result.tokenVersion;
+        delete result.recoveryOtp;
+        delete result.recoveryGrant;
         delete result.passwordResetToken;
         delete result.passwordResetExpires;
         delete result.passwordResetRequestedAt;
@@ -61,5 +74,7 @@ const userSchema = new mongoose.Schema(
     },
   }
 );
+
+userSchema.index({ "recoveryGrant.hash": 1 }, { sparse: true });
 
 export default mongoose.model("User", userSchema);

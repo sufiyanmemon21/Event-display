@@ -1,5 +1,5 @@
 import AnimatedIcon from "@/components/AnimatedIcon";
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import {
   CalendarIcon,
   UsersIcon,
@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, CalendarDays, RefreshCw } from "lucide-react";
 import API from "@/api/api";
+import useAuth from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +25,8 @@ import {
 } from "@/components/ui/table";
 export default function Dashboard() {
   const [token, setToken] = useState(() => localStorage.getItem("token"));
-  const [user, setUser] = useState(null);
+  const user = useAuth();
+  const role = user?.role;
   const [stats, setStats] = useState([]);
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(Boolean(token));
@@ -45,11 +47,8 @@ export default function Dashboard() {
   useEffect(() => {
     const controller = new AbortController();
     async function loadDashboard() {
-      setUser(null);
-      setStats([]);
-      setRecords([]);
       setError("");
-      if (!token) {
+      if (!token || !role) {
         setLoading(false);
         return;
       }
@@ -58,15 +57,9 @@ export default function Dashboard() {
         const options = {
           signal: controller.signal,
         };
-        const account = await API.get("/auth/me", options);
-        const currentUser =
-          account.data.user || account.data.data || account.data;
-        if (!currentUser.role) {
-          throw new Error("Unable to identify account role.");
-        }
         let nextStats = [];
         let nextRecords = [];
-        if (["organizer", "admin"].includes(currentUser.role)) {
+        if (["organizer", "admin"].includes(role)) {
           const response = await API.get("/analytics/summary", options);
           const data = response.data.analytics;
           nextStats = [
@@ -112,7 +105,7 @@ export default function Dashboard() {
             title: event.title,
             detail: "Manage this event from the Events page.",
           }));
-        } else if (currentUser.role === "exhibitor") {
+        } else if (role === "exhibitor") {
           const response = await API.get("/exhibitors/all", options);
           const applications = response.data.exhibitors;
           nextStats = [
@@ -141,7 +134,7 @@ export default function Dashboard() {
             title: item.companyName,
             detail: `${item.event?.title || "Unavailable event"} · ${item.status} · Booth: ${item.boothNumber || "Not assigned"}`,
           }));
-        } else if (currentUser.role === "attendee") {
+        } else if (role === "attendee") {
           const response = await API.get("/attendees/all", options);
           const registrations = response.data.attendees;
           nextStats = [
@@ -159,7 +152,6 @@ export default function Dashboard() {
           throw new Error("This account role is not supported.");
         }
         if (controller.signal.aborted) return;
-        setUser(currentUser);
         setStats(nextStats);
         setRecords(nextRecords);
       } catch (err) {
@@ -178,7 +170,7 @@ export default function Dashboard() {
     }
     loadDashboard();
     return () => controller.abort();
-  }, [token, refresh]);
+  }, [token, role, refresh]);
   if (!token) {
     return (
       <div className="mx-auto w-full max-w-5xl space-y-6 p-4 md:p-6">
@@ -314,17 +306,13 @@ export default function Dashboard() {
           disabled={loading}
           onClick={() => setRefresh((previous) => previous + 1)}
         >
-          {loading ? (
-            <EllipsisLoader scope="inline" label="Refreshing overview" />
-          ) : (
-            <RefreshCw className="size-4" />
-          )}
-          Refresh overview
+          <RefreshCw className="size-4" />
+          {loading && stats.length ? "Refreshing overview…" : "Refresh overview"}
         </Button>
       </div>
 
-      {loading ? (
-        <EllipsisLoader scope="page" label="Loading dashboard" />
+      {loading && !stats.length ? (
+        <CardGridSkeleton label="Loading dashboard" count={role === "attendee" ? 1 : role === "exhibitor" ? 4 : 9} className="sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3" />
       ) : error ? (
         <Card className="rounded-2xl border-destructive/30">
           <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">

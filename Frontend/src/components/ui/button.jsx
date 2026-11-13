@@ -14,6 +14,12 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/80",
+        "account-primary": `bg-[var(--account-accent)] text-[var(--account-accent-foreground)]
+          hover:[&:not(:disabled)]:bg-[var(--account-accent-hover)]
+          active:[&:not(:disabled)]:bg-[var(--account-accent-active)]
+          focus-visible:border-transparent focus-visible:ring-0
+          disabled:bg-[var(--account-accent-disabled)] disabled:opacity-100
+          [&_[data-loading-scope=inline]]:text-current`,
         outline:
           "border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:

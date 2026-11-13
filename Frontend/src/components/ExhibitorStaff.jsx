@@ -1,4 +1,4 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { TableSkeleton } from "@/components/LoadingSkeletons";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import { Button } from "@/components/ui/button";
@@ -96,7 +96,7 @@ export default function ExhibitorStaff({ exhibitorId, canEdit }) {
       </div>
 
       {loading ? (
-        <EllipsisLoader label="Loading staff" />
+        <TableSkeleton label="Loading staff" columns={3} rows={3} />
       ) : error ? (
         <p className="text-sm text-destructive" role="alert">
           {error}

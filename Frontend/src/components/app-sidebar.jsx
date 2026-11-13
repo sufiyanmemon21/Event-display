@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import {
   LayoutDashboardIcon,
   CalendarIcon,
@@ -244,10 +245,10 @@ export function AppSidebar({ onSignOut, ...props }) {
                   <CalendarDays className="size-5" />
                 </span>
                 {logo ? (
-                  <img
+                  <ImageWithSkeleton
                     src={logo}
                     alt="EventSphere"
-                    className="h-9 max-w-full object-contain group-data-[collapsible=icon]:hidden"
+                    className="h-9 w-28 max-w-full object-contain group-data-[collapsible=icon]:hidden"
                   />
                 ) : (
                   <span className="grid min-w-0 text-left group-data-[collapsible=icon]:hidden">

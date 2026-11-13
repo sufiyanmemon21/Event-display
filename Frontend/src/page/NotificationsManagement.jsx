@@ -1,4 +1,4 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import { RecordBrowser } from "@/components/workspace";
 import { Badge } from "@/components/ui/badge";
 import { PageHeading } from "@/components/workspace";
@@ -124,7 +124,7 @@ export default function NotificationsManagement() {
       )}
 
       {loading ? (
-        <EllipsisLoader scope="page" label="Loading notifications" />
+        <CardGridSkeleton label="Loading notifications" className="md:grid-cols-1 lg:grid-cols-1" />
       ) : notifications.length === 0 ? (
         !error && (
           <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground [.workspace-form-body_fieldset_>_p&]:py-[14px]">

@@ -1,3 +1,5 @@
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import EllipsisLoader from "@/components/EllipsisLoader";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { PageHeading } from "@/components/workspace";
@@ -38,12 +40,12 @@ function CompanyLogo({ exhibitorId, companyName }) {
     );
   }
   return (
-    <img
+    <ImageWithSkeleton
       src={logoURL}
       alt={`${companyName} logo`}
       loading="lazy"
       onError={() => setFailed(true)}
-      className="h-16 w-16 shrink-0 rounded-md border bg-white object-contain p-2"
+      className="h-16 w-16 shrink-0 rounded-md border bg-white object-contain [&_img]:p-2"
     />
   );
 }
@@ -257,7 +259,7 @@ export default function ExhibitorSearch() {
       )}
 
       {loading ? (
-        <EllipsisLoader scope="page" label="Loading exhibitors" />
+        <CardGridSkeleton label="Loading exhibitors" className="lg:grid-cols-2 xl:grid-cols-3" />
       ) : error ? (
         <div className="space-y-3">
           <p role="alert">{error}</p>

@@ -1,4 +1,4 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { Textarea } from "@/components/ui/textarea";
 import WorkspaceSelect from "@/components/workspace-select";
@@ -239,7 +239,7 @@ export default function ExhibitorServices({ profile }) {
       ) : null}
 
       {loading ? (
-        <EllipsisLoader label="Loading requests" />
+        <CardGridSkeleton label="Loading requests" className="lg:grid-cols-2" />
       ) : error ? (
         <p className="text-sm text-destructive" role="alert">
           {error}

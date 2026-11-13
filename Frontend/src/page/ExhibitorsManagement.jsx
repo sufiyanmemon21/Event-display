@@ -1,5 +1,5 @@
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import ExhibitorApplicationForm from "@/components/ExhibitorApplicationForm";
-import EllipsisLoader from "@/components/EllipsisLoader";
 import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
@@ -168,7 +168,7 @@ export default function ExhibitorsManagement() {
       )}
 
       {loading ? (
-        <EllipsisLoader scope="page" label="Loading applications" />
+        <CardGridSkeleton label="Loading applications" className="lg:grid-cols-2" />
       ) : loadError ? (
         <p role="alert">{loadError}</p>
       ) : exhibitors.length === 0 ? (

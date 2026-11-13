@@ -225,7 +225,7 @@ export default function FloorPlan() {
               {loadingEvents && (
                 <EllipsisLoader scope="inline" label="Loading expos" />
               )}
-              {!loadingEvents && events.length === 0 && (
+              {!loadingEvents && !eventError && events.length === 0 && (
                 <p className="text-sm text-muted-foreground">
                   No expos are available yet.
                 </p>
@@ -236,7 +236,7 @@ export default function FloorPlan() {
                 disabled={!eventId || loadingEvents || busy}
               >
                 {loading ? (
-                  <EllipsisLoader scope="inline" />
+                  "Loading floor plan…"
                 ) : (
                   "Load / Reload Floor Plan"
                 )}
@@ -252,8 +252,8 @@ export default function FloorPlan() {
         </p>
       )}
 
-      {loading && <EllipsisLoader scope="page" label="Loading floor plan" />}
-      {layout && !loading && (
+      {loading && !layout && <EllipsisLoader scope="section" label="Loading floor plan" />}
+      {layout && (
         <div
           className={
             canEdit

@@ -2,9 +2,19 @@
 
 ## Environment
 
-Keep the existing MONGODB_URL and JWT_SECRET values in the backend environment. PORT defaults to 3000. FRONTEND_URL is used for account recovery links. PUBLIC_WEBSITE_URL sets the public HTTPS origin for QR passes and defaults to https://event-display-frontend.vercel.app.
+Set MONGODB_URL and JWT_SECRET in the backend environment. PORT defaults to 3000. PUBLIC_WEBSITE_URL sets the public HTTPS origin for QR passes and defaults to https://event-display-frontend.vercel.app.
 
 Set the frontend VITE_API_URL to the API origin. Rebuild the frontend after changing it. Its development fallback is http://localhost:3000.
+
+## Password recovery
+
+Set EMAIL_USER to the sending Gmail address and EMAIL_PASS to its Gmail app password in the backend environment. An optional RECOVERY_OTP_SECRET can be set to a dedicated random secret shared across backend instances. Otherwise recovery uses JWT_SECRET. Changing the recovery secret invalidates outstanding email codes.
+
+Deploy the backend and frontend together. The frontend uses /forget/request-otp, /forget/verify-otp and /forget/resetPassword on the API origin. Recovery emails contain a code, so FRONTEND_URL is no longer needed for recovery.
+
+On Vercel, keep system environment variables available so the backend can use VERCEL and register the SMTP send with waitUntil. MongoDB must permit creation of the recoveryrates collection and its expiresAt TTL index. The database enforces the 60-second resend cooldown, five guesses per code, and request limits across instances.
+
+The request endpoint acknowledges requests uniformly for privacy. Monitor backend logs for delivery failures and check an actual mailbox after deploying. The code and reset authorization each expire after 10 minutes.
 
 ## Website logo
 

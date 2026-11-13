@@ -1,4 +1,6 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { TableSkeleton } from "@/components/LoadingSkeletons";
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
@@ -16,7 +18,11 @@ async function getErrorMessage(error, fallback) {
   }
   return data?.msg || data?.error || fallback;
 }
-export function LogoPreview({ exhibitorId, fallback, kind = "logo" }) {
+export function LogoPreview({ exhibitorId, kind = "logo", ...props }) {
+  return <PrivateImage key={exhibitorId + ":" + kind} exhibitorId={exhibitorId} kind={kind} {...props} />;
+}
+function PrivateImage({ exhibitorId, fallback, kind }) {
+  const size = fallback ? "size-20" : "size-24";
   const [url, setUrl] = useState("");
   const [failed, setFailed] = useState(false);
   useEffect(() => {
@@ -55,13 +61,14 @@ export function LogoPreview({ exhibitorId, fallback, kind = "logo" }) {
     );
   }
   if (!url) {
-    return <EllipsisLoader scope="inline" label="Loading logo" />;
+    return <Skeleton className={size + " shrink-0 rounded-xl"} role="status" aria-label="Loading image" />;
   }
   return (
-    <img
+    <ImageWithSkeleton
       src={url}
       alt={kind === "photo" ? "Exhibitor profile photo" : "Company logo"}
-      className="h-24 w-24 rounded-md border object-contain p-2"
+      className={size + " shrink-0 rounded-md border object-contain [&_img]:p-2"}
+      fallback={fallback}
     />
   );
 }
@@ -185,7 +192,7 @@ function CompanyFiles({ exhibitorId, canUpload }) {
       </div>
 
       {loading ? (
-        <EllipsisLoader label="Loading files" />
+        <TableSkeleton label="Loading files" columns={3} rows={3} />
       ) : error ? (
         <p className="text-sm text-destructive" role="alert">
           {error}

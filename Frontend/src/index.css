@@ -286,6 +286,9 @@
   --account-copy: #69534b;
   --account-accent: #87584d;
   --account-accent-hover: #694239;
+  --account-accent-active: #57362e;
+  --account-accent-disabled: #79645c;
+  --account-accent-foreground: #fffaf6;
 }
 
 body:has(.eventsphere-workspace) {
@@ -350,4 +353,36 @@ body:has(.eventsphere-workspace) {
 
 .eventsphere-workspace .workspace-event-scope {
   --card-spacing: 18px;
+}
+
+@layer components {
+  .eventsphere-image-content {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: inherit;
+    object-position: inherit;
+  }
+
+  .eventsphere-image[data-image-state="loading"] > .eventsphere-image-content {
+    opacity: 0;
+  }
+
+  .eventsphere-image-placeholder {
+    background: var(--muted);
+    color: var(--muted-foreground);
+  }
+
+  .public-theme .eventsphere-image-placeholder {
+    background: #e7d5c8;
+    color: #76554a;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .eventsphere-image-content {
+      transition: opacity 180ms ease;
+    }
+  }
 }

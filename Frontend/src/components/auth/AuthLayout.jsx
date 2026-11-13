@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -29,7 +30,7 @@ export default function AuthLayout({ title, description, children, photoBackgrou
           [.public-theme.celebration-auth_>_&]:[background:radial-gradient(ellipse_at_15%_22%,_#fffaf0_0,_transparent_48%),_radial-gradient(ellipse_at_89%_68%,_#edcfad80_0,_transparent_42%),_linear-gradient(145deg,_#f9eee4_0%,_#f0ddd1_65%,_#f7ebe1_100%)]`}
       >
         {photoBackground && <>
-          <img src={planningImage} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" fetchPriority="high" />
+          <ImageWithSkeleton src={planningImage} alt="" aria-hidden="true" className="absolute inset-0 -z-20 h-full w-full object-cover object-center" fetchPriority="high" />
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-[#30201a]/45" />
         </>}
         <div
@@ -40,15 +41,15 @@ export default function AuthLayout({ title, description, children, photoBackgrou
         >
           {!photoBackground && <div
             className="celebration-auth-photo relative isolate grid items-end min-h-[500px] p-[clamp(26px,_4vw,_56px)]
-          [background:#69534b] [&_img]:absolute [&_img]:inset-0 [&_img]:w-full [&_img]:h-full [&_img]:z-[-2]
-          [&_img]:object-cover [&::after]:absolute [&::after]:inset-0 [&::after]:w-full [&::after]:h-full
+          [background:#69534b] [&_.auth-photo-image]:absolute [&_.auth-photo-image]:inset-0 [&_.auth-photo-image]:w-full [&_.auth-photo-image]:h-full [&_.auth-photo-image]:z-[-2]
+          [&_.auth-photo-image]:object-cover [&::after]:absolute [&::after]:inset-0 [&::after]:w-full [&::after]:h-full
           [&::after]:content-[''] [&::after]:z-[-1]
           [&::after]:[background:linear-gradient(transparent_35%,_rgb(42_25_19_/_83%))] [&_p]:text-[#fff6f0]
           [&_p]:[font:clamp(2rem,_3.5vw,_3.6rem)/1.04_Georgia,_serif] [&_em]:text-[#f3ccba] max-[760px]:min-h-[165px]
-          max-[760px]:p-5 max-[760px]:[&_img]:[object-position:center_60%]"
+          max-[760px]:p-5 max-[760px]:[&_.auth-photo-image]:[object-position:center_60%]"
             aria-hidden="true"
           >
-            <img src={planningImage} alt="" />
+            <ImageWithSkeleton src={planningImage} alt="" className="auth-photo-image" fetchPriority="high" />
             <p>
               Beautifully planned.
               <br />
@@ -57,8 +58,8 @@ export default function AuthLayout({ title, description, children, photoBackgrou
           </div>}
           <section
             className="celebration-auth-panel self-center min-w-0 p-[clamp(26px,_4vw,_56px)] text-[var(--account-ink)]
-          [&_p:not([role='alert'])]:text-[var(--account-copy)] [&_a]:text-[var(--account-accent-hover)]
-          [&_a]:underline-offset-[4px] [&_a:hover]:underline [&_label]:text-[var(--account-ink)] [&_label]:text-[.84rem]
+          [&_p:not([role='alert'])]:text-[var(--account-copy)] [&_a:not([data-slot='button'])]:text-[var(--account-accent-hover)]
+          [&_a]:underline-offset-[4px] [&_a:not([data-slot='button']):hover]:underline [&_label]:text-[var(--account-ink)] [&_label]:text-[.84rem]
           [&_label]:font-[550] [&_input]:w-full [&_input]:min-w-0 [&_input]:min-h-[44px] [&_input]:p-[9px_12px]
           [&_input]:[border:1px_solid_#d8baad] [&_input]:rounded-[7px] [&_input]:[background:#fffdfb]
           [&_input]:text-[var(--account-ink)] [&_input]:text-[1rem] [&_select]:w-full [&_select]:min-w-0

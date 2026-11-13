@@ -1,4 +1,5 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, ChevronDown, MessageSquare, Quote, Star } from "lucide-react";
@@ -33,6 +34,7 @@ function ClientReviews() {
     api
       .get("/feedback/reviews", { signal: controller.signal })
       .then(({ data }) => {
+        if (controller.signal.aborted) return;
         setReviews(data.reviews);
         setLoadError(false);
       })
@@ -72,7 +74,7 @@ function ClientReviews() {
           </button>
         </p>
       )}
-      {!loadError && !reviews && <EllipsisLoader label="Loading reviews" />}
+      {!loadError && !reviews && <CardGridSkeleton label="Loading reviews" />}
       {!loadError && reviews?.length === 0 && <p>No client reviews yet.</p>}
       {!!reviews?.length && (
         <div className="flex flex-wrap justify-center gap-6">
@@ -145,7 +147,7 @@ export default function LandingExtras({ photos }) {
             className="celebration-extras-grid celebration-preview-photos grid grid-cols-3 gap-[clamp(12px,_2vw,_24px)]
           max-[640px]:[grid-template-columns:1fr] [&_figure]:relative [&_figure]:overflow-hidden
           [&_figure]:[border:1px_solid_#fff6ef] [&_figure]:rounded-[18px] [&_figure]:[box-shadow:0_10px_26px_#57342b26]
-          [&_img]:w-full [&_img]:h-[clamp(220px,_24vw,_330px)] [&_img]:object-cover [&_img]:[transition:scale_.35s_ease]
+          [&_.eventsphere-image]:w-full [&_.eventsphere-image]:h-[clamp(220px,_24vw,_330px)] [&_.eventsphere-image]:object-cover [&_img]:[transition:scale_.35s_ease]
           [&_figure:hover_img]:[scale:1.045] [&_figcaption]:absolute [&_figcaption]:inset-[auto_0_0]
           [&_figcaption]:p-[28px_16px_14px] [&_figcaption]:[background:linear-gradient(transparent,_#30201bec)]
           [&_figcaption]:text-[white] [&_figcaption]:font-semibold motion-reduce:[&_img]:transition-none
@@ -153,7 +155,7 @@ export default function LandingExtras({ photos }) {
           >
             {photos.map(({ name, photo, alt }) => (
               <figure key={name}>
-                <img src={photo} alt={alt} loading="lazy" />
+                <ImageWithSkeleton src={photo} alt={alt} loading="lazy" />
                 <figcaption>{name}</figcaption>
               </figure>
             ))}

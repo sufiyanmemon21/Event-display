@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { useEffect, useState } from "react";
 import { ArrowLeft, CalendarDays, MapPin, Ticket, UserRound } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
@@ -243,7 +244,7 @@ function ExpoBookingForm({ initialExpoId }) {
               </div>
               {selected && (
                 <div className="grid gap-4 rounded-2xl bg-[#fbf7f0] p-4 text-sm text-[#69534b] sm:grid-cols-[minmax(0,0.42fr)_minmax(0,0.58fr)] sm:items-center">
-                  <img
+                  <ImageWithSkeleton
                     src={getEventImage(selected, catalog.items.indexOf(selected))}
                     alt={`${selected.title} cover image`}
                     className="block aspect-video w-full rounded-xl object-cover"

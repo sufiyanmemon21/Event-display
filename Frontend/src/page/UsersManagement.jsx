@@ -1,4 +1,5 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton } from "@/components/LoadingSkeletons";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import { PageHeading, RecordBrowser, FormPanel } from "@/components/workspace";
@@ -111,7 +112,7 @@ export default function UsersManagement() {
                 {label}
               </p>
               <p className="mt-2 text-3xl font-semibold">
-                {loading ? "—" : value}
+                {loading ? <Skeleton className="h-8 w-12" aria-hidden="true" /> : value}
               </p>
             </CardContent>
           </Card>
@@ -142,7 +143,7 @@ export default function UsersManagement() {
         </Button>
       </div>
       {loading ? (
-        <EllipsisLoader scope="page" label="Loading accounts" />
+        <TableSkeleton label="Loading accounts" columns={5} />
       ) : error ? (
         <p role="alert" className="text-destructive">
           {error}

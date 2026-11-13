@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { useEffect, useState } from "react";
 import {
   ArrowLeft,
@@ -270,7 +271,7 @@ function BookingForm({ initialEventId }) {
               )}
               {selected && (
                 <div className="mt-4 flex min-w-0 items-center gap-4 rounded-2xl border border-[#ead9ce] bg-[#fffaf4] p-3 sm:p-4">
-                  <img
+                  <ImageWithSkeleton
                     src={getEventImage(selected)}
                     alt=""
                     className="size-20 shrink-0 rounded-xl object-cover sm:size-24"

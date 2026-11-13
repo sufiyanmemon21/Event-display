@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { useEffect } from "react";
 import PublicPageShell from "@/components/landing/PublicPageShell";
 import birthdayImage from "@/assets/birthday.avif";
@@ -44,11 +45,12 @@ export default function Gallery() {
               key={src}
               className="mb-3 break-inside-avoid overflow-hidden rounded-xl border border-[var(--public-line)] bg-white shadow-sm sm:mb-4 sm:rounded-2xl [.workspace-form-body_fieldset_>_p&]:py-[14px]"
             >
-              <img
+              <ImageWithSkeleton
                 src={src}
+                imageClassName="transition duration-500 hover:scale-[1.03] motion-reduce:transition-none"
                 alt={alt}
                 loading={index < 3 ? "eager" : "lazy"}
-                className={`w-full object-cover transition duration-500 hover:scale-[1.03] ${
+                className={`w-full object-cover ${
                   index % 3 === 0
                     ? "aspect-[1.15]"
                     : index % 3 === 1

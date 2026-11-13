@@ -1,9 +1,10 @@
+import { TableSkeleton } from "@/components/LoadingSkeletons";
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { todayDate } from "@/lib/eventDates";
 import BoothSelection from "@/page/BoothSelection";
 import CoverImageField from "@/components/CoverImageField";
 import ExhibitorApplicationForm from "@/components/ExhibitorApplicationForm";
 import { useRef } from "react";
-import EllipsisLoader from "@/components/EllipsisLoader";
 
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { Textarea } from "@/components/ui/textarea";
@@ -587,7 +588,7 @@ export default function EventsManagement({ listingType = "expo" }) {
           </Card>
         )}
         {loading ? (
-          <EllipsisLoader scope="page" label="Loading events" />
+          <TableSkeleton label="Loading events" columns={7} rowClassName="h-[68px]" />
         ) : loadError ? (
           <div className="space-y-3">
             <p role="alert">{loadError}</p>
@@ -632,7 +633,7 @@ export default function EventsManagement({ listingType = "expo" }) {
                     {visible.map((event, index) => (
                       <TableRow key={event._id}>
                         <TableCell>
-                          <img
+                          <ImageWithSkeleton
                             src={getEventImage(event, index)}
                             alt=""
                             loading="lazy"
@@ -775,7 +776,7 @@ export default function EventsManagement({ listingType = "expo" }) {
           </DialogHeader>
           {details && (
             <div className="min-w-0 space-y-5">
-              <img
+              <ImageWithSkeleton
                 src={getEventImage(details)}
                 alt=""
                 className="h-40 w-full rounded-xl border object-cover sm:h-52 [.workspace-form-body_fieldset_>_p&]:py-[14px]"

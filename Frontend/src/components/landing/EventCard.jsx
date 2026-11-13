@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import BookLink from "@/components/landing/BookLink";
 import {
   ArrowUpRight,
@@ -78,10 +79,10 @@ export default function EventCard({ event, index = 0 }) {
       <article className="celebration-listing-ticket flex flex-col h-full overflow-hidden [border:1px_solid_var(--ticket-line)] rounded-2xl [background:#fffaf5]">
         <div
           className="celebration-listing-photo relative flex-none h-[clamp(132px,_15vw,_188px)] overflow-hidden [background:#e9cfc0]
-          [&_img]:block [&_img]:[transition:scale_.4s_ease] [.celebration-listing:hover_&_img]:[scale:1.035]
+          [&_img]:block [&_img]:[transition:scale_.4s_ease,opacity_.18s_ease] [.celebration-listing:hover_&_img]:[scale:1.035]
           motion-reduce:[&_img]:transition-none motion-reduce:[.celebration-listing:hover_&_img]:[scale:none]"
         >
-          <img
+          <ImageWithSkeleton
             src={getEventImage(event, index)}
             alt=""
             loading="lazy"

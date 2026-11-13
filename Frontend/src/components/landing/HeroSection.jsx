@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import BookLink from "@/components/landing/BookLink";
 import { ArrowUpRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -20,19 +21,21 @@ export default function HeroSection() {
           before:bg-[linear-gradient(90deg,#f6ece0ed_24%,#f6ece0a8_100%)] max-[720px]:py-[106px_30px]"
         aria-labelledby="celebration-title"
       >
-        <img
+        <ImageWithSkeleton
           src={image}
+          fallbackSrc={venueImage}
           alt=""
+          fetchPriority="high"
           className="absolute inset-0 -z-2 size-full object-cover"
         />
         <div
           className="celebration-wrap attendee-hero-layout w-[min(1200px,_calc(100%_-_72px))] mx-auto
           max-[640px]:w-[calc(100%_-_32px)] grid [grid-template-columns:minmax(0,_1.25fr)_minmax(0,_.85fr)]
           gap-[clamp(24px,_7vw,_106px)] items-center [&_h1]:max-w-[13ch] [&_h1]:text-[clamp(3rem,_6vw,_5.8rem)]
-          [&_>_img]:w-full [&_>_img]:h-[clamp(300px,_40vw,_560px)] [&_>_img]:object-cover
-          [&_>_img]:[border:1px_solid_#fff6ee] [&_>_img]:rounded-[27px] [&_>_img]:[box-shadow:0_18px_40px_#4b302426]
-          max-[720px]:[grid-template-columns:minmax(0,_1fr)] max-[720px]:[&_>_img]:h-[clamp(210px,_55vw,_350px)]
-          max-[720px]:[&_>_img]:rounded-[15px] max-[720px]:[&_h1]:text-[clamp(2.6rem,_9vw,_4rem)]"
+          [&_>_.eventsphere-image]:w-full [&_>_.eventsphere-image]:h-[clamp(300px,_40vw,_560px)] [&_>_.eventsphere-image]:object-cover
+          [&_>_.eventsphere-image]:[border:1px_solid_#fff6ee] [&_>_.eventsphere-image]:rounded-[27px] [&_>_.eventsphere-image]:[box-shadow:0_18px_40px_#4b302426]
+          max-[720px]:[grid-template-columns:minmax(0,_1fr)] max-[720px]:[&_>_.eventsphere-image]:h-[clamp(210px,_55vw,_350px)]
+          max-[720px]:[&_>_.eventsphere-image]:rounded-[15px] max-[720px]:[&_h1]:text-[clamp(2.6rem,_9vw,_4rem)]"
         >
           <div>
             <p
@@ -68,7 +71,7 @@ export default function HeroSection() {
               </BookLink>
             </div>
           </div>
-          <img
+          <ImageWithSkeleton
             src={image}
             alt={bannerImage ? "" : "Tables set for an evening reception"}
             fetchPriority="high"
@@ -88,9 +91,10 @@ export default function HeroSection() {
           max-[640px]:[&::after]:[background:linear-gradient(0deg,_#f5e4d9_25%,_rgb(245_228_217_/_97%)_36%,_rgb(245_228_217_/_75%)_53%,_transparent_77%)]"
       aria-labelledby="celebration-title"
     >
-      <img
+      <ImageWithSkeleton
         className="celebration-hero-photo absolute inset-[0_0_0_auto] w-[73%] h-full object-cover [object-position:center_55%] z-[-2] max-[640px]:w-full max-[640px]:h-[70%] max-[640px]:object-center"
         src={bannerImage || birthdayImage}
+        fallbackSrc={birthdayImage}
         alt={
           bannerImage
             ? ""

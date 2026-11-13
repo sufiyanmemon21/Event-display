@@ -1,3 +1,6 @@
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
+import { Skeleton } from "@/components/ui/skeleton";
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import {
   Dialog,
   DialogContent,
@@ -5,7 +8,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import EllipsisLoader from "@/components/EllipsisLoader";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -150,7 +152,7 @@ function BookingCard({ booking }) {
           </div>
           {qr && (
             <div className="flex flex-wrap items-end gap-3">
-              <img
+              <ImageWithSkeleton
                 className="size-36 rounded-md border bg-white"
                 src={qr}
                 alt={`Entry QR code for ${event.title}`}
@@ -271,6 +273,8 @@ export default function AttendeeProfile() {
   useEffect(() => {
     if (!eventId) return;
     const controller = new AbortController();
+    setEvent(null);
+    setEventError("");
     API.get(`/events/${encodeURIComponent(eventId)}`, {
       signal: controller.signal,
     })
@@ -353,6 +357,9 @@ export default function AttendeeProfile() {
         {eventId && (
           <section className="max-w-2xl space-y-4 rounded-xl border border-[#e2c9bd] bg-[var(--public-paper)] p-5 [.workspace-form-body_fieldset_>_p&]:py-[14px]">
             <h2 className="font-serif text-2xl">Request a booking</h2>
+            {event?._id !== eventId && !eventError && (
+              <Skeleton className="h-20 w-full" role="status" aria-label="Loading booking details" />
+            )}
             {eventError && (
               <p role="alert" className="text-sm text-red-800">
                 {eventError}
@@ -432,7 +439,7 @@ export default function AttendeeProfile() {
             </p>
           )}
           {loading ? (
-            <EllipsisLoader label="Loading your bookings" />
+            <CardGridSkeleton label="Loading your bookings" className="lg:grid-cols-2" />
           ) : visible.length ? (
             <div className="grid gap-4 md:grid-cols-2">
               {visible.map((item) => (

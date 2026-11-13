@@ -17,7 +17,7 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Analytics />
 
-    <BrowserRouter>
+    <BrowserRouter useTransitions={false}>
       <ScrollToTop />
       <Provider store={store}>
         <ThemeProvider>

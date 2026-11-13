@@ -1,176 +1,113 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
-import AuthLayout from "@/components/auth/AuthLayout";
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
-import { toast } from "react-toastify";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { CircleCheck, Eye, EyeOff } from "lucide-react";
 import API, { clearAuth } from "@/api/api";
+import AuthLayout from "@/components/auth/AuthLayout";
+import { recoveryButton, recoveryError, recoveryLink } from "@/components/auth/recovery";
+import EllipsisLoader from "@/components/EllipsisLoader";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function Reset() {
-  const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
+function PasswordField({ id, label, value, onChange, loading }) {
+  const [visible, setVisible] = useState(false);
 
+  return (
+    <div className="grid gap-1">
+      <Label htmlFor={id}>{label}</Label>
+      <div className="celebration-auth-password relative">
+        <Input
+          id={id}
+          type={visible ? "text" : "password"}
+          autoComplete="new-password"
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          minLength={8}
+          disabled={loading}
+          className="pe-12!"
+          required
+        />
+        <button
+          type="button"
+          className="absolute inset-y-0 end-0 grid w-11 place-items-center rounded-e-[7px] text-[var(--account-copy)] enabled:hover:text-[var(--account-accent-hover)] enabled:active:text-[var(--account-ink)] disabled:cursor-not-allowed disabled:text-[var(--account-accent-disabled)]"
+          onClick={() => setVisible(!visible)}
+          aria-label={(visible ? "Hide " : "Show ") + label.toLowerCase()}
+          disabled={loading}
+        >
+          {visible ? <EyeOff size={17} /> : <Eye size={17} />}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function Reset() {
+  const { state } = useLocation();
+  const navigate = useNavigate();
+  const token = state?.token;
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const token = searchParams.get("token") || "";
-  const validToken = /^[a-f0-9]{64}$/.test(token);
-
-  async function handleSubmit(e) {
-    e.preventDefault();
-
+  async function handleSubmit(event) {
+    event.preventDefault();
     if (loading) return;
 
     setError("");
-
-    if (
-      password.length < 8 ||
-      new TextEncoder().encode(password).length > 72 ||
-      !/\S/.test(password)
-    ) {
-      setError("Password must be at least 8 characters and at most 72 bytes.");
+    if (password.length < 8 || new TextEncoder().encode(password).length > 72 || !/\S/.test(password)) {
+      setError("Use at least 8 characters and at most 72 bytes.");
       return;
     }
-
     if (password !== confirmPassword) {
       setError("Passwords do not match.");
       return;
     }
 
     setLoading(true);
-
     try {
-      const response = await API.post("/forget/resetPassword", {
-        token,
-        password,
-      });
-
+      await API.post("/forget/resetPassword", { token, password, confirmPassword });
       clearAuth();
-      toast.success(response.data.msg);
-      navigate("/login", { replace: true });
+      setPassword("");
+      setConfirmPassword("");
+      navigate("/dashboard/reset", { replace: true, state: { complete: true } });
     } catch (error) {
-      setError(
-        error.response?.data?.msg ||
-          "Unable to reset password. Please try again.",
-      );
+      setError(error.response?.data?.msg || "Unable to reset password. Please try again.");
     } finally {
       setLoading(false);
     }
   }
 
+  if (state?.complete) {
+    return (
+      <AuthLayout title="Password updated" description="You can now sign in with your new password.">
+        <CircleCheck size={34} className="mb-5 text-[var(--account-accent)]" aria-hidden="true" />
+        <Button asChild variant="account-primary" className={recoveryButton}>
+          <Link to="/login">Back to Login</Link>
+        </Button>
+      </AuthLayout>
+    );
+  }
+
+  if (typeof token !== "string" || !/^[a-f0-9]{64}$/.test(token)) {
+    return (
+      <AuthLayout title="Reset password" description="Request a verification code to continue.">
+        <Link to="/forget" className={recoveryLink}>Request a code</Link>
+      </AuthLayout>
+    );
+  }
+
   return (
-    <AuthLayout
-      title="Account recovery"
-      description="Securely recover your EventSphere account."
-    >
-      {!validToken ? (
-        <>
-          <p
-            className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950"
-            role="alert"
-          >
-            This reset link is invalid. Request a new link to continue.
-          </p>
-          <Link
-            to="/forget"
-            className="mt-4 block text-center text-sm font-medium text-[#247d78] underline-offset-4 hover:text-[#145e5c] hover:underline"
-          >
-            Request a reset link
-          </Link>
-        </>
-      ) : (
-        <>
-          <form onSubmit={handleSubmit} className="grid gap-3">
-            <div className="grid gap-1">
-              <Label htmlFor="new-password">New password</Label>
-              <div
-                className="celebration-auth-password relative [&_input]:pe-[50px] [&_button]:absolute [&_button]:inset-[0_0_0_auto]
-          [&_button]:grid [&_button]:w-[44px] [&_button]:place-items-center [&_button]:rounded-[0_7px_7px_0]
-          [&_button]:text-[var(--account-copy)] [&_button:hover]:text-[var(--account-accent-hover)]"
-              >
-                <Input
-                  id="new-password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={8}
-                  disabled={loading}
-                  aria-describedby="new-password-help"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((value) => !value)}
-                  aria-label={
-                    showPassword ? "Hide passwords" : "Show passwords"
-                  }
-                  aria-pressed={showPassword}
-                  disabled={loading}
-                >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
-                </button>
-              </div>
-              <p
-                id="new-password-help"
-                className="text-xs leading-5 text-[#556c74] [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]"
-              >
-                Use at least 8 characters.
-              </p>
-            </div>
-            <div className="grid gap-1">
-              <Label htmlFor="confirm-new-password">Confirm password</Label>
-              <Input
-                id="confirm-new-password"
-                type={showPassword ? "text" : "password"}
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                minLength={8}
-                disabled={loading}
-                required
-              />
-            </div>
-            {error && (
-              <p
-                className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
-                role="alert"
-              >
-                {error}
-              </p>
-            )}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="celebration-auth-submit w-full text-sm font-semibold min-h-[46px] rounded-[7px] [background:var(--account-accent)] text-[#fffaf6] hover:[background:var(--account-accent-hover)]"
-            >
-              {loading ? (
-                <EllipsisLoader scope="inline" label="Updating password" />
-              ) : (
-                "Reset password"
-              )}
-            </Button>
-          </form>
-          <Link
-            to="/forget"
-            className="mt-4 block text-center text-sm font-medium text-[#247d78] underline-offset-4 hover:text-[#145e5c] hover:underline"
-          >
-            Request a new link
-          </Link>
-        </>
-      )}
-      <Link
-        to="/login"
-        className="mt-4 block text-center text-sm font-medium text-[#247d78] underline-offset-4 hover:text-[#145e5c] hover:underline"
-      >
-        Back to login
-      </Link>
+    <AuthLayout title="Reset password" description="Choose a new password with at least 8 characters.">
+      <form onSubmit={handleSubmit} className="grid gap-3">
+        <PasswordField id="new-password" label="New password" value={password} onChange={setPassword} loading={loading} />
+        <PasswordField id="confirm-password" label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} loading={loading} />
+        {error && <p className={recoveryError} role="alert">{error}</p>}
+        <Button type="submit" variant="account-primary" className={recoveryButton} disabled={loading}>
+          {loading ? <EllipsisLoader scope="inline" label="Updating password" /> : "Reset Password"}
+        </Button>
+      </form>
+      <Link to="/forget" className={recoveryLink + " mt-4"}>Request a new code</Link>
     </AuthLayout>
   );
 }

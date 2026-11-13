@@ -1,3 +1,4 @@
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import EllipsisLoader from "@/components/EllipsisLoader";
 import { RecordBrowser } from "@/components/workspace";
 import { Badge } from "@/components/ui/badge";
@@ -265,13 +266,13 @@ export default function SessionsManagement() {
                 disabled={!eventId || loadingEvents || busy}
               >
                 {loadingSessions ? (
-                  <EllipsisLoader scope="inline" />
+                  "Loading schedule…"
                 ) : (
                   "Load Schedule"
                 )}
               </Button>
 
-              {!loadingEvents && events.length === 0 && (
+              {!loadingEvents && !eventError && events.length === 0 && (
                 <p className="rounded-xl border border-dashed bg-card px-6 py-12 text-center text-sm text-muted-foreground [.workspace-form-body_fieldset_>_p&]:py-[14px]">
                   No events are available yet.
                 </p>
@@ -383,7 +384,7 @@ export default function SessionsManagement() {
       )}
 
       {loadingSessions ? (
-        <EllipsisLoader scope="page" label="Loading sessions" />
+        <CardGridSkeleton label="Loading sessions" className="lg:grid-cols-2" />
       ) : sessionError ? (
         <p role="alert">{sessionError}</p>
       ) : loadedEventId === eventId && eventId ? (

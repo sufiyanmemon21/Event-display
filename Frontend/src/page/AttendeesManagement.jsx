@@ -1,3 +1,4 @@
+import { TableSkeleton } from "@/components/LoadingSkeletons";
 import PassScanner from "@/components/PassScanner";
 import EllipsisLoader from "@/components/EllipsisLoader";
 
@@ -262,7 +263,7 @@ export default function AttendeesManagement() {
         </WorkspaceSelect>
       </div>
       {loading ? (
-        <EllipsisLoader scope="page" label="Loading registrations" />
+        <TableSkeleton label="Loading registrations" columns={isOrganizer ? 8 : 7} />
       ) : loadError ? (
         <div className="space-y-3">
           <p role="alert">{loadError}</p>

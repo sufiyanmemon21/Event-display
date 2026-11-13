@@ -8,7 +8,12 @@
     <title>EventSphere</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div role="status" style="min-height:100dvh;display:grid;place-items:center;background:#fffaf6;color:#87584d">
+        <span aria-hidden="true" style="font:32px Georgia,serif">•••</span>
+        <span style="position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)">Loading EventSphere</span>
+      </div>
+    </div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

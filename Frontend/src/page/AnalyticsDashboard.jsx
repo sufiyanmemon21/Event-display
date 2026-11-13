@@ -1,4 +1,4 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import {
   ResponsiveContainer,
   BarChart,
@@ -312,7 +312,7 @@ export default function AnalyticsDashboard() {
       )}
 
       {loading ? (
-        <EllipsisLoader scope="page" label="Loading analytics" />
+        <CardGridSkeleton label="Loading analytics" count={6} className="sm:grid-cols-2 lg:grid-cols-3" />
       ) : currentReport ? (
         <>
           <p className="text-sm text-muted-foreground">

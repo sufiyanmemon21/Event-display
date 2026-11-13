@@ -1,3 +1,4 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import {
@@ -163,7 +164,7 @@ export default function EventSphereHome() {
           >
             {photos.map(({ name, photo, alt }) => (
               <figure key={name} tabIndex={0} className="group relative m-0 overflow-hidden rounded-xl focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#87584d]">
-                <img src={photo} alt={alt} loading="lazy" className="block h-[clamp(170px,22vw,290px)] w-full object-cover max-[640px]:h-[clamp(125px,37vw,200px)]" />
+                <ImageWithSkeleton src={photo} alt={alt} loading="lazy" className="block h-[clamp(170px,22vw,290px)] w-full object-cover max-[640px]:h-[clamp(125px,37vw,200px)]" />
                 <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#1e1411]/80 via-transparent to-transparent transition-opacity duration-300 group-hover:opacity-0 group-focus-visible:opacity-0 motion-reduce:transition-none" />
                 <span aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[#241813]/55 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none" />
                 <figcaption className="absolute bottom-3 left-3 max-w-[calc(100%-24px)] text-[.76rem] font-medium text-white transition-[left,bottom,translate,font-size] duration-300 ease-out group-hover:bottom-1/2 group-hover:left-1/2 group-hover:-translate-x-1/2 group-hover:translate-y-1/2 group-hover:text-center group-hover:text-xl group-focus-visible:bottom-1/2 group-focus-visible:left-1/2 group-focus-visible:-translate-x-1/2 group-focus-visible:translate-y-1/2 group-focus-visible:text-center group-focus-visible:text-xl motion-reduce:transition-none">{name}</figcaption>
@@ -196,7 +197,7 @@ export default function EventSphereHome() {
           className="celebration-wrap celebration-intro w-[min(1200px,_calc(100%_-_72px))] mx-auto max-[640px]:w-[calc(100%_-_32px)]
           py-[clamp(32px,_6vw,_76px)] grid [grid-template-columns:1fr_1fr] items-center gap-[clamp(22px,_6vw,_90px)]
           [&_>_div_>_p:not(.celebration-kicker)]:max-w-[43ch] [&_>_div_>_p:not(.celebration-kicker)]:m-[16px_0_20px]
-          [&_>_img]:w-full [&_>_img]:h-[clamp(220px,_28vw,_340px)] [&_>_img]:object-cover [&_>_img]:rounded-[18px]
+          [&_>_.eventsphere-image]:w-full [&_>_.eventsphere-image]:h-[clamp(220px,_28vw,_340px)] [&_>_.eventsphere-image]:object-cover [&_>_.eventsphere-image]:rounded-[18px]
           max-[640px]:[grid-template-columns:1fr]"
           aria-labelledby="about-title"
         >
@@ -222,7 +223,7 @@ export default function EventSphereHome() {
               through the inquiry form.
             </p>
           </div>
-          <img
+          <ImageWithSkeleton
             src={receptionImage}
             alt="Tables set with flowers for a formal reception"
             loading="lazy"
@@ -247,9 +248,9 @@ export default function EventSphereHome() {
           className="celebration-wrap celebration-inquiry w-[min(1200px,_calc(100%_-_72px))] mx-auto
           max-[640px]:w-[calc(100%_-_32px)] [&_>_div_>_p:not(.celebration-kicker)]:max-w-[43ch]
           [&_>_div_>_p:not(.celebration-kicker)]:m-[16px_0_20px] grid [grid-template-columns:1fr_.8fr_1fr] items-center
-          gap-[22px] py-[clamp(30px,_5vw,_65px)] [&_>_img]:w-full [&_>_img]:h-full [&_>_img]:max-h-[410px]
-          [&_>_img]:rounded-[12px] [&_>_img]:object-cover max-[930px]:[grid-template-columns:1fr_1fr]
-          max-[930px]:[&_>_img]:hidden max-[640px]:[grid-template-columns:1fr]"
+          gap-[22px] py-[clamp(30px,_5vw,_65px)] [&_>_.eventsphere-image]:w-full [&_>_.eventsphere-image]:min-h-[240px] [&_>_.eventsphere-image]:h-full [&_>_.eventsphere-image]:max-h-[410px]
+          [&_>_.eventsphere-image]:rounded-[12px] [&_>_.eventsphere-image]:object-cover max-[930px]:[grid-template-columns:1fr_1fr]
+          max-[930px]:[&_>_.eventsphere-image]:hidden max-[640px]:[grid-template-columns:1fr]"
           aria-labelledby="inquiry-title"
         >
           <div>
@@ -266,7 +267,7 @@ export default function EventSphereHome() {
               details you already know.
             </p>
           </div>
-          <img
+          <ImageWithSkeleton
             src={receptionImage}
             alt="Tables set with candles and flowers for a reception"
             loading="lazy"

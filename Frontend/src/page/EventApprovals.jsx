@@ -1,4 +1,4 @@
-import EllipsisLoader from "@/components/EllipsisLoader";
+import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import { useEffect, useState } from "react";
 import API from "@/api/api";
 import { PageHeading, RecordBrowser } from "@/components/workspace";
@@ -70,7 +70,7 @@ export default function EventApprovals() {
         </Button>
       </PageHeading>
       {loading ? (
-        <EllipsisLoader scope="page" label="Loading events" />
+        <CardGridSkeleton label="Loading events" className="lg:grid-cols-2" />
       ) : error ? (
         <p role="alert" className="text-destructive">
           {error}

@@ -1,3 +1,5 @@
+import ImageWithSkeleton from "@/components/ImageWithSkeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useConfirmation } from "@/hooks/useConfirmation";
 import { useEffect, useRef, useState } from "react";
 import { PageHeading } from "@/components/workspace";
@@ -144,10 +146,10 @@ function AssetField({ id, label, currentImage, onFileChange }) {
       )}
       {selection && (
         <div className="flex flex-wrap items-center gap-4 rounded-lg border bg-muted/40 p-3">
-          <img
+          <ImageWithSkeleton
             src={selection.url}
             alt={`${label} preview`}
-            className="max-h-32 max-w-full rounded-md border object-contain"
+            className="h-32 w-44 max-w-full rounded-md border object-contain"
           />
           <div className="min-w-0 flex-1">
             <p className="break-all text-sm font-medium">{selection.name}</p>
@@ -173,10 +175,10 @@ function AssetField({ id, label, currentImage, onFileChange }) {
           <p className="text-xs text-muted-foreground [.public-theme_&]:text-[0.8125rem] [.public-theme_&]:leading-[1.4rem]">
             Current banner image
           </p>
-          <img
+          <ImageWithSkeleton
             src={currentImage}
             alt="Current banner"
-            className="max-h-36 max-w-full rounded-md object-contain"
+            className="h-36 w-full rounded-md object-contain"
           />
         </div>
       )}
@@ -266,11 +268,13 @@ function WebsiteLogoField() {
                 : "Default EventSphere branding"}
         </p>
         {selection || logo.url ? (
-          <img
+          <ImageWithSkeleton
             src={selection?.url || logo.url}
             alt="Website logo preview"
-            className="max-h-24 max-w-full object-contain"
+            className="h-24 w-36 max-w-full object-contain"
           />
+        ) : logo.loading ? (
+          <Skeleton className="h-24 w-36 max-w-full" aria-hidden="true" />
         ) : (
           <span className="font-serif text-2xl text-primary">EventSphere</span>
         )}

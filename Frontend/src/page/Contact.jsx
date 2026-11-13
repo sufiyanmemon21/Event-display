@@ -1,5 +1,6 @@
 import BookLink from "@/components/landing/BookLink";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { Clock3, Mail, MapPin, MessageCircle, Phone, Send } from "lucide-react";
 import PublicPageShell from "@/components/landing/PublicPageShell";
@@ -27,6 +28,7 @@ function openEmail(event) {
 }
 
 export default function Contact() {
+  const [mapLoaded, setMapLoaded] = useState(false);
   const loggedIn = Boolean(localStorage.getItem("token"));
   const role = localStorage.getItem("userRole");
   const canMessage =
@@ -211,13 +213,17 @@ export default function Contact() {
                 information.
               </p>
             </div>
-            <iframe
-              title="Map of Karachi, Pakistan"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=66.92%2C24.80%2C67.08%2C24.92&layer=mapnik&marker=24.8607%2C67.0011"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              className="h-72 w-full border-0 sm:h-80"
-            />
+            <div className="relative h-72 sm:h-80">
+              {!mapLoaded && <Skeleton className="absolute inset-0 rounded-none" role="status" aria-label="Loading map" />}
+              <iframe
+                title="Map of Karachi, Pakistan"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=66.92%2C24.80%2C67.08%2C24.92&layer=mapnik&marker=24.8607%2C67.0011"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                onLoad={() => setMapLoaded(true)}
+                className={`absolute inset-0 size-full border-0 ${mapLoaded ? "" : "opacity-0"}`}
+              />
+            </div>
             <a
               href="https://www.openstreetmap.org/?mlat=24.8607&mlon=67.0011#map=12/24.8607/67.0011"
               target="_blank"
