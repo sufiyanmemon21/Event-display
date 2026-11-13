@@ -276,12 +276,6 @@ export default function PublicFeedback() {
             </fieldset>
           </form>
         )}
-        <Link
-          to="/share-feedback"
-          className="action-button celebration-feedback-trigger fixed z-40 right-3 bottom-20 flex items-center gap-2 shadow-md"
-        >
-          <MessageSquare size={19} aria-hidden="true" /> Feedback
-        </Link>
       </main>
     </PublicPageShell>
   );

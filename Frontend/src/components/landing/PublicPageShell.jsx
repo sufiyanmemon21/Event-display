@@ -1,3 +1,5 @@
+import { MessageSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 import LandingFooter from "./LandingFooter";
 import LandingNavigation from "./LandingNavigation";
 
@@ -15,6 +17,12 @@ export default function PublicPageShell({ children }) {
     >
       <LandingNavigation />
       {children}
+      <Link
+        to="/share-feedback"
+        className="action-button celebration-feedback-trigger fixed top-1/2 right-0 z-40 -translate-y-1/2 shadow-md [writing-mode:vertical-rl]"
+      >
+        <MessageSquare size={19} aria-hidden="true" /> Feedback
+      </Link>
       <LandingFooter />
     </div>
   );

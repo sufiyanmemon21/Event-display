@@ -2,7 +2,7 @@ import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import ImageWithSkeleton from "@/components/ImageWithSkeleton";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowUpRight, ChevronDown, MessageSquare, Quote, Star } from "lucide-react";
+import { ArrowUpRight, ChevronDown, Quote, Star } from "lucide-react";
 import api from "@/api/api";
 
 const questions = [
@@ -108,12 +108,6 @@ function ClientReviews() {
 export default function LandingExtras({ photos }) {
   return (
     <>
-      <Link
-        to="/share-feedback"
-        className="action-button celebration-feedback-trigger fixed z-40 right-3 bottom-20 flex items-center gap-2 shadow-md"
-      >
-        <MessageSquare size={19} aria-hidden="true" /> Feedback
-      </Link>
       <section
         id="event-gallery"
         className="celebration-gallery-preview [background:linear-gradient(135deg,_#e9d5ca,_#cdb3a8)]"
