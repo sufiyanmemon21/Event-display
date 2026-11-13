@@ -23,6 +23,7 @@ const EventListing = lazy(() =>
 );
 const Gallery = lazy(() => import("./page/Gallery"));
 const PublicFeedback = lazy(() => import("./page/PublicFeedback"));
+const PublicExhibitorProfile = lazy(() => import("./page/PublicExhibitorProfile"));
 const Services = lazy(() => import("./page/Services"));
 const Login = lazy(() => import("./page/login"));
 const Signup = lazy(() => import("./page/signup"));
@@ -66,6 +67,7 @@ function App() {
         <Route path="/event-listing" element={<EventListing />} />
         <Route path="/gallery" element={<Gallery />} />
         <Route path="/share-feedback" element={<PublicFeedback />} />
+        <Route path="/exhibitors/profile/:userId" element={<PublicExhibitorProfile />} />
         <Route path="/event-gallery" element={<Gallery />} />
         <Route path="/service" element={<Services />} />
         <Route path="/services" element={<Services />} />

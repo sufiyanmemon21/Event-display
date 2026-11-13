@@ -1,6 +1,7 @@
 import { CardGridSkeleton } from "@/components/LoadingSkeletons";
 import { Skeleton } from "@/components/ui/skeleton";
 import ImageWithSkeleton from "@/components/ImageWithSkeleton";
+import { bookingStatus } from "@/lib/bookingStatus";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +27,7 @@ import useLiveRefresh from "@/hooks/useLiveRefresh";
 import { isExpo } from "@/hooks/useExpos";
 import { isPastEvent } from "@/lib/eventDates";
 
-const statuses = ["Pending", "Confirmed", "Rejected", "Cancelled"];
+const statuses = ["Pending", "Approved", "Rejected", "Cancelled"];
 const tickets = ["Standard", "VIP", "Regular"];
 const dateFormat = new Intl.DateTimeFormat("en-GB", {
   dateStyle: "long",
@@ -38,7 +39,7 @@ function BookingCard({ booking }) {
   const [preview, setPreview] = useState("");
   const [working, setWorking] = useState("");
   const [error, setError] = useState("");
-  const status = booking.status || "Confirmed";
+  const status = bookingStatus(booking.status);
   const event = booking.event;
 
   useEffect(
@@ -99,7 +100,7 @@ function BookingCard({ booking }) {
             {event?.title || "Event unavailable"}
           </h3>
         </div>
-        <Badge variant={status === "Confirmed" ? "default" : "outline"}>
+        <Badge variant={status === "Approved" ? "default" : "outline"}>
           {status}
         </Badge>
       </div>
@@ -122,7 +123,7 @@ function BookingCard({ booking }) {
           Waiting for the organizer to confirm your booking.
         </p>
       )}
-      {status === "Confirmed" && event && (
+      {status === "Approved" && event && (
         <div className="grid gap-3 border-t border-[#e2c9bd] pt-4">
           <div className="flex flex-wrap gap-2">
             <Button
@@ -231,16 +232,18 @@ export default function AttendeeProfile() {
   const [params, setParams] = useSearchParams();
   const eventId = params.get("event");
   const [bookings, setBookings] = useState([]);
-  const [event, setEvent] = useState(null);
+  const [eventRequest, setEventRequest] = useState(null);
   const [listingFilter, setListingFilter] = useState("All");
   const [status, setStatus] = useState("All");
   const [ticket, setTicket] = useState("Standard");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [eventError, setEventError] = useState("");
   const [notice, setNotice] = useState("");
   const [refresh, setRefresh] = useState(0);
+  const currentEventRequest = eventRequest?.id === eventId ? eventRequest : null;
+  const event = currentEventRequest?.event;
+  const eventError = currentEventRequest?.error;
 
   useLiveRefresh(() => setRefresh((value) => value + 1));
   useEffect(() => {
@@ -273,19 +276,16 @@ export default function AttendeeProfile() {
   useEffect(() => {
     if (!eventId) return;
     const controller = new AbortController();
-    setEvent(null);
-    setEventError("");
     API.get(`/events/${encodeURIComponent(eventId)}`, {
       signal: controller.signal,
     })
       .then(({ data }) => {
         if (controller.signal.aborted) return;
-        setEvent(data.event);
-        setEventError("");
+        setEventRequest({ id: eventId, event: data.event });
       })
       .catch(() => {
         if (!controller.signal.aborted)
-          setEventError("This event could not be loaded.");
+          setEventRequest({ id: eventId, error: "This event could not be loaded." });
       });
     return () => controller.abort();
   }, [eventId]);
@@ -293,12 +293,17 @@ export default function AttendeeProfile() {
   async function requestBooking(e) {
     e.preventDefault();
     if (saving || !eventId) return;
+    function setBookingError(error) {
+      setEventRequest((request) =>
+        request?.id === eventId ? { ...request, error } : request,
+      );
+    }
     if (event && isExpo(event) && isPastEvent(event.date)) {
-      setEventError("Bookings are closed for past events.");
+      setBookingError("Bookings are closed for past events.");
       return;
     }
     setSaving(true);
-    setEventError("");
+    setBookingError("");
     try {
       const { data } = await API.post("/attendees/register", {
         event: eventId,
@@ -309,7 +314,7 @@ export default function AttendeeProfile() {
       setParams({}, { replace: true });
       setRefresh((value) => value + 1);
     } catch (failure) {
-      setEventError(
+      setBookingError(
         failure.response?.data?.msg || "Unable to request a booking.",
       );
     } finally {
@@ -318,7 +323,7 @@ export default function AttendeeProfile() {
   }
 
   const alreadyBooked = bookings.find((item) => item.event?._id === eventId);
-  const visible = bookings.filter(item => (status === "All" || (item.status || "Confirmed") === status) && (listingFilter === "All" || (item.event && isExpo(item.event) === (listingFilter === "Expos"))));
+  const visible = bookings.filter(item => (status === "All" || (bookingStatus(item.status)) === status) && (listingFilter === "All" || (item.event && isExpo(item.event) === (listingFilter === "Expos"))));
 
   return (
     <PublicPageShell>

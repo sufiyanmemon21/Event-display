@@ -21,7 +21,7 @@ export function NavMain({ items }) {
   return (
     <>
       {Object.entries(groups).map(([group, groupItems]) => (
-        <SidebarGroup key={group} className="px-0 py-2">
+        <SidebarGroup key={group} className="px-0 py-1">
           <SidebarGroupLabel className="px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/45">
             {group}
           </SidebarGroupLabel>
@@ -40,7 +40,7 @@ export function NavMain({ items }) {
                       tooltip={{
                         children: item.title,
                       }}
-                      className="h-10 rounded-lg px-3 text-sm transition-colors data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:font-semibold"
+                      className="h-8 rounded-lg px-2 text-sm transition-colors data-[active=true]:bg-sidebar-primary data-[active=true]:text-sidebar-primary-foreground data-[active=true]:font-semibold"
                     >
                       <NavLink
                         {...triggerProps}

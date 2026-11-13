@@ -10,6 +10,7 @@ import {
 import {
   updateProfile,
   searchProfiles,
+  getPublicProfile,
 } from "../controllers/exhibitorprofilecontroller.js";
 import {
   getStaff,
@@ -38,6 +39,7 @@ const serviceLimiter = rateLimit({
 });
 
 exhibitorRouter.get("/search", searchProfiles);
+exhibitorRouter.get("/public/:userId", getPublicProfile);
 
 exhibitorRouter.post(
   "/register",

@@ -9,7 +9,7 @@ import Booth from "../models/boothmodel.js";
 import Session from "../models/sessionmodel.js";
 import User from "../models/authmodel.js";
 import { isExpo, isPublished, publicEventFilter } from "../services/eventworkflow.js";
-import { isPastEvent } from "../services/eventdates.js";
+import { isPastEvent, sortEventsUpcomingFirst } from "../services/eventdates.js";
 
 async function readCover(req, res, data) {
   if (!req.file) return true;
@@ -131,10 +131,11 @@ async function createEvent(req, res) {
 async function getEvents(req, res) {
   try {
     const events = await Event.find(publicEventFilter)
-      .populate("organizer", "name")
+      .populate("organizer", "name companyName role")
+      .populate("reviewExhibitor", "name companyName")
       .sort({ date: 1 });
 
-    return res.status(200).json({ events });
+    return res.status(200).json({ events: sortEventsUpcomingFirst(events) });
   } catch (error) {
     console.error("Get Events Error:", error);
 
@@ -152,8 +153,8 @@ async function getEvent(req, res) {
 
     const event = await Event.findById(req.params.id).populate(
       "organizer",
-      "name"
-    );
+      "name companyName role"
+    ).populate("reviewExhibitor", "name companyName");
 
     if (!event || !isPublished(event)) {
       return res.status(404).json({ msg: "Event not found" });

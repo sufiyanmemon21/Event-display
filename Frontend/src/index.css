@@ -134,18 +134,6 @@
     @apply [color-scheme:dark];
   }
 
-  .dark body,
-  .dark p,
-  .dark span,
-  .dark h1,
-  .dark h2,
-  .dark h3,
-  .dark h4,
-  .dark h5,
-  .dark h6,
-  .dark label {
-    @apply text-foreground;
-  }
   #root {
     @apply w-full min-h-[100vh] m-0 p-0;
   }
@@ -385,4 +373,77 @@ body:has(.eventsphere-workspace) {
       transition: opacity 180ms ease;
     }
   }
+}
+
+/* Public pages retain their light palette even when the workspace is dark. */
+.public-theme {
+  color-scheme: light;
+  --background: var(--public-paper);
+  --foreground: var(--public-ink);
+  --card: #fffaf6;
+  --card-foreground: var(--public-ink);
+  --popover: #fffaf6;
+  --popover-foreground: var(--public-ink);
+  --primary: #795042;
+  --primary-foreground: #fff8f2;
+  --secondary: #f1e1d4;
+  --secondary-foreground: #51362d;
+  --muted: #f3e8dd;
+  --muted-foreground: var(--public-copy);
+  --accent: #efdfd2;
+  --accent-foreground: #55382d;
+  --border: var(--public-line);
+  --input: #d9bdae;
+  --ring: #a46b56;
+}
+
+/* One solid primary treatment for links and native form actions. */
+.action-button,
+.public-theme :is(.celebration-button, .celebration-nav-action, .celebration-auth-submit, .public-feedback-submit, button[type="submit"]) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.625rem 1rem;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 150ms ease;
+}
+.action-button:hover,
+.public-theme :is(.celebration-button, .celebration-nav-action, .celebration-auth-submit, .public-feedback-submit, button[type="submit"]):hover {
+  background: color-mix(in srgb, var(--primary) 85%, black);
+  color: var(--primary-foreground);
+  text-decoration: none;
+}
+.action-button svg { flex-shrink: 0; }
+.public-theme :is(input, textarea, select) {
+  color: var(--public-ink);
+  background-color: #fffdfb;
+  caret-color: var(--public-ink);
+  color-scheme: light;
+  transition-property: border-color, box-shadow;
+}
+.public-theme :is(input, textarea)::placeholder { color: #826d63; opacity: 1; }
+.public-theme :is(input, textarea):autofill {
+  -webkit-text-fill-color: var(--public-ink);
+  caret-color: var(--public-ink);
+}
+.public-theme .celebration-footer :is(input, textarea) {
+  color: #fff8f2;
+  background: #352722;
+  caret-color: #fff8f2;
+}
+
+.public-feedback > .public-feedback-submit {
+  display: flex;
+  width: fit-content;
+  margin-inline: auto;
 }

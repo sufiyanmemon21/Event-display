@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { renderBookingPass } from "../presentation/bookingpass.js";
 import Attendee from "../models/attendeemodel.js";
 import { canReviewEvent } from "../services/eventworkflow.js";
+import { isApprovedBooking, approvedBookingFilter } from "../services/bookingstatus.js";
 
 const passOptions = { issuer: "eventsphere-booking", audience: "eventsphere-entry" };
 
@@ -13,7 +14,7 @@ export async function issueBookingPass(req, res) {
   if (!mongoose.isObjectIdOrHexString(id)) return res.status(404).json({ msg: "Booking not found" });
   const booking = await Attendee.findOne({ _id: id, user: req.user._id }).populate("event", "title date location");
   if (!booking?.event) return res.status(404).json({ msg: "Booking not found" });
-  if (booking.status !== "Confirmed") return res.status(409).json({ msg: "Only confirmed bookings have a pass" });
+  if (!isApprovedBooking(booking.status)) return res.status(409).json({ msg: "Only approved bookings have a pass" });
 
   const token = jwt.sign({}, process.env.JWT_SECRET, { ...passOptions, subject: id, jwtid: id, algorithm: "HS256", noTimestamp: true });
   const url = passVerificationUrl(token);
@@ -38,7 +39,7 @@ export async function verifyBookingPass(req, res) {
   }
 
   const booking = await Attendee.findById(id).populate("event", "title");
-  if (booking?.status !== "Confirmed" || !booking.event) {
+  if (!booking?.event || !isApprovedBooking(booking.status)) {
     return res.status(404).json({ msg: "This booking pass is no longer valid" });
   }
   return res.json({ title: booking.event.title, ticketType: booking.ticketType, checkedInAt: booking.checkedInAt || null });
@@ -55,18 +56,18 @@ export async function checkInBookingPass(req, res) {
     return res.status(400).json({ msg: "This QR pass is invalid." });
   }
   const booking = await Attendee.findById(id).populate("event");
-  if (!booking?.event || booking.status !== "Confirmed") return res.status(409).json({ msg: "Only a booked and confirmed ticket can check in." });
+  if (!booking?.event || !isApprovedBooking(booking.status)) return res.status(409).json({ msg: "Only an approved ticket can check in." });
   if (!canReviewEvent(req.user, booking.event)) return res.status(403).json({ msg: "You are not authorized to check in attendees for this event." });
   const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Karachi", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
   if (booking.event.date.toISOString().slice(0, 10) !== today) return res.status(409).json({ msg: "Check-in is available on the event date only (Pakistan time)." });
   const updated = await Attendee.findOneAndUpdate(
-    { _id: id, $or: [{ status: "Confirmed" }, { status: { $exists: false } }], checkedInAt: null },
+    { _id: id, ...approvedBookingFilter, checkedInAt: null },
     { $set: { checkedInAt: new Date(), checkedInBy: req.user._id } },
     { new: true },
   );
   if (!updated) {
     const latest = await Attendee.findById(id);
-    if (latest?.status !== "Confirmed") return res.status(409).json({ msg: "This ticket is no longer confirmed." });
+    if (!latest || !isApprovedBooking(latest.status)) return res.status(409).json({ msg: "This ticket is no longer approved." });
     return res.json({ title: booking.event.title, checkedInAt: latest.checkedInAt, alreadyCheckedIn: true });
   }
   return res.json({ title: booking.event.title, checkedInAt: updated.checkedInAt, alreadyCheckedIn: false });

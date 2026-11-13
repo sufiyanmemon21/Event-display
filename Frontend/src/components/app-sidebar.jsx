@@ -234,7 +234,7 @@ export function AppSidebar({ onSignOut, ...props }) {
   }
   return (
     <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader className="border-b border-sidebar-border px-3 py-6">
+      <SidebarHeader className="border-b border-sidebar-border px-2 py-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="EventSphere">
@@ -272,7 +272,7 @@ export function AppSidebar({ onSignOut, ...props }) {
         )}
       </SidebarHeader>
 
-      <SidebarContent className="px-3 py-4">
+      <SidebarContent className="px-2 py-2">
         <NavMain items={items} />
       </SidebarContent>
 

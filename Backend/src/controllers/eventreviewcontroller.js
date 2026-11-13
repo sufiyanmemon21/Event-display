@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import Event from "../models/eventmodel.js";
 import User from "../models/authmodel.js";
 import { canReviewEvent, publicEventFilter } from "../services/eventworkflow.js";
-import { isPastEvent } from "../services/eventdates.js";
+import { isPastEvent, sortEventsUpcomingFirst } from "../services/eventdates.js";
 
 export async function getReviewers(req, res) {
   const reviewers = await User.find({ role: "exhibitor" }).select("name email").sort({ name: 1 });
@@ -15,7 +15,7 @@ export async function getWorkspaceEvents(req, res) {
     : req.user.role === "organizer" ? { organizer: req.user._id }
     : { $or: [publicEventFilter, { reviewExhibitor: req.user._id }] };
   const events = await Event.find(filter).populate("organizer", "name").populate("reviewExhibitor", "name").sort({ date: 1 });
-  res.set("Cache-Control", "no-store").json({ events });
+  res.set("Cache-Control", "no-store").json({ events: sortEventsUpcomingFirst(events) });
 }
 
 export async function reviewEvent(req, res) {

@@ -65,18 +65,14 @@ export default function PublicFeedback() {
         className="public-feedback p-[120px_44px_76px] [background:#fcfaf6] text-[#302a23] [&_header]:m-[0_auto_42px]
           [&_header]:text-center [&_h1]:m-[8px_0_15px] [&_h1]:[font:700_clamp(2rem,_5vw,_3.35rem)/1.05_Georgia,_serif]
           [&_h1_em]:text-[#a16d12] [&_h1_em]:not-italic [&_header_>_p:last-child]:text-[#675c50]
-          max-[540px]:px-[15px_37px]"
+          max-[540px]:px-4"
       >
         <header>
-          <span className="public-feedback-icon inline-grid place-items-center w-[62px] h-[62px] rounded-[17px] [background:#fff2d6] text-[#a16d12]">
-            <MessageSquare size={28} aria-hidden="true" />
-          </span>
-          <p className="public-feedback-kicker mt-5 text-[#916316] uppercase tracking-[.24em] text-[.75rem] font-bold">
-            Your feedback matters
-          </p>
-          <h1>
-            Share Your <em>Feedback</em>
-          </h1>
+          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[var(--public-teal)]">Your feedback matters</p>
+          <div className="flex items-center justify-center gap-2">
+            <MessageSquare className="size-7 shrink-0 text-[var(--public-teal)]" aria-hidden="true" />
+            <h1>Share Your <em>Feedback</em></h1>
+          </div>
           <p>Share a review, send a suggestion, or report an issue.</p>
         </header>
         {!user ? (
@@ -282,17 +278,7 @@ export default function PublicFeedback() {
         )}
         <Link
           to="/share-feedback"
-          className="celebration-feedback-trigger fixed z-[40] right-0 top-[50%] [translate:0_-50%] [writing-mode:vertical-rl] flex
-          items-center gap-[7px] p-[12px_8px] [border:1px_solid_#dfc79f] [border-right:0] rounded-[12px_0_0_12px]
-          [background:linear-gradient(150deg,_#fffdf7ef,_#f8e8cbd9)] [backdrop-filter:blur(12px)] text-[#503925]
-          [box-shadow:inset_1px_1px_0_#ffffffbf,_0_7px_22px_#523a1828]
-          [transition:background-color_.2s_ease,_box-shadow_.2s_ease,_border-color_.2s_ease] tracking-[.035em]
-          text-[.86rem] font-bold [&_svg]:text-[#9d6a10] hover:border-[#b68a46]
-          hover:[box-shadow:inset_1px_1px_0_#ffffffbf,_0_8px_24px_#523a1840] focus-visible:[outline:2px_solid_#87584d]
-          focus-visible:outline-offset-[-4px] max-[700px]:top-[auto]
-          max-[700px]:bottom-[max(1rem,_env(safe-area-inset-bottom))] max-[700px]:[translate:none]
-          max-[700px]:p-[8px_5px] max-[700px]:text-[.75rem] motion-reduce:transition-none"
-          aria-current="page"
+          className="action-button celebration-feedback-trigger fixed z-40 right-3 bottom-20 flex items-center gap-2 shadow-md"
         >
           <MessageSquare size={19} aria-hidden="true" /> Feedback
         </Link>

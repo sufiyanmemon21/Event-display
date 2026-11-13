@@ -54,6 +54,7 @@ function ListingDetailCard({ event, eventIndex, user, featured = false }) {
   const backToEvents = !isExpo(event);
   const catalogPath = backToEvents ? "/event-listing" : "/expos";
   const Heading = featured ? "h1" : "h3";
+  const exhibitor = event.reviewExhibitor || (event.organizer?.role === "exhibitor" ? event.organizer : null);
   return (
     <article
       className={
@@ -62,13 +63,16 @@ function ListingDetailCard({ event, eventIndex, user, featured = false }) {
           : "flex min-w-0 flex-col overflow-hidden rounded-2xl border border-[var(--public-line)] bg-white shadow-[0_10px_28px_rgba(54,27,25,0.08)] transition-shadow hover:shadow-[0_16px_38px_rgba(54,27,25,0.14)]"
       }
     >
-      <ImageWithSkeleton
-        src={getEventImage(event, eventIndex)}
-        loading={featured ? "eager" : "lazy"}
-        fetchPriority={featured ? "high" : undefined}
-        alt={`${event.title} cover image`}
-        className="block aspect-video w-full object-cover"
-      />
+      <div className="group overflow-hidden">
+        <ImageWithSkeleton
+          src={getEventImage(event, eventIndex)}
+          loading={featured ? "eager" : "lazy"}
+          fetchPriority={featured ? "high" : undefined}
+          alt={`${event.title} cover image`}
+          className="block aspect-video w-full object-cover"
+          imageClassName="motion-safe:[transition:scale_.3s_ease,opacity_.18s_ease] motion-safe:group-hover:scale-105"
+        />
+      </div>
       <div
         className={
           featured
@@ -88,6 +92,14 @@ function ListingDetailCard({ event, eventIndex, user, featured = false }) {
         >
           {event.title}
         </Heading>
+        {exhibitor?._id && (
+          <p className="mt-3 text-sm text-[var(--public-copy)]">
+            Managed by {" "}
+            <Link to={`/exhibitors/profile/${exhibitor._id}`} className="font-semibold text-[var(--public-teal)] underline underline-offset-4">
+              {exhibitor.companyName || exhibitor.name}
+            </Link>
+          </p>
+        )}
         <p
           className={
             featured
@@ -146,8 +158,8 @@ function ListingDetailCard({ event, eventIndex, user, featured = false }) {
         <div
           className={
             featured
-              ? "flex flex-col gap-3 pt-5 sm:flex-row"
-              : "mt-auto flex flex-col gap-3 pt-5 sm:flex-row"
+              ? "flex flex-wrap gap-2 pt-5"
+              : "mt-auto flex flex-wrap gap-2 pt-5"
           }
         >
           {isExpo(event) && isPastEvent(event.date) ? (
@@ -159,7 +171,7 @@ function ListingDetailCard({ event, eventIndex, user, featured = false }) {
               <BookLink
                 eventId={event._id}
                 expo={isExpo(event)}
-                className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#70483d] px-4 text-sm font-bold text-white shadow-[0_4px_10px_#51342b24] transition hover:bg-[#59382f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#80570e]"
+                className="action-button min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-[#70483d] px-4 text-sm font-bold text-white shadow-[0_4px_10px_#51342b24] transition hover:bg-[#59382f] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#80570e]"
               >
                 {user ? "Book this event" : "Log in to book"}{" "}
                 <ArrowUpRight size={17} aria-hidden="true" />
@@ -168,7 +180,7 @@ function ListingDetailCard({ event, eventIndex, user, featured = false }) {
           )}
           <Link
             to={featured ? catalogPath : `/expos/${event._id}`}
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-[#b99479] bg-white px-4 text-sm font-semibold text-[#49352d] transition hover:bg-[#f8eee5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#80570e]"
+            className="action-button min-h-11 flex-1 items-center justify-center rounded-xl border border-[#b99479] bg-white px-4 text-sm font-semibold text-[#49352d] transition hover:bg-[#f8eee5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#80570e]"
           >
             {featured
               ? backToEvents

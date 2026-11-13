@@ -1,4 +1,8 @@
 import { TableSkeleton } from "@/components/LoadingSkeletons";
+import { bookingStatus } from "@/lib/bookingStatus";
+import useAuth from "@/hooks/useAuth";
+import { toast } from "react-toastify";
+import { useConfirmation } from "@/hooks/useConfirmation";
 import { useEffect, useState } from "react";
 import { isExpo } from "@/hooks/useExpos";
 import API from "@/api/api";
@@ -24,6 +28,9 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 export default function ExpoTickets() {
+  const user = useAuth();
+  const confirm = useConfirmation();
+  const [reviewing, setReviewing] = useState("");
   const [registrations, setRegistrations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,6 +38,19 @@ export default function ExpoTickets() {
   const [ticketType, setTicketType] = useState("all");
   const [expo, setExpo] = useState("");
   const [selected, setSelected] = useState(null);
+  async function reviewTicket(ticket, status) {
+    if (reviewing) return;
+    if (status === "Rejected" && !await confirm("Reject this ticket? Its QR pass will no longer be valid.")) return;
+    setReviewing(ticket._id);
+    try {
+      const { data } = await API.patch(`/attendees/${ticket._id}/status`, { status });
+      setRegistrations(items => items.map(item => item._id === ticket._id ? { ...item, status: data.status } : item));
+      setSelected(item => item?._id === ticket._id ? { ...item, status: data.status } : item);
+      toast.success(`Ticket ${data.status.toLowerCase()}.`);
+    } catch (error) {
+      toast.error(error.response?.data?.msg || "Unable to update ticket.");
+    } finally { setReviewing(""); }
+  }
   useEffect(() => {
     const controller = new AbortController();
     async function load() {
@@ -60,7 +80,7 @@ export default function ExpoTickets() {
     <div className="space-y-6">
       <PageHeading
         title="Expo tickets"
-        description="View ticket registrations. Attendees can download QR passes from their profile once confirmed."
+        description="Review ticket registrations. Attendees can download QR passes from their profile once approved."
       >
         <Button
           variant="outline"
@@ -87,7 +107,7 @@ export default function ExpoTickets() {
       </div>
       <div className="max-w-md space-y-2"><Label htmlFor="expo-filter">Expo</Label><WorkspaceSelect id="expo-filter" value={expo} onChange={event => setExpo(event.target.value)}><option value="">All Expos</option>{[...new Map(registrations.map(item => [item.event._id, item.event])).values()].map(event => <option key={event._id} value={event._id}>{event.title}</option>)}</WorkspaceSelect></div>
       {loading ? (
-        <TableSkeleton label="Loading ticket registrations" columns={7} />
+        <TableSkeleton label="Loading ticket registrations" columns={user?.role === "admin" ? 8 : 7} />
       ) : error ? (
         <p role="alert" className="text-destructive">
           {error}
@@ -98,8 +118,8 @@ export default function ExpoTickets() {
             (item) => (!expo || item.event._id === expo) && (ticketType === "all" || item.ticketType === ticketType),
           )}
           label="ticket registrations"
-          statusOptions={["Pending", "Confirmed", "Rejected", "Cancelled"]}
-          statusValue={item => item.status || "Confirmed"}
+          statusOptions={["Pending", "Approved", "Rejected", "Cancelled"]}
+          statusValue={item => bookingStatus(item.status)}
           searchText={(item) =>
             [
               item.user?.name,
@@ -125,6 +145,7 @@ export default function ExpoTickets() {
                     ].map((label) => (
                       <TableHead key={label}>{label}</TableHead>
                     ))}
+                    {user?.role === "admin" && <TableHead>Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -149,7 +170,7 @@ export default function ExpoTickets() {
                           ? new Date(item.createdAt).toLocaleDateString("en-GB")
                           : "Not recorded"}
                       </TableCell>
-                      <TableCell><Badge variant="outline">{item.status || "Confirmed"}</Badge></TableCell>
+                      <TableCell><Badge variant="outline">{bookingStatus(item.status)}</Badge></TableCell>
                       <TableCell>{item.checkedInAt ? "Checked in" : "Not checked in"}</TableCell>
                       <TableCell>
                         <Button
@@ -160,6 +181,10 @@ export default function ExpoTickets() {
                           View registration
                         </Button>
                       </TableCell>
+                      {user?.role === "admin" && <TableCell><div className="flex gap-2">
+                        <Button size="sm" disabled={Boolean(reviewing) || bookingStatus(item.status) === "Approved"} onClick={() => reviewTicket(item, "Approved")}>Approve</Button>
+                        <Button size="sm" variant="outline" disabled={Boolean(reviewing) || item.status === "Rejected"} onClick={() => reviewTicket(item, "Rejected")}>Reject</Button>
+                      </div></TableCell>}
                     </TableRow>
                   ))}
                 </TableBody>
@@ -200,7 +225,7 @@ export default function ExpoTickets() {
             </div>
           </dl>
           <p className="text-sm text-muted-foreground">
-            Booking status: {selected?.status || "Confirmed"}
+            Booking status: {bookingStatus(selected?.status)}
           </p>
         </DialogContent>
       </Dialog>

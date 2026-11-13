@@ -48,10 +48,10 @@ export default function DashboardLayout() {
       <SidebarInset className="min-w-0 bg-background">
         <SiteHeader user={user} onSignOut={signOut} />
         <main
-          className="workspace-content min-w-0 flex-1 px-4 py-6 sm:px-7 sm:py-8 xl:px-10 xl:py-10 workspace:overflow-x-clip
-          workspace:text-[1rem] workspace:leading-[1.55] workspace:[overflow-wrap:anywhere]
+          className="workspace-content min-w-0 flex-1 px-3 py-4 sm:px-5 sm:py-5 xl:px-6 xl:py-6 workspace:overflow-x-clip
+          workspace:text-sm workspace:leading-relaxed workspace:[overflow-wrap:anywhere]
           [.eventsphere-workspace_&_h1]:font-serif [.eventsphere-workspace_&_h1]:font-normal
-          [.eventsphere-workspace_&_h1]:text-[clamp(1.9rem,_3.1vw,_3rem)] [.eventsphere-workspace_&_h1]:leading-[1.1]
+          [.eventsphere-workspace_&_h1]:text-[clamp(1.5rem,_2.2vw,_2rem)] [.eventsphere-workspace_&_h1]:leading-[1.1]
           [.eventsphere-workspace_&_h1]:[overflow-wrap:anywhere]
           [.eventsphere-workspace_&_>_div_>_p[role='status']]:p-[14px_16px]
           [.eventsphere-workspace_&_>_div_>_p[role='status']]:[border:1px_solid_var(--border)]
